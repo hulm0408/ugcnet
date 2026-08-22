@@ -2,11 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Header from '@/components/layout/Header';
 import { auth } from '@/lib/auth';
-import { Inter, Amiri, Amiri_Quran } from 'next/font/google';
+import { Inter, Noto_Kufi_Arabic } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const amiri = Amiri({ weight: ['400', '700'], subsets: ['arabic'], variable: '--font-amiri' });
-const amiriQuran = Amiri_Quran({ weight: ['400'], subsets: ['arabic'], variable: '--font-amiri-quran' });
+const notoKufi = Noto_Kufi_Arabic({ subsets: ['arabic'], variable: '--font-noto-kufi' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
@@ -53,7 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <body className={`bg-slate-50 min-h-screen flex flex-col antialiased ${inter.variable} ${amiri.variable} ${amiriQuran.variable}`}>
+      <body className={`bg-slate-50 min-h-screen flex flex-col antialiased ${inter.variable} ${notoKufi.variable}`}>
         {/* Sticky header — always on top via z-50 */}
         <Header user={session?.user || null} />
         {/* Page content fills remaining viewport height */}
