@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "prisma db push",
+    "db:seed": "npx tsx scripts/import/run-import.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
