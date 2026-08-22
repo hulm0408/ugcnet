@@ -1,16 +1,36 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calendar, FileText, CheckCircle, ArrowRight } from 'lucide-react';
+import { Calendar, FileText, CheckCircle } from 'lucide-react';
 import ArchBookQuillSvg from '@/components/ui/ArchBookQuillSvg';
+import prisma from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'PYQs — Previous Year Questions',
   description: 'Browse UGC NET Arabic Previous Year Questions from 2004 to 2024.',
 };
 
-const years = Array.from({ length: 21 }, (_, i) => 2024 - i);
+export const dynamic = 'force-dynamic';
 
-export default function PYQPage() {
+export default async function PYQPage() {
+  const papers = await prisma.examPaper.findMany({
+    where: { content_status: 'PUBLISHED' },
+    select: { id: true, year: true, total_questions: true }
+  });
+  
+  const totalQuestions = await prisma.question.count({
+    where: { content_status: 'PUBLISHED' }
+  });
+  
+  const totalPapers = papers.length;
+  
+  const yearStats = papers.reduce((acc, p) => {
+    if (!acc[p.year]) acc[p.year] = { year: p.year, paperCount: 0 };
+    acc[p.year].paperCount++;
+    return acc;
+  }, {} as Record<number, { year: number, paperCount: number }>);
+  
+  const years = Object.values(yearStats).sort((a, b) => b.year - a.year);
+  const totalYears = years.length;
   return (
     <div className="flex-1 bg-stone-50 min-h-screen font-sans">
       {/* 01. PYQs - LANDING PAGE HERO SECTION */}
@@ -32,15 +52,15 @@ export default function PYQPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto lg:mx-0">
               <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">21</div>
+                <div className="text-3xl font-bold text-white mb-1">{totalYears}</div>
                 <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Years</div>
               </div>
               <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">56+</div>
+                <div className="text-3xl font-bold text-white mb-1">{totalPapers}</div>
                 <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Papers</div>
               </div>
               <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">3,150+</div>
+                <div className="text-3xl font-bold text-white mb-1">{totalQuestions.toLocaleString()}</div>
                 <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Questions</div>
               </div>
               <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
@@ -131,12 +151,7 @@ export default function PYQPage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {years.map((year) => {
-            // Mocking paper counts based on historical structure
-            let paperCount = '2 Papers';
-            if (year >= 2019) paperCount = '3 Papers';
-            if (year === 2024 || year === 2023) paperCount = '2 Papers';
-            
+          {years.map(({ year, paperCount }) => {
             return (
               <Link
                 key={year}
@@ -148,7 +163,7 @@ export default function PYQPage() {
                   <span className="text-lg font-bold text-stone-900 group-hover:text-[#107A53]">{year}</span>
                 </div>
                 <div className="text-xs text-stone-500 font-medium bg-stone-50 px-2 py-1 rounded-md inline-block border border-stone-100">
-                  {paperCount}
+                  {paperCount} {paperCount === 1 ? 'Paper' : 'Papers'}
                 </div>
               </Link>
             )
