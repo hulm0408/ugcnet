@@ -71,7 +71,12 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
                   </div>
                 </div>
               </div>
-              <ChevronRight size={20} className={isActive ? 'text-[#D97706]' : 'text-stone-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0'} />
+              <div className="flex flex-col items-end">
+                <ChevronRight size={20} className={isActive ? 'text-[#D97706]' : 'text-stone-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0'} />
+                <div className={`text-[10px] font-bold tracking-widest uppercase mt-2 px-2 py-0.5 rounded-full ${isActive ? 'bg-[#D97706]/10 text-[#D97706]' : 'bg-stone-100 text-stone-500'}`}>
+                  {unit.questionCount} Qs
+                </div>
+              </div>
             </button>
           );
         })}
@@ -116,15 +121,31 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-[11px] font-bold text-stone-400 bg-stone-50 px-3 py-2 rounded-lg mt-auto">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-stone-400 bg-stone-50 px-3 py-2 rounded-lg mb-4">
                     <div className="flex items-center gap-1.5">
                       <span className="text-stone-800 text-[12px]">{topic.subtopics.length}</span> Nodes
                     </div>
-                    <div className="w-1 h-1 rounded-full bg-stone-300"></div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-stone-800 text-[12px]">{topic.questionCount}</span> Questions
                     </div>
                   </div>
+
+                  {/* Nodes List */}
+                  {topic.subtopics.length > 0 && (
+                    <div className="space-y-1.5 mt-auto border-t border-stone-100 pt-3">
+                      <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Learning Nodes</div>
+                      {topic.subtopics.map(node => (
+                        <div key={node.id} className="flex justify-between items-center text-xs group-hover/node:bg-stone-50 p-1.5 -mx-1.5 rounded transition-colors">
+                          <span className="truncate pr-3 text-stone-600 font-medium group-hover:text-stone-900 transition-colors" title={node.nameEn}>
+                            {node.nameEn}
+                          </span>
+                          <span className="shrink-0 font-bold text-[#107A53] bg-[#107A53]/10 px-2 py-0.5 rounded-full text-[10px]">
+                            {node.questionCount}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </Link>
               ))}
             </div>
