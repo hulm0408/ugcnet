@@ -1,52 +1,66 @@
-import React from 'react';
-
-export default function InstructionsSvg({ className }: { className?: string }) {
+export default function InstructionsSvg({ className = "" }: { className?: string }) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 400 400"
-      className={className}
+      viewBox="0 0 300 300"
       fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      preserveAspectRatio="xMidYMid meet"
     >
-      <rect width="400" height="400" rx="40" fill="#F0F9F6" />
-      
-      {/* Background decorations */}
-      <circle cx="350" cy="50" r="100" fill="#107A53" opacity="0.05" />
-      <circle cx="50" cy="350" r="150" fill="#D97706" opacity="0.05" />
+      <defs>
+        <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+          <feDropShadow dx="10" dy="15" stdDeviation="10" floodColor="#000000" floodOpacity="0.1" />
+        </filter>
+        <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#F59E0B" />
+          <stop offset="50%" stopColor="#FCD34D" />
+          <stop offset="100%" stopColor="#B45309" />
+        </linearGradient>
+      </defs>
 
-      {/* Clipboard base */}
-      <rect x="120" y="80" width="160" height="240" rx="12" fill="white" stroke="#107A53" strokeWidth="8" />
-      
-      {/* Clipboard clip */}
-      <rect x="160" y="60" width="80" height="30" rx="6" fill="#107A53" />
-      <circle cx="200" cy="75" r="5" fill="white" />
-      
-      {/* Document lines */}
-      <line x1="150" y1="140" x2="250" y2="140" stroke="#E7E5E4" strokeWidth="8" strokeLinecap="round" />
-      <line x1="150" y1="170" x2="250" y2="170" stroke="#E7E5E4" strokeWidth="8" strokeLinecap="round" />
-      <line x1="150" y1="200" x2="210" y2="200" stroke="#E7E5E4" strokeWidth="8" strokeLinecap="round" />
-      
-      {/* Checkmarks */}
-      <circle cx="155" cy="245" r="12" fill="#107A53" />
-      <path d="M150 245 L154 249 L160 241" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      
-      <circle cx="155" cy="285" r="12" fill="#D97706" />
-      <path d="M150 285 L154 289 L160 281" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <g transform="translate(150, 150) scale(0.9)" filter="url(#shadow)">
+        
+        {/* CLIPBOARD BOARD */}
+        <path d="M-80 -100 L40 -100 C50 -100 60 -90 60 -80 L60 120 C60 130 50 140 40 140 L-80 140 C-90 140 -100 130 -100 120 L-100 -80 C-100 -90 -90 -100 -80 -100 Z" fill="#064E3B" stroke="url(#gold-grad)" strokeWidth="4" />
+        
+        {/* CLIPBOARD PAPER */}
+        <path d="M-90 -70 L50 -70 L50 130 L-90 130 Z" fill="#FEF3C7" />
+        <path d="M-90 -70 L50 -70 L50 130 L-90 130 Z" fill="#FFFBEB" opacity="0.8" />
+        
+        {/* PAPER CONTENT (LINES) */}
+        <g stroke="#B45309" strokeWidth="2" strokeLinecap="round" opacity="0.3">
+          <line x1="-70" y1="-40" x2="10" y2="-40" strokeWidth="4" />
+          <line x1="-70" y1="-15" x2="30" y2="-15" />
+          <line x1="-70" y1="5" x2="30" y2="5" />
+          <line x1="-70" y1="25" x2="-10" y2="25" />
+          
+          <line x1="-70" y1="60" x2="30" y2="60" />
+          <line x1="-70" y1="80" x2="30" y2="80" />
+          <line x1="-70" y1="100" x2="0" y2="100" />
+        </g>
+        
+        {/* CLIP MECHANISM (GOLD) */}
+        <path d="M-40 -115 L0 -115 C5 -115 10 -110 10 -105 L10 -90 C10 -85 5 -80 0 -80 L-40 -80 C-45 -80 -50 -85 -50 -90 L-50 -105 C-50 -110 -45 -115 -40 -115 Z" fill="url(#gold-grad)" />
+        <circle cx="-20" cy="-97" r="4" fill="#78350F" opacity="0.6" />
+        
+        {/* HOURGLASS */}
+        <g transform="translate(60, 50) scale(1.1)">
+          {/* Top/Bottom bases */}
+          <path d="M-25 -40 L25 -40 L25 -35 L-25 -35 Z" fill="url(#gold-grad)" />
+          <path d="M-25 40 L25 40 L25 35 L-25 35 Z" fill="url(#gold-grad)" />
+          
+          {/* Glass bulbs */}
+          <path d="M-20 -35 C-20 -10, -5 -5, -5 0 C-5 5, -20 10, -20 35 L20 35 C20 10, 5 5, 5 0 C5 -5, 20 -10, 20 -35 Z" fill="#F0FDF4" opacity="0.6" stroke="#FEF3C7" strokeWidth="1" />
+          
+          {/* Sand top */}
+          <path d="M-15 -35 L15 -35 C15 -15, 5 -5, 5 0 C-5 -5, -15 -15, -15 -35 Z" fill="#F59E0B" />
+          {/* Sand bottom */}
+          <path d="M-10 35 L10 35 C10 15, 5 5, -5 5 C-15 15, -10 35, -10 35 Z" fill="#F59E0B" />
+          {/* Falling sand line */}
+          <line x1="0" y1="0" x2="0" y2="25" stroke="#F59E0B" strokeWidth="1.5" />
+        </g>
 
-      {/* Hourglass */}
-      <g transform="translate(240, 220)">
-        <path d="M10 0 H50 L35 30 L50 60 H10 L25 30 Z" fill="#FCFAF8" stroke="#107A53" strokeWidth="6" strokeLinejoin="round" />
-        {/* Sand top */}
-        <path d="M16 10 H44 L35 25 H25 Z" fill="#D97706" />
-        {/* Sand bottom */}
-        <path d="M25 35 H35 L42 50 H18 Z" fill="#D97706" />
-        {/* Falling sand */}
-        <line x1="30" y1="25" x2="30" y2="50" stroke="#D97706" strokeWidth="2" strokeDasharray="2 2" />
       </g>
-
-      {/* Floating sparkles */}
-      <path d="M80 120 L85 110 L95 110 L87 105 L90 95 L80 102 L70 95 L73 105 L65 110 L75 110 Z" fill="#D97706" opacity="0.6" />
-      <path d="M300 160 L303 155 L308 155 L304 152 L306 147 L300 150 L294 147 L296 152 L292 155 L297 155 Z" fill="#107A53" opacity="0.4" />
     </svg>
   );
 }

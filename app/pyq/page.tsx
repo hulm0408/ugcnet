@@ -1,131 +1,165 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import prisma from '@/lib/db';
-import { BookMarked, Calendar, FileText, ChevronRight, History } from 'lucide-react';
+import { Calendar, FileText, CheckCircle, ArrowRight } from 'lucide-react';
+import ArchBookQuillSvg from '@/components/ui/ArchBookQuillSvg';
 
 export const metadata: Metadata = {
-  title: 'PYQ Years — Browse Previous Year Questions',
-  description: 'Browse UGC NET Arabic Previous Year Questions year-wise from 2004 to 2023. Paper II and Paper III.',
+  title: 'PYQs — Previous Year Questions',
+  description: 'Browse UGC NET Arabic Previous Year Questions from 2004 to 2024.',
 };
 
-export const dynamic = 'force-dynamic';
+const years = Array.from({ length: 21 }, (_, i) => 2024 - i);
 
-export default async function PYQPage() {
-  const papers = await prisma.examPaper.findMany({
-    where: { content_status: 'PUBLISHED' },
-    orderBy: [
-      { year: 'desc' },
-      { exam_date: 'desc' }
-    ],
-    include: {
-      _count: {
-        select: { questions: { where: { content_status: 'PUBLISHED' } } }
-      }
-    }
-  });
-
-  // Group papers by year
-  const groupedPapers = papers.reduce((acc: Record<number, any>, paper: any) => {
-    if (!acc[paper.year]) {
-      acc[paper.year] = [];
-    }
-    acc[paper.year].push(paper);
-    return acc;
-  }, {} as Record<number, typeof papers>);
-
-  const years = Object.keys(groupedPapers).map(Number).sort((a, b) => b - a);
-
+export default function PYQPage() {
   return (
-    <div className="flex-1 bg-slate-50 min-h-screen">
-      
-      {/* ── Header Section ── */}
-      <section className="relative bg-slate-950 text-white overflow-hidden py-16">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-950 to-slate-950 pointer-events-none" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm font-medium mb-6 backdrop-blur-md">
-            <History size={16} className="text-purple-400" />
-            <span className="text-slate-300">Archive & Analytics</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
-            Previous Year <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-emerald-400">Questions</span>
-          </h1>
-          <p dir="rtl" lang="ar" className="font-arabic text-2xl text-slate-300 mb-2">
-            أسئلة السنوات السابقة
-          </p>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Browse all UGC NET Arabic PYQs. Select a paper to view and practice its questions under authentic exam conditions.
-          </p>
-        </div>
-      </section>
-
-      {/* ── Content Section ── */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-        <div className="space-y-8">
-          {years.map((year) => (
-            <div key={year} className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden group/year relative">
-              <div className="absolute top-0 left-0 w-1 h-full bg-slate-200 group-hover/year:bg-purple-500 transition-colors" />
-              <div className="bg-slate-50/80 px-8 py-5 border-b border-slate-200 flex items-center gap-4 backdrop-blur-sm">
-                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-slate-200 text-slate-500 group-hover/year:text-purple-600 transition-colors">
-                  <Calendar size={20} />
-                </div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{year}</h2>
-              </div>
-              
-              <div className="divide-y divide-slate-100">
-                {groupedPapers[year].map((paper: any) => (
-                  <Link
-                    key={paper.id}
-                    href={`/instructions/${paper.id}`}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-6 hover:bg-slate-50 transition-colors group"
-                  >
-                    <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0 border border-purple-100 shadow-sm group-hover:scale-105 transition-transform">
-                        <FileText size={28} />
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900 text-xl group-hover:text-purple-600 transition-colors tracking-tight">
-                          {paper.title_english || `UGC NET Arabic Paper - ${year}`}
-                        </div>
-                        {paper.title_arabic && (
-                          <div dir="rtl" lang="ar" className="font-arabic text-slate-600 mt-2 text-lg">
-                            {paper.title_arabic}
-                          </div>
-                        )}
-                        <div className="flex flex-wrap items-center gap-3 mt-3 text-xs font-semibold text-slate-500">
-                          {paper.shift && (
-                            <span className="bg-white border border-slate-200 shadow-sm px-2.5 py-1 rounded-md text-slate-700 uppercase tracking-wider">
-                              Shift: {paper.shift}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            {paper._count.questions} / {paper.total_questions} Questions Available
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-400 group-hover:text-purple-600 transition-colors mt-4 sm:mt-0 ml-19 sm:ml-0">
-                      <span className="text-sm font-bold opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">Practice Now</span>
-                      <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
+    <div className="flex-1 bg-stone-50 min-h-screen font-sans">
+      {/* 01. PYQs - LANDING PAGE HERO SECTION */}
+      <div className="bg-[#0A231C] text-stone-100 overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative z-10 flex flex-col lg:flex-row items-center">
           
-          {years.length === 0 && (
-            <div className="text-center p-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-400">
-                <FileText size={32} />
+          {/* Left Text Content */}
+          <div className="flex-1 text-center lg:text-left mb-12 lg:mb-0">
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight mb-3">
+              Previous Year Questions
+            </h1>
+            <p dir="rtl" className="text-2xl lg:text-3xl font-arabic text-[#D97706] mb-6 drop-shadow-md">
+              الأسئلة السابقة للسنوات
+            </p>
+            <p className="text-lg text-emerald-100/80 mb-10 max-w-xl mx-auto lg:mx-0">
+              Practice real UGC NET Arabic questions asked in the actual exam. Track your accuracy and master the pattern.
+            </p>
+            
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto lg:mx-0">
+              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-1">21</div>
+                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Years</div>
               </div>
-              <h3 className="text-lg font-bold text-slate-900">No Papers Found</h3>
-              <p className="text-slate-500 mt-2">Previous year papers have not been published yet.</p>
+              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-1">56+</div>
+                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Papers</div>
+              </div>
+              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-1">3,150+</div>
+                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Questions</div>
+              </div>
+              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
+                <div className="text-3xl font-bold text-white mb-1">100%</div>
+                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Real Exam</div>
+              </div>
             </div>
-          )}
+          </div>
+          
+          {/* Right SVG Graphic */}
+          <div className="w-full lg:w-[450px] shrink-0 relative">
+            {/* Soft backdrop glow behind SVG */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-600/20 rounded-full blur-[80px]" />
+            <ArchBookQuillSvg className="w-full h-auto drop-shadow-2xl relative z-10" />
+          </div>
+        </div>
+      </div>
+
+      {/* HOW IT WORKS SECTION */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <h2 className="text-xl font-bold text-stone-900 mb-6">How it Works?</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+            
+            <div className="flex gap-4">
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">1</div>
+              <div>
+                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
+                  <Calendar size={14} className="text-stone-400" /> Choose Year
+                </div>
+                <div className="text-xs text-stone-500 mt-1">Select the exam year you want to practice.</div>
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">2</div>
+              <div>
+                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
+                  <FileText size={14} className="text-stone-400" /> Select Paper
+                </div>
+                <div className="text-xs text-stone-500 mt-1">Choose the paper/part/shift available.</div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">3</div>
+              <div>
+                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
+                  <FileText size={14} className="text-stone-400" /> Read Instructions
+                </div>
+                <div className="text-xs text-stone-500 mt-1">Go through exam instructions & pattern.</div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">4</div>
+              <div>
+                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
+                  <CheckCircle size={14} className="text-stone-400" /> Start Test
+                </div>
+                <div className="text-xs text-stone-500 mt-1">Take the test in real CBT mode.</div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">5</div>
+              <div>
+                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
+                  <CheckCircle size={14} className="text-stone-400" /> View Result
+                </div>
+                <div className="text-xs text-stone-500 mt-1">Get detailed analysis and review.</div>
+              </div>
+            </div>
+            
+          </div>
+          <div className="mt-6 flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+            <CheckCircle size={16} /> All questions are 100% real and based on official UGC NET exams.
+          </div>
+        </div>
+      </div>
+
+      {/* 02. SELECT YEAR SECTION */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-stone-900">Select Exam Year</h2>
+          <p dir="rtl" className="text-lg font-arabic font-bold text-stone-600 mt-1">اختر سنة الامتحان</p>
+          <p className="text-stone-500 text-sm mt-2">Choose the year of UGC NET Arabic exam you want to practice.</p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {years.map((year) => {
+            // Mocking paper counts based on historical structure
+            let paperCount = '2 Papers';
+            if (year >= 2019) paperCount = '3 Papers';
+            if (year === 2024 || year === 2023) paperCount = '2 Papers';
+            
+            return (
+              <Link
+                key={year}
+                href={`/pyq/${year}`}
+                className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#107A53] hover:ring-1 hover:ring-[#107A53]/50 transition-all group flex flex-col justify-between"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar size={16} className="text-stone-400 group-hover:text-[#107A53] transition-colors" />
+                  <span className="text-lg font-bold text-stone-900 group-hover:text-[#107A53]">{year}</span>
+                </div>
+                <div className="text-xs text-stone-500 font-medium bg-stone-50 px-2 py-1 rounded-md inline-block border border-stone-100">
+                  {paperCount}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+
+        <div className="mt-8 flex items-center gap-2 text-sm text-amber-700 bg-amber-50 p-4 rounded-lg border border-amber-200">
+          <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+            <span className="font-bold text-xs">!</span>
+          </div>
+          Note: Number of papers may vary by year depending on whether there were multiple shifts or canceled exams.
         </div>
       </div>
     </div>
