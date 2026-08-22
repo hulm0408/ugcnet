@@ -52,50 +52,120 @@ export default function HomePage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-40 -left-40 w-[400px] h-[400px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
         
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          
-          {/* Trust Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm font-medium mb-8 backdrop-blur-md shadow-2xl transition-transform hover:scale-105 cursor-default">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-slate-300">Updated for 2024 Syllabus</span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 leading-tight mb-6 tracking-tight">
-            Master UGC NET Arabic <br />
-            <span className="text-emerald-400">The Smart Way.</span>
-          </h1>
-          
-          <p dir="rtl" lang="ar" className="font-arabic text-3xl sm:text-4xl text-emerald-300/90 leading-loose mb-6 drop-shadow-md">
-            أتقن أسئلة الامتحانات السابقة بذكاء
-          </p>
-          
-          <p className="text-slate-400 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto font-medium">
-            Join thousands of JRF aspirants. Practice <strong className="text-white">3,150+</strong> official PYQs, track your accuracy, and conquer all 10 syllabus units.
-          </p>
-
-          {/* Primary CTAs (Psychology: Scarcity & Action) */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/practice"
-              className="group relative inline-flex items-center gap-2 px-8 py-4 bg-emerald-500 text-slate-950 font-bold text-lg rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] w-full sm:w-auto justify-center"
-            >
-              <span className="relative z-10">Start Mock Test</span>
-              <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
-              {/* Shine effect */}
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
-            </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             
-            <Link
-              href="/syllabus"
-              className="inline-flex items-center justify-center px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-semibold text-lg rounded-2xl transition-all border border-white/10 hover:border-white/20 w-full sm:w-auto"
-            >
-              Explore Syllabus
-            </Link>
+            {/* LHS: Text Content */}
+            <div className="text-left text-center lg:text-left">
+              {/* Trust Badge */}
+              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm font-medium mb-8 backdrop-blur-md shadow-2xl transition-transform hover:scale-105 cursor-default">
+                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-slate-300">Updated for 2024 Syllabus</span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 leading-tight mb-6 tracking-tight">
+                Master UGC NET Arabic <br />
+                <span className="text-emerald-400">The Smart Way.</span>
+              </h1>
+              
+              <p dir="rtl" lang="ar" className="font-arabic text-3xl sm:text-4xl text-emerald-300/90 leading-loose mb-6 drop-shadow-md text-center lg:text-right">
+                أتقن أسئلة الامتحانات السابقة بذكاء
+              </p>
+              
+              <p className="text-slate-400 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 font-medium">
+                Join thousands of JRF aspirants. Practice <strong className="text-white">3,150+</strong> official PYQs, track your accuracy, and conquer all 10 syllabus units.
+              </p>
+
+              {/* Primary CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+                <Link
+                  href="/practice"
+                  className="group relative inline-flex items-center gap-2 px-8 py-4 bg-emerald-500 text-slate-950 font-bold text-lg rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] w-full sm:w-auto justify-center"
+                >
+                  <span className="relative z-10">Start Mock Test</span>
+                  <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+                </Link>
+                
+                <Link
+                  href="/syllabus"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-semibold text-lg rounded-2xl transition-all border border-white/10 hover:border-white/20 w-full sm:w-auto"
+                >
+                  Explore Syllabus
+                </Link>
+              </div>
+            </div>
+
+            {/* RHS: SVG Illustration */}
+            <div className="hidden lg:flex justify-center items-center relative w-full h-[500px]">
+              {/* Glow backdrop */}
+              <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
+              
+              <svg viewBox="0 0 500 500" className="w-full h-full max-w-[450px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="gradStair" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#047857" />
+                  </linearGradient>
+                  <linearGradient id="gradJrf" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                </defs>
+
+                {/* Background Grid */}
+                <g stroke="#ffffff" strokeOpacity="0.03" strokeWidth="2">
+                  <line x1="100" y1="0" x2="100" y2="500" />
+                  <line x1="200" y1="0" x2="200" y2="500" />
+                  <line x1="300" y1="0" x2="300" y2="500" />
+                  <line x1="400" y1="0" x2="400" y2="500" />
+                  <line x1="0" y1="100" x2="500" y2="100" />
+                  <line x1="0" y1="200" x2="500" y2="200" />
+                  <line x1="0" y1="300" x2="500" y2="300" />
+                  <line x1="0" y1="400" x2="500" y2="400" />
+                </g>
+
+                {/* Stairs Ascending Right */}
+                <g className="transition-transform duration-700 hover:-translate-y-2 cursor-default">
+                  {/* Step 1 */}
+                  <rect x="30" y="380" width="90" height="120" fill="url(#gradStair)" rx="4" opacity="0.6" />
+                  <rect x="30" y="380" width="90" height="25" fill="#34d399" rx="4" />
+                  
+                  {/* Step 2 */}
+                  <rect x="140" y="280" width="90" height="220" fill="url(#gradStair)" rx="4" opacity="0.75" />
+                  <rect x="140" y="280" width="90" height="25" fill="#34d399" rx="4" />
+
+                  {/* Step 3 */}
+                  <rect x="250" y="180" width="90" height="320" fill="url(#gradStair)" rx="4" opacity="0.9" />
+                  <rect x="250" y="180" width="90" height="25" fill="#34d399" rx="4" />
+
+                  {/* Step 4 */}
+                  <rect x="360" y="80" width="110" height="420" fill="url(#gradStair)" rx="4" opacity="1" />
+                  <rect x="360" y="80" width="110" height="25" fill="#10b981" rx="4" />
+                </g>
+
+                {/* Target/Goal at the top */}
+                <g transform="translate(370, -10)" className="animate-[bounce_4s_infinite]">
+                  <circle cx="45" cy="45" r="45" fill="url(#gradJrf)" className="drop-shadow-[0_0_30px_rgba(251,191,36,0.6)]" />
+                  <circle cx="45" cy="45" r="35" fill="#020617" />
+                  <text x="45" y="57" fontFamily="sans-serif" fontSize="28" fontWeight="900" fill="#fbbf24" textAnchor="middle">JRF</text>
+                  
+                  {/* Sparkles */}
+                  <path d="M -10 10 L -5 20 L 5 25 L -5 30 L -10 40 L -15 30 L -25 25 L -15 20 Z" fill="#fbbf24" className="animate-pulse" />
+                  <path d="M 90 80 L 93 88 L 100 90 L 93 92 L 90 100 L 87 92 L 80 90 L 87 88 Z" fill="#fbbf24" className="animate-pulse" style={{ animationDelay: '1s' }} />
+                </g>
+                
+                {/* Connection Line (Progress) */}
+                <path d="M 75 350 C 185 250, 295 150, 390 80" stroke="#fbbf24" strokeWidth="4" strokeDasharray="12,12" strokeLinecap="round" fill="transparent" className="animate-[pulse_2s_infinite]" />
+              </svg>
+            </div>
+
           </div>
 
-          {/* Stats Grid (Psychology: Social Proof) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-4xl mx-auto border-t border-white/10 pt-10">
+          {/* Stats Grid (Full Width Below) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 border-t border-white/10 pt-10">
             {stats.map((s) => (
               <div key={s.label} className="text-center group">
                 <div className="text-3xl sm:text-4xl font-black text-white group-hover:text-emerald-400 transition-colors">{s.value}</div>
