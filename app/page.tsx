@@ -47,7 +47,7 @@ export default function HomePage() {
     <div className="flex-1 overflow-hidden">
 
       {/* ── Hero Section (Psychology: Authority & Aspiration) ── */}
-      <section className="relative bg-slate-950 text-white overflow-hidden pb-12 pt-20 sm:pt-32">
+      <section className="relative bg-slate-950 text-white overflow-hidden pb-12 pt-8 sm:pt-12">
         {/* Abstract Background Glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-40 -left-40 w-[400px] h-[400px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
