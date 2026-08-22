@@ -210,17 +210,17 @@ async function runImport() {
       let subtopic_id = null;
 
       if (q.classification && q.classification.unit_number) {
-        const unit = dbUnits.find(u => u.unit_number === q.classification.unit_number);
+        const unit = dbUnits.find((u: any) => u.unit_number === q.classification.unit_number);
         if (unit) {
           unit_id = unit.id;
           if (q.classification.broad_topic_arabic || q.classification.broad_topic_english) {
             const btSlug = generateSlug(q.classification.broad_topic_english || q.classification.broad_topic_arabic);
-            const bt = unit.broad_topics.find(b => b.slug === btSlug);
+            const bt = unit.broad_topics.find((b: any) => b.slug === btSlug);
             if (bt) {
               broad_topic_id = bt.id;
               if (q.classification.subtopic_arabic || q.classification.subtopic_english) {
                 const stSlug = generateSlug(q.classification.subtopic_english || q.classification.subtopic_arabic);
-                const st = bt.subtopics.find(s => s.slug === stSlug);
+                const st = bt.subtopics.find((s: any) => s.slug === stSlug);
                 if (st) subtopic_id = st.id;
               }
             }

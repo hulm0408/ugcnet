@@ -20,7 +20,7 @@ export default async function AdminSettingsPage() {
 
   // Fetch settings from db
   const dbSettings = await prisma.siteSetting.findMany();
-  const settingsMap = new Map(dbSettings.map(s => [s.key, s.value]));
+  const settingsMap = new Map(dbSettings.map((s: any) => [s.key, s.value]));
 
   const defaultSettings = {
     seo_title: settingsMap.get('seo_title') as string || 'Arabic NET/JRF Practice — UGC NET Arabic Previous Year Questions',

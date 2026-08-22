@@ -25,7 +25,7 @@ export default async function PYQPage() {
   });
 
   // Group papers by year
-  const groupedPapers = papers.reduce((acc, paper) => {
+  const groupedPapers = papers.reduce((acc: Record<number, any>, paper: any) => {
     if (!acc[paper.year]) {
       acc[paper.year] = [];
     }
@@ -75,7 +75,7 @@ export default async function PYQPage() {
               </div>
               
               <div className="divide-y divide-slate-100">
-                {groupedPapers[year].map((paper) => (
+                {groupedPapers[year].map((paper: any) => (
                   <Link
                     key={paper.id}
                     href={`/instructions/${paper.id}`}

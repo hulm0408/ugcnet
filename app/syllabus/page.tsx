@@ -45,24 +45,24 @@ export default async function SyllabusPage() {
     })
   ]);
 
-  const unitCountMap = new Map(unitCounts.map(c => [c.unit_id, c._count.id]));
-  const broadTopicCountMap = new Map(broadTopicCounts.map(c => [c.broad_topic_id, c._count.id]));
-  const subtopicCountMap = new Map(subtopicCounts.map(c => [c.subtopic_id, c._count.id]));
+  const unitCountMap = new Map(unitCounts.map((c: any) => [c.unit_id, c._count.id]));
+  const broadTopicCountMap = new Map(broadTopicCounts.map((c: any) => [c.broad_topic_id, c._count.id]));
+  const subtopicCountMap = new Map(subtopicCounts.map((c: any) => [c.subtopic_id, c._count.id]));
 
   // Map database records to the structure expected by SyllabusList
-  const hierarchicalUnits = units.map(unit => ({
+  const hierarchicalUnits = units.map((unit: any) => ({
     id: unit.id,
     number: unit.unit_number,
     nameAr: unit.name_arabic,
     nameEn: unit.name_english,
     questionCount: unitCountMap.get(unit.id) || 0,
-    broadTopics: unit.broad_topics.map(bt => ({
+    broadTopics: unit.broad_topics.map((bt: any) => ({
       id: bt.id,
       nameAr: bt.name_arabic,
       nameEn: bt.name_english,
       slug: bt.slug,
       questionCount: broadTopicCountMap.get(bt.id) || 0,
-      subtopics: bt.subtopics.map(st => ({
+      subtopics: bt.subtopics.map((st: any) => ({
         id: st.id,
         nameAr: st.name_arabic,
         nameEn: st.name_english,
