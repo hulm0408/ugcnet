@@ -2,6 +2,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Header from '@/components/layout/Header';
 import { auth } from '@/lib/auth';
+import { Inter, Amiri, Amiri_Quran } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const amiri = Amiri({ weight: ['400', '700'], subsets: ['arabic'], variable: '--font-amiri' });
+const amiriQuran = Amiri_Quran({ weight: ['400'], subsets: ['arabic'], variable: '--font-amiri-quran' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
@@ -48,15 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Amiri+Quran&family=Amiri:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="bg-slate-50 min-h-screen flex flex-col antialiased">
+      <body className={`bg-slate-50 min-h-screen flex flex-col antialiased ${inter.variable} ${amiri.variable} ${amiriQuran.variable}`}>
         {/* Sticky header — always on top via z-50 */}
         <Header user={session?.user || null} />
         {/* Page content fills remaining viewport height */}

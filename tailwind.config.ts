@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        arabic: ['Amiri', 'Amiri Quran', 'Noto Naskh Arabic', 'Traditional Arabic', 'serif'],
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        ui: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        arabic: ['var(--font-amiri)', 'var(--font-amiri-quran)', 'Noto Naskh Arabic', 'serif'],
+        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        ui: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       colors: {
         primary: {
