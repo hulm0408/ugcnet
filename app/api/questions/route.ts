@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const paperId = searchParams.get('paperId');
     const unitId = searchParams.get('unitId');
+    const unit = searchParams.get('unit');
     const topic = searchParams.get('topic');
     const subtopic = searchParams.get('subtopic');
     const year = searchParams.get('year');
@@ -25,6 +26,10 @@ export async function GET(request: Request) {
 
     if (unitId) {
       where.unit_id = unitId;
+    }
+
+    if (unit) {
+      where.unit = { unit_number: parseInt(unit, 10) };
     }
     
     if (topic) {

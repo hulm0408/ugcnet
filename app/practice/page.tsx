@@ -22,9 +22,9 @@ const evaluateAnswer = async (questionId: string, selectedOption: string) => {
 
 function PracticeContent() {
   const searchParams = useSearchParams();
-  const year = searchParams.get('year') || '2009';
-  const paper = searchParams.get('paper') || 'Paper II';
   const unit = searchParams.get('unit');
+  const year = searchParams.get('year') || (unit ? null : '2009');
+  const paper = searchParams.get('paper') || (unit ? null : 'Paper II');
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,6 +143,9 @@ function PracticeContent() {
   }
 
   // "? Mode Selection Screen
+  const displayYear = year || (unit ? `Unit ${unit}` : '2009');
+  const displayPaper = paper || (unit ? 'Mixed' : 'Paper II');
+
   if (!sessionMode) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#FCFAF8] p-6" style={{ height: 'calc(100vh - 64px)' }}>
@@ -182,8 +185,8 @@ function PracticeContent() {
   if (sessionMode === 'instructions') {
     return (
       <InstructionsView 
-        year={year}
-        paper={paper}
+        year={displayYear}
+        paper={displayPaper}
         totalQuestions={questions.length}
         onStart={() => {
           setSessionMode('mock');
@@ -207,8 +210,8 @@ function PracticeContent() {
     // Given the 9 screens, MockTestView is what we built.
     return (
       <MockTestView 
-        year={year}
-        paper={paper}
+        year={displayYear}
+        paper={displayPaper}
         questions={questions}
         currentIndex={currentIndex}
         answers={answers}
@@ -228,8 +231,8 @@ function PracticeContent() {
   if (testStatus === 'summary') {
     return (
       <ResultSummaryView 
-        year={year}
-        paper={paper}
+        year={displayYear}
+        paper={displayPaper}
         correctCount={correctCount}
         incorrectCount={incorrectCount}
         unattemptedCount={unattemptedCount}
@@ -243,8 +246,8 @@ function PracticeContent() {
   if (testStatus === 'review') {
     return (
       <QuestionReviewView 
-        year={year}
-        paper={paper}
+        year={displayYear}
+        paper={displayPaper}
         questions={questions}
         answers={answers}
         evaluations={evaluations}
