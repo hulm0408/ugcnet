@@ -1,0 +1,387 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+// ═══════════════════════════════════════════════════
+// OFFICIAL SYLLABUS
+// ═══════════════════════════════════════════════════
+
+model SyllabusUnit {
+  id              String   @id @default(cuid())
+  unit_number     Int      @unique
+  name_arabic     String
+  name_english    String
+  slug            String   @unique
+  description_arabic  String?
+  description_english String?
+  is_active       Boolean  @default(true)
+  order_index     Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  broad_topics    BroadTopic[]
+  questions       Question[]
+}
+
+model BroadTopic {
+  id              String       @id @default(cuid())
+  unit_id         String
+  unit            SyllabusUnit @relation(fields: [unit_id], references: [id])
+  name_arabic     String
+  name_english    String
+  slug            String
+  is_active       Boolean      @default(true)
+  order_index     Int
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  subtopics       Subtopic[]
+  questions       Question[]
+
+  @@unique([unit_id, slug])
+}
+
+model Subtopic {
+  id              String      @id @default(cuid())
+  broad_topic_id  String
+  broad_topic     BroadTopic  @relation(fields: [broad_topic_id], references: [id])
+  name_arabic     String
+  name_english    String
+  slug            String
+  node_type       String      // official_topic | subtopic | entity | category
+  node_source     String      // official | dynamic | generated
+  is_active       Boolean     @default(true)
+  order_index     Int         @default(0)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  questions       Question[]
+
+  @@unique([broad_topic_id, slug])
+}
+
+// ═══════════════════════════════════════════════════
+// EXAM PAPERS + QUESTIONS (SOURCE DATA — IMMUTABLE)
+// ═══════════════════════════════════════════════════
+
+model ExamPaper {
+  id                  String   @id @default(cuid())
+  source_file_name    String
+  exam_name           String
+  subject             String   @default("Arabic (Code No. 029)")
+  paper_number        String   // "II" | "III"
+  year                Int
+  session             String?  // "June" | "Dec" | "Jan" | "Nov"
+  part                String?  // "Part 1" | "Part 2" | null
+  exam_date           String?
+  total_questions     Int
+  content_status      String   @default("PUBLISHED") // PUBLISHED|DRAFT|PRIVATE|UNVERIFIED|RESTRICTED|ARCHIVED
+  status_reason       String?  // Why it's restricted/unverified
+  is_paper_iii        Boolean  @default(false)
+  display_name        String   // Human-readable name for UI
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  questions           Question[]
+  import_jobs         ImportJob[]
+
+  @@index([year, content_status])
+  @@index([content_status])
+}
+
+model Question {
+  id                          String   @id @default(cuid())
+  source_question_id          String   @unique  // Original ID or generated NET_YYYY_Px_Qnnn
+  source_file_name            String
+  exam_paper_id               String
+  exam_paper                  ExamPaper @relation(fields: [exam_paper_id], references: [id])
+  original_question_number    String
+  
+  // ── IMMUTABLE SOURCE CONTENT ──────────────────────
+  question_arabic             String
+  question_english            String?
+  question_type               String   @default("Direct MCQ")
+  context_paragraph_arabic    String?
+  context_paragraph_english   String?
+  matching_table_arabic       Json?
+  matching_table_english      Json?
+  options_arabic              Json     // {A: str, B: str, C: str, D: str}
+  options_english             Json?
+  options_generated           Boolean  @default(false)
+  correct_answer              String   // "A" | "B" | "C" | "D"
+  correct_answer_text_arabic  String?
+  correct_answer_text_english String?
+  explanation_arabic          String?  // Legacy schema only
+  explanation_english         String?  // Legacy schema only
+  
+  // ── ADMIN-EDITABLE CLASSIFICATION ─────────────────
+  unit_id                     String?
+  unit                        SyllabusUnit? @relation(fields: [unit_id], references: [id])
+  broad_topic_id              String?
+  broad_topic                 BroadTopic? @relation(fields: [broad_topic_id], references: [id])
+  subtopic_id                 String?
+  subtopic                    Subtopic? @relation(fields: [subtopic_id], references: [id])
+  specific_entity_name_arabic  String?
+  specific_entity_name_english String?
+  question_micro_focus_arabic  String?
+  question_micro_focus_english String?
+  folder_path_arabic           String?
+  folder_path_english          String?
+  final_folder_arabic          String?
+  final_folder_english         String?
+  final_folder_type            String?
+  
+  // ── STATUS ────────────────────────────────────────
+  content_status              String   @default("PUBLISHED")
+  classification_status       String   @default("classified") // classified|unclassified|pending_review
+  import_job_id               String?
+  import_job                  ImportJob? @relation(fields: [import_job_id], references: [id])
+  
+  created_at                  DateTime @default(now())
+  updated_at                  DateTime @updatedAt
+
+  // Relations
+  practice_attempts           PracticeAttempt[]
+  bookmarks                   Bookmark[]
+  reports                     QuestionReport[]
+  classification_history      ClassificationHistory[]
+
+  @@index([exam_paper_id, content_status])
+  @@index([unit_id, content_status])
+  @@index([broad_topic_id])
+  @@index([content_status])
+  @@index([question_type])
+}
+
+// ═══════════════════════════════════════════════════
+// USERS + AUTH (NextAuth.js tables)
+// ═══════════════════════════════════════════════════
+
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  email_verified  DateTime?
+  image           String?
+  password_hash   String?
+  role            String    @default("USER")  // USER | ADMIN | SUPER_ADMIN
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+  last_active_at  DateTime?
+
+  accounts        Account[]
+  sessions        Session[]
+  
+  practice_sessions PracticeSession[]
+  bookmarks       Bookmark[]
+  reports         QuestionReport[]
+  audit_logs      AuditLog[]
+  classification_history ClassificationHistory[]
+}
+
+model Account {
+  id                  String  @id @default(cuid())
+  user_id             String
+  user                User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+
+  @@unique([provider, provider_account_id])
+}
+
+model Session {
+  id            String   @id @default(cuid())
+  session_token String   @unique
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  expires       DateTime
+}
+
+model VerificationToken {
+  identifier  String
+  token       String   @unique
+  expires     DateTime
+
+  @@unique([identifier, token])
+}
+
+// ═══════════════════════════════════════════════════
+// PRACTICE ENGINE
+// ═══════════════════════════════════════════════════
+
+model PracticeSession {
+  id              String    @id @default(cuid())
+  user_id         String
+  user            User      @relation(fields: [user_id], references: [id])
+  
+  mode            String    // year_wise|unit_wise|topic_wise|mixed|incorrect|bookmarked|unattempted|custom
+  filters         Json?     // {year, unit_id, topic_id, paper_id, question_type, ...}
+  question_ids    Json      // ordered array of question IDs for this session
+  total_questions Int
+  current_index   Int       @default(0)
+  
+  status          String    @default("in_progress") // in_progress|completed|abandoned
+  score           Int       @default(0)
+  correct_count   Int       @default(0)
+  incorrect_count Int       @default(0)
+  skipped_count   Int       @default(0)
+  
+  started_at      DateTime  @default(now())
+  completed_at    DateTime?
+  last_active_at  DateTime  @default(now())
+
+  attempts        PracticeAttempt[]
+
+  @@index([user_id, status])
+  @@index([user_id, started_at])
+}
+
+model PracticeAttempt {
+  id              String   @id @default(cuid())
+  session_id      String
+  session         PracticeSession @relation(fields: [session_id], references: [id])
+  user_id         String
+  question_id     String
+  question        Question @relation(fields: [question_id], references: [id])
+  
+  selected_option String?  // A|B|C|D or null if skipped
+  is_correct      Boolean?
+  is_skipped      Boolean  @default(false)
+  
+  attempted_at    DateTime @default(now())
+
+  @@unique([session_id, question_id])
+  @@index([user_id, question_id])
+  @@index([user_id, is_correct])
+}
+
+// ═══════════════════════════════════════════════════
+// USER FEATURES
+// ═══════════════════════════════════════════════════
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  question_id String
+  question    Question @relation(fields: [question_id], references: [id])
+  created_at  DateTime @default(now())
+
+  @@unique([user_id, question_id])
+  @@index([user_id])
+}
+
+model QuestionReport {
+  id          String   @id @default(cuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  question_id String
+  question    Question @relation(fields: [question_id], references: [id])
+  report_type String   // incorrect_answer|typo|unclear|wrong_classification|duplicate|formatting|other
+  description String?
+  status      String   @default("open") // open|reviewed|resolved|dismissed
+  reviewed_by String?
+  reviewed_at DateTime?
+  created_at  DateTime @default(now())
+
+  @@index([status])
+  @@index([question_id])
+}
+
+// ═══════════════════════════════════════════════════
+// ADMIN + AUDIT
+// ═══════════════════════════════════════════════════
+
+model ImportJob {
+  id              String    @id @default(cuid())
+  file_name       String
+  imported_by     String
+  status          String    @default("pending") // pending|validating|preview|importing|completed|failed
+  total_records   Int       @default(0)
+  imported_count  Int       @default(0)
+  skipped_count   Int       @default(0)
+  error_count     Int       @default(0)
+  report          Json?     // Validation report summary
+  created_at      DateTime  @default(now())
+  completed_at    DateTime?
+
+  errors          ImportError[]
+  questions       Question[]
+  exam_papers     ExamPaper[]
+}
+
+model ImportError {
+  id            String    @id @default(cuid())
+  job_id        String
+  job           ImportJob @relation(fields: [job_id], references: [id])
+  row_number    Int?
+  error_type    String    // missing_field|duplicate_id|invalid_answer|schema_error|etc
+  error_message String
+  raw_data      Json?
+
+  @@index([job_id])
+}
+
+model ClassificationHistory {
+  id          String   @id @default(cuid())
+  question_id String
+  question    Question @relation(fields: [question_id], references: [id])
+  changed_by  String
+  user        User     @relation(fields: [changed_by], references: [id])
+  field_name  String
+  old_value   String?
+  new_value   String?
+  changed_at  DateTime @default(now())
+
+  @@index([question_id])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  user_id     String?
+  user        User?    @relation(fields: [user_id], references: [id])
+  action      String   // e.g. QUESTION_ARCHIVED, HIERARCHY_CHANGED, USER_ROLE_CHANGED
+  entity_type String?  // Question | ExamPaper | User | SyllabusUnit | etc.
+  entity_id   String?
+  old_value   Json?
+  new_value   Json?
+  ip_address  String?
+  created_at  DateTime @default(now())
+
+  @@index([entity_type, entity_id])
+  @@index([user_id])
+  @@index([created_at])
+}
+
+// Simple DB-based rate limiting
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  attempts    Int      @default(1)
+  reset_at    DateTime
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([key])
+  @@index([reset_at])
+}
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  updated_by  String?
+  updated_at  DateTime @updatedAt
+}
