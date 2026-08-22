@@ -67,7 +67,7 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
             <div className="space-y-5 text-stone-600 mb-10">
               <div className="flex gap-4">
                 <div className="font-bold text-stone-900">1.</div>
-                <p className="text-sm font-medium leading-relaxed">The test will start immediately after you click on "Start Test".</p>
+                <p className="text-sm font-medium leading-relaxed">The test will start immediately after you click on &quot;Start Test&quot;.</p>
               </div>
               <div className="flex gap-4">
                 <div className="font-bold text-stone-900">2.</div>
@@ -79,7 +79,7 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
               </div>
               <div className="flex gap-4">
                 <div className="font-bold text-stone-900">4.</div>
-                <p className="text-sm font-medium leading-relaxed">You can mark questions for review using the "Mark for Review" option.</p>
+                <p className="text-sm font-medium leading-relaxed">You can mark questions for review using the &quot;Mark for Review&quot; option.</p>
               </div>
               <div className="flex gap-4">
                 <div className="font-bold text-stone-900">5.</div>
