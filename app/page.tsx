@@ -103,7 +103,7 @@ export default function HomePage() {
               {/* Glow backdrop */}
               <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
               
-              <svg viewBox="0 0 500 500" className="w-full h-auto max-w-[500px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="0 -80 460 500" className="w-full h-auto max-w-[460px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="gradStair" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" />
@@ -117,44 +117,47 @@ export default function HomePage() {
                 </defs>
 
                 {/* Connection Line (Progress) */}
-                <path d="M 80 370 C 200 350, 300 220, 380 90" stroke="#fbbf24" strokeWidth="5" strokeDasharray="12,12" strokeLinecap="round" fill="transparent" className="animate-[pulse_2s_infinite]" />
+                <path d="M 80 310 C 180 290, 280 180, 380 50" stroke="#fbbf24" strokeWidth="5" strokeDasharray="12,12" strokeLinecap="round" fill="transparent" className="animate-[pulse_2s_infinite]" />
 
-                {/* Target/Goal at the top right */}
-                <g transform="translate(380, 60)" className="animate-[bounce_4s_infinite] group cursor-pointer">
-                  <circle cx="0" cy="0" r="55" fill="url(#gradJrf)" className="drop-shadow-[0_0_40px_rgba(251,191,36,0.6)]" />
-                  <circle cx="0" cy="0" r="45" fill="#020617" />
-                  
-                  {/* Default JRF Text */}
-                  <text x="0" y="12" fontFamily="sans-serif" fontSize="34" fontWeight="900" fill="#fbbf24" textAnchor="middle" letterSpacing="2" className="group-hover:opacity-0 transition-opacity duration-300">JRF</text>
-                  
-                  {/* Hover "PARHLE BHAI" Text */}
-                  <text x="0" y="2" fontFamily="sans-serif" fontSize="14" fontWeight="900" fill="#fbbf24" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <tspan x="0" dy="0">PARHLE</tspan>
-                    <tspan x="0" dy="18">BHAI</tspan>
-                  </text>
-                  
-                  {/* Sparkles */}
-                  <path d="M -65 -45 L -60 -30 L -45 -25 L -60 -20 L -65 -5 L -70 -20 L -85 -25 L -70 -30 Z" fill="#fbbf24" className="animate-pulse" />
-                  <path d="M 55 -55 L 58 -45 L 68 -42 L 58 -39 L 55 -29 L 52 -39 L 42 -42 L 52 -45 Z" fill="#fbbf24" className="animate-pulse" style={{ animationDelay: '1s' }} />
+                {/* Target/Goal at the top right, directly resting on Step 4 */}
+                <g transform="translate(380, 25)" className="group cursor-pointer">
+                  {/* Subtle float animation instead of bounce */}
+                  <g className="animate-[pulse_3s_infinite]">
+                    <circle cx="0" cy="0" r="55" fill="url(#gradJrf)" className="drop-shadow-[0_0_40px_rgba(251,191,36,0.6)]" />
+                    <circle cx="0" cy="0" r="45" fill="#020617" />
+                    
+                    {/* Default JRF Text */}
+                    <text x="0" y="12" fontFamily="sans-serif" fontSize="34" fontWeight="900" fill="#fbbf24" textAnchor="middle" letterSpacing="2" className="group-hover:opacity-0 transition-opacity duration-300">JRF</text>
+                    
+                    {/* Hover "PARHLE BHAI" Text */}
+                    <text x="0" y="2" fontFamily="sans-serif" fontSize="14" fontWeight="900" fill="#fbbf24" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <tspan x="0" dy="0">PARHLE</tspan>
+                      <tspan x="0" dy="18">BHAI</tspan>
+                    </text>
+                    
+                    {/* Sparkles */}
+                    <path d="M -65 -45 L -60 -30 L -45 -25 L -60 -20 L -65 -5 L -70 -20 L -85 -25 L -70 -30 Z" fill="#fbbf24" opacity="0.8" />
+                    <path d="M 55 -55 L 58 -45 L 68 -42 L 58 -39 L 55 -29 L 52 -39 L 42 -42 L 52 -45 Z" fill="#fbbf24" opacity="0.9" />
+                  </g>
                 </g>
 
                 {/* Stairs Ascending Right */}
                 <g className="transition-transform duration-700 hover:-translate-y-2 cursor-default">
                   {/* Step 1 */}
-                  <rect x="40" y="380" width="80" height="100" fill="url(#gradStair)" rx="4" />
-                  <rect x="40" y="380" width="80" height="20" fill="#34d399" rx="4" />
+                  <rect x="40" y="320" width="80" height="100" fill="url(#gradStair)" rx="4" />
+                  <rect x="40" y="320" width="80" height="20" fill="#34d399" rx="4" />
                   
                   {/* Step 2 */}
-                  <rect x="140" y="290" width="80" height="190" fill="url(#gradStair)" rx="4" />
-                  <rect x="140" y="290" width="80" height="20" fill="#34d399" rx="4" />
+                  <rect x="140" y="240" width="80" height="180" fill="url(#gradStair)" rx="4" />
+                  <rect x="140" y="240" width="80" height="20" fill="#34d399" rx="4" />
 
                   {/* Step 3 */}
-                  <rect x="240" y="200" width="80" height="280" fill="url(#gradStair)" rx="4" />
-                  <rect x="240" y="200" width="80" height="20" fill="#34d399" rx="4" />
+                  <rect x="240" y="160" width="80" height="260" fill="url(#gradStair)" rx="4" />
+                  <rect x="240" y="160" width="80" height="20" fill="#34d399" rx="4" />
 
                   {/* Step 4 */}
-                  <rect x="340" y="110" width="80" height="370" fill="url(#gradStair)" rx="4" />
-                  <rect x="340" y="110" width="80" height="20" fill="#10b981" rx="4" />
+                  <rect x="340" y="80" width="80" height="340" fill="url(#gradStair)" rx="4" />
+                  <rect x="340" y="80" width="80" height="20" fill="#10b981" rx="4" />
                 </g>
               </svg>
             </div>
