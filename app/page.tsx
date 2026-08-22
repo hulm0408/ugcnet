@@ -99,66 +99,55 @@ export default function HomePage() {
             </div>
 
             {/* RHS: SVG Illustration */}
-            <div className="hidden lg:flex justify-center items-center relative w-full h-[500px]">
+            <div className="hidden lg:flex justify-center items-center relative w-full">
               {/* Glow backdrop */}
               <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
               
-              <svg viewBox="0 0 500 500" className="w-full h-full max-w-[450px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="0 0 600 450" className="w-full h-auto max-w-[550px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <linearGradient id="gradStair" x1="0" y1="0" x2="1" y2="1">
+                  <linearGradient id="gradStair" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#047857" />
+                    <stop offset="100%" stopColor="#064e3b" />
                   </linearGradient>
                   <linearGradient id="gradJrf" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#d97706" />
+                    <stop offset="0%" stopColor="#fde047" />
+                    <stop offset="50%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#b45309" />
                   </linearGradient>
                 </defs>
 
-                {/* Background Grid */}
-                <g stroke="#ffffff" strokeOpacity="0.03" strokeWidth="2">
-                  <line x1="100" y1="0" x2="100" y2="500" />
-                  <line x1="200" y1="0" x2="200" y2="500" />
-                  <line x1="300" y1="0" x2="300" y2="500" />
-                  <line x1="400" y1="0" x2="400" y2="500" />
-                  <line x1="0" y1="100" x2="500" y2="100" />
-                  <line x1="0" y1="200" x2="500" y2="200" />
-                  <line x1="0" y1="300" x2="500" y2="300" />
-                  <line x1="0" y1="400" x2="500" y2="400" />
+                {/* Target/Goal at the top right */}
+                <g transform="translate(480, 100)" className="animate-[bounce_4s_infinite]">
+                  <circle cx="0" cy="0" r="60" fill="url(#gradJrf)" className="drop-shadow-[0_0_40px_rgba(251,191,36,0.6)]" />
+                  <circle cx="0" cy="0" r="48" fill="#020617" />
+                  <text x="0" y="14" fontFamily="sans-serif" fontSize="38" fontWeight="900" fill="#fbbf24" textAnchor="middle" letterSpacing="2">JRF</text>
+                  
+                  {/* Sparkles */}
+                  <path d="M -70 -50 L -65 -35 L -50 -30 L -65 -25 L -70 -10 L -75 -25 L -90 -30 L -75 -35 Z" fill="#fbbf24" className="animate-pulse" />
+                  <path d="M 60 -60 L 63 -50 L 73 -47 L 63 -44 L 60 -34 L 57 -44 L 47 -47 L 57 -50 Z" fill="#fbbf24" className="animate-pulse" style={{ animationDelay: '1s' }} />
                 </g>
+                
+                {/* Connection Line (Progress) */}
+                <path d="M 80 370 C 200 350, 380 220, 450 140" stroke="#fbbf24" strokeWidth="5" strokeDasharray="12,12" strokeLinecap="round" fill="transparent" className="animate-[pulse_2s_infinite]" />
 
                 {/* Stairs Ascending Right */}
                 <g className="transition-transform duration-700 hover:-translate-y-2 cursor-default">
                   {/* Step 1 */}
-                  <rect x="30" y="380" width="90" height="120" fill="url(#gradStair)" rx="4" opacity="0.6" />
-                  <rect x="30" y="380" width="90" height="25" fill="#34d399" rx="4" />
+                  <rect x="40" y="370" width="80" height="80" fill="url(#gradStair)" rx="4" />
+                  <rect x="40" y="370" width="80" height="20" fill="#34d399" rx="4" />
                   
                   {/* Step 2 */}
-                  <rect x="140" y="280" width="90" height="220" fill="url(#gradStair)" rx="4" opacity="0.75" />
-                  <rect x="140" y="280" width="90" height="25" fill="#34d399" rx="4" />
+                  <rect x="140" y="280" width="80" height="170" fill="url(#gradStair)" rx="4" />
+                  <rect x="140" y="280" width="80" height="20" fill="#34d399" rx="4" />
 
                   {/* Step 3 */}
-                  <rect x="250" y="180" width="90" height="320" fill="url(#gradStair)" rx="4" opacity="0.9" />
-                  <rect x="250" y="180" width="90" height="25" fill="#34d399" rx="4" />
+                  <rect x="240" y="190" width="80" height="260" fill="url(#gradStair)" rx="4" />
+                  <rect x="240" y="190" width="80" height="20" fill="#34d399" rx="4" />
 
                   {/* Step 4 */}
-                  <rect x="360" y="80" width="110" height="420" fill="url(#gradStair)" rx="4" opacity="1" />
-                  <rect x="360" y="80" width="110" height="25" fill="#10b981" rx="4" />
+                  <rect x="340" y="100" width="80" height="350" fill="url(#gradStair)" rx="4" />
+                  <rect x="340" y="100" width="80" height="20" fill="#10b981" rx="4" />
                 </g>
-
-                {/* Target/Goal at the top */}
-                <g transform="translate(370, -10)" className="animate-[bounce_4s_infinite]">
-                  <circle cx="45" cy="45" r="45" fill="url(#gradJrf)" className="drop-shadow-[0_0_30px_rgba(251,191,36,0.6)]" />
-                  <circle cx="45" cy="45" r="35" fill="#020617" />
-                  <text x="45" y="57" fontFamily="sans-serif" fontSize="28" fontWeight="900" fill="#fbbf24" textAnchor="middle">JRF</text>
-                  
-                  {/* Sparkles */}
-                  <path d="M -10 10 L -5 20 L 5 25 L -5 30 L -10 40 L -15 30 L -25 25 L -15 20 Z" fill="#fbbf24" className="animate-pulse" />
-                  <path d="M 90 80 L 93 88 L 100 90 L 93 92 L 90 100 L 87 92 L 80 90 L 87 88 Z" fill="#fbbf24" className="animate-pulse" style={{ animationDelay: '1s' }} />
-                </g>
-                
-                {/* Connection Line (Progress) */}
-                <path d="M 75 350 C 185 250, 295 150, 390 80" stroke="#fbbf24" strokeWidth="4" strokeDasharray="12,12" strokeLinecap="round" fill="transparent" className="animate-[pulse_2s_infinite]" />
               </svg>
             </div>
 
