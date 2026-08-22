@@ -110,8 +110,8 @@ export async function auditLog(params: {
   action: AuditAction;
   entityType?: string;
   entityId?: string;
-  oldValue?: Record<string, unknown>;
-  newValue?: Record<string, unknown>;
+  oldValue?: any;
+  newValue?: any;
   ipAddress?: string;
 }) {
   try {
