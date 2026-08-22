@@ -2,13 +2,23 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { evaluateAnswer } from '@/lib/database';
+
 import { Target, CheckCircle2 } from 'lucide-react';
 
 import InstructionsView from '@/components/practice/InstructionsView';
 import MockTestView from '@/components/practice/MockTestView';
 import ResultSummaryView from '@/components/practice/ResultSummaryView';
 import QuestionReviewView from '@/components/practice/QuestionReviewView';
+
+const evaluateAnswer = async (questionId: string, selectedOption: string) => {
+  const res = await fetch('/api/questions/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questionId, selectedOption })
+  });
+  if (!res.ok) throw new Error('Evaluation failed');
+  return res.json();
+};
 
 function PracticeContent() {
   const searchParams = useSearchParams();
