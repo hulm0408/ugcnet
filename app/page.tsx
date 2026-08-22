@@ -1,20 +1,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BookMarked, GraduationCap, Calendar, Search, ChevronRight, Award, Brain, Zap, BookOpen } from 'lucide-react';
+import prisma from '@/lib/db';
 
-export const metadata: Metadata = {
-  title: 'Arabic NET/JRF Practice — UGC NET Arabic Previous Year Questions 2004–2023',
-  description:
-    'Practice 3,150+ UGC NET/JRF Arabic Previous Year Questions (PYQ) from 2004 to 2023. Year-wise, Unit-wise, Topic-wise practice. Free, bilingual (Arabic & English) platform.',
-  alternates: { canonical: '/' },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
+  
+  return {
+    title: 'Arabic NET/JRF Practice — UGC NET Arabic Previous Year Questions',
+    description: `Practice ${totalQuestions.toLocaleString()} UGC NET/JRF Arabic Previous Year Questions (PYQ). Year-wise, Unit-wise, Topic-wise practice. Free, bilingual (Arabic & English) platform.`,
+    alternates: { canonical: '/' },
+  };
+}
 
-const stats = [
-  { value: '3,150+', label: 'Questions', labelAr: 'سؤال' },
-  { value: '20', label: 'Years', labelAr: 'سنة' },
-  { value: '10', label: 'Units', labelAr: 'وحدة' },
-  { value: '45', label: 'Papers', labelAr: 'ورقة' },
-];
+export const dynamic = 'force-dynamic';
 
 const features = [
   { icon: Award, title: 'Authentic PYQs', desc: 'Sourced directly from NTA official papers.' },
@@ -42,7 +41,24 @@ const units = [
   { n: 10, ar: 'التَّرْجَمَةُ', en: 'Translation' },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
+  const totalPapers = await prisma.examPaper.count({ where: { content_status: 'PUBLISHED' } });
+  const totalUnits = await prisma.syllabusUnit.count();
+  
+  const papers = await prisma.examPaper.findMany({
+    where: { content_status: 'PUBLISHED' },
+    select: { year: true }
+  });
+  const totalYears = new Set(papers.map(p => p.year)).size;
+
+  const stats = [
+    { value: totalQuestions.toLocaleString(), label: 'Questions', labelAr: 'أسئلة' },
+    { value: totalYears.toString(), label: 'Years', labelAr: 'سنوات' },
+    { value: totalUnits.toString(), label: 'Units', labelAr: 'وحدات' },
+    { value: totalPapers.toString(), label: 'Papers', labelAr: 'أوراق' },
+  ];
+
   return (
     <div className="flex-1 overflow-hidden">
 
@@ -74,7 +90,7 @@ export default function HomePage() {
               </p>
               
               <p className="text-slate-400 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 font-medium">
-                Join thousands of JRF aspirants. Practice <strong className="text-white">3,150+</strong> official PYQs, track your accuracy, and conquer all 10 syllabus units.
+                Join thousands of JRF aspirants. Practice <strong className="text-white">{totalQuestions.toLocaleString()}</strong> official PYQs, track your accuracy, and conquer all {totalUnits} syllabus units.
               </p>
 
               {/* Primary CTAs */}

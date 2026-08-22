@@ -24,7 +24,9 @@ function PracticeContent() {
   const searchParams = useSearchParams();
   const unit = searchParams.get('unit');
   const year = searchParams.get('year') || (unit ? null : '2009');
-  const paper = searchParams.get('paper') || (unit ? null : 'Paper II');
+  const paperId = searchParams.get('paperId');
+  const paperTitle = searchParams.get('paperTitle');
+  const paper = searchParams.get('paper') || paperTitle || (unit ? null : 'Paper II');
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +49,7 @@ function PracticeContent() {
         let url = '/api/questions?published=true';
         if (year) url += `&year=${year}`;
         if (unit) url += `&unit=${unit}`;
+        if (paperId) url += `&paperId=${paperId}`;
 
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to load questions');

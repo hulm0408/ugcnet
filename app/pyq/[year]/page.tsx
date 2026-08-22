@@ -2,47 +2,44 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, Info } from 'lucide-react';
 import YearFolderSvg from '@/components/ui/YearFolderSvg';
+import prisma from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'Select Paper — PYQs',
   description: 'Choose the specific paper or part for the selected year.',
 };
 
-export default function SelectYearPaperPage({ params }: { params: { year: string } }) {
+export const dynamic = 'force-dynamic';
+
+export default async function SelectYearPaperPage({ params }: { params: { year: string } }) {
   const { year } = params;
+  const yearInt = parseInt(year);
 
-  // Mock available papers based on historical UGC NET structure
-  // Usually there's Paper 2 (100 Qs) and sometimes Paper 3 (75 Qs) or shifts.
-  const papers = [
-    {
-      id: 'paper1',
-      title: 'Paper I',
-      subtitle: '(General)',
-      questions: 50,
-      marks: 100,
-      minutes: 60,
+  // Fetch actual papers for this year from the database
+  const dbPapers = await prisma.examPaper.findMany({
+    where: { 
+      year: yearInt,
+      content_status: 'PUBLISHED'
     },
-    {
-      id: 'paper2',
-      title: 'Paper II',
-      subtitle: '(Arabic)',
-      questions: 100,
-      marks: 200,
-      minutes: 120,
-    }
-  ];
+    orderBy: [
+      { is_paper_iii: 'asc' },
+      { id: 'asc' }
+    ]
+  });
 
-  // For older years (pre-2019), they had Paper 3. Let's conditionally add it.
-  if (parseInt(year) < 2019) {
-    papers.push({
-      id: 'paper3',
-      title: 'Paper III',
-      subtitle: '(Arabic)',
-      questions: 75,
-      marks: 150,
-      minutes: 150,
-    });
-  }
+  const papers = dbPapers.map((paper) => {
+    // Basic heuristic: 2 marks per question, and assuming 1 minute per question + a bit of buffer usually
+    // Standard NET: Paper II = 100Qs, 200Marks, 120mins
+    return {
+      id: paper.id,
+      title: paper.display_name || paper.paper_number,
+      subtitle: `(${paper.session || 'UGC NET Arabic'})`,
+      questions: paper.total_questions,
+      marks: paper.total_questions * 2,
+      minutes: paper.total_questions === 100 ? 120 : paper.total_questions === 75 ? 150 : paper.total_questions * 1.5,
+    };
+  });
+
 
   return (
     <div className="flex-1 bg-stone-50 min-h-screen font-sans">
@@ -71,41 +68,48 @@ export default function SelectYearPaperPage({ params }: { params: { year: string
         </div>
 
         {/* Papers Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {papers.map((paper) => (
-            <Link
-              key={paper.id}
-              href={`/practice?year=${year}&paper=${paper.id}`}
-              className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#107A53] transition-all group relative overflow-hidden flex flex-col h-full"
-            >
-              {/* Highlight accent bar */}
-              <div className="absolute top-0 left-0 w-full h-1 bg-stone-200 group-hover:bg-[#107A53] transition-colors" />
-              
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-stone-900 group-hover:text-[#107A53] transition-colors">
-                  {paper.title}
-                </h3>
-                <p className="text-sm font-medium text-stone-500 mt-1">{paper.subtitle}</p>
-              </div>
+        {papers.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {papers.map((paper) => (
+              <Link
+                key={paper.id}
+                href={`/practice?year=${year}&paperId=${paper.id}&paperTitle=${encodeURIComponent(paper.title)}`}
+                className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#107A53] transition-all group relative overflow-hidden flex flex-col h-full"
+              >
+                {/* Highlight accent bar */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-stone-200 group-hover:bg-[#107A53] transition-colors" />
+                
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-stone-900 group-hover:text-[#107A53] transition-colors">
+                    {paper.title}
+                  </h3>
+                  <p className="text-sm font-medium text-stone-500 mt-1">{paper.subtitle}</p>
+                </div>
 
-              <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mt-auto mb-6">
-                <div>
-                  <div className="text-stone-900 font-semibold">{paper.questions} Questions</div>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mt-auto mb-6">
+                  <div>
+                    <div className="text-stone-900 font-semibold">{paper.questions} Questions</div>
+                  </div>
+                  <div>
+                    <div className="text-stone-900 font-semibold">{paper.marks} Marks</div>
+                  </div>
+                  <div>
+                    <div className="text-stone-900 font-semibold">{paper.minutes} Minutes</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-stone-900 font-semibold">{paper.marks} Marks</div>
-                </div>
-                <div>
-                  <div className="text-stone-900 font-semibold">{paper.minutes} Minutes</div>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-end text-[#107A53]">
-                <ArrowRight size={20} className="transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="flex items-center justify-end text-[#107A53]">
+                  <ArrowRight size={20} className="transform group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center shadow-sm mb-8">
+            <h3 className="text-xl font-bold text-stone-900 mb-2">No Papers Available</h3>
+            <p className="text-stone-500">We couldn't find any published papers for the year {year}.</p>
+          </div>
+        )}
 
         <div className="flex items-center gap-3 text-sm text-emerald-700 bg-emerald-50 p-4 rounded-xl border border-emerald-200">
           <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">

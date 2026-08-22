@@ -1,9 +1,14 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
+import prisma from '@/lib/db';
 
-export const metadata: Metadata = {
-  title: 'Search Questions',
-  description: 'Search 3,150+ UGC NET Arabic previous year questions by keyword, topic, or year.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
+  
+  return {
+    title: 'Search Questions',
+    description: `Search ${totalQuestions.toLocaleString()} UGC NET Arabic previous year questions by keyword, topic, or year.`,
+  };
+}
 
 export default function SearchPage() {
   return (
