@@ -5,14 +5,15 @@ import { ArrowLeft, PlayCircle, BookOpen, Target } from 'lucide-react';
 import prisma from '@/lib/db';
 import QuillInkPotIcon from '@/components/ui/QuillInkPotIcon';
 
-export async function generateMetadata({ params }: { params: { unit_number: string, topic_slug: string } }): Promise<Metadata> {
-  const unitNum = parseInt(params.unit_number);
+export async function generateMetadata({ params }: { params: Promise<{ unit_number: string, topic_slug: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const unitNum = parseInt(resolvedParams.unit_number);
   
   if (isNaN(unitNum)) return { title: 'Topic Not Found' };
 
   const topic = await prisma.broadTopic.findFirst({
     where: { 
-      slug: params.topic_slug,
+      slug: resolvedParams.topic_slug,
       unit: { unit_number: unitNum }
     },
     include: { unit: true }
@@ -26,13 +27,14 @@ export async function generateMetadata({ params }: { params: { unit_number: stri
   };
 }
 
-export default async function TopicPage({ params }: { params: { unit_number: string, topic_slug: string } }) {
-  const unitNum = parseInt(params.unit_number);
+export default async function TopicPage({ params }: { params: Promise<{ unit_number: string, topic_slug: string }> }) {
+  const resolvedParams = await params;
+  const unitNum = parseInt(resolvedParams.unit_number);
   if (isNaN(unitNum)) return notFound();
 
   const topic = await prisma.broadTopic.findFirst({
     where: { 
-      slug: params.topic_slug,
+      slug: resolvedParams.topic_slug,
       unit: { unit_number: unitNum }
     },
     include: { 

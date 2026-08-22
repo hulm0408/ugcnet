@@ -11,8 +11,9 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function SelectYearPaperPage({ params }: { params: { year: string } }) {
-  const { year } = params;
+export default async function SelectYearPaperPage({ params }: { params: Promise<{ year: string }> }) {
+  const resolvedParams = await params;
+  const { year } = resolvedParams;
   const yearInt = parseInt(year);
 
   // Fetch actual papers for this year from the database
