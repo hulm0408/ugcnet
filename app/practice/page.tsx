@@ -63,7 +63,7 @@ function PracticeContent() {
       }
     }
     loadQuestions();
-  }, [year, unit]);
+  }, [year, unit, paperId]);
 
   useEffect(() => {
     if (questions.length > 0 && testStatus === 'in-progress') {
