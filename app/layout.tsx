@@ -52,7 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <body className={`bg-slate-50 min-h-screen flex flex-col antialiased ${inter.variable} ${notoKufi.variable}`}>
+      <body className={`bg-[#FCFAF8] text-stone-900 min-h-screen flex flex-col antialiased ${inter.variable} ${notoKufi.variable}`}>
         {/* Sticky header — always on top via z-50 */}
         <Header user={session?.user || null} />
         {/* Page content fills remaining viewport height */}

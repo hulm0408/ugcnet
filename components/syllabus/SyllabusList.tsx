@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronDown, ChevronUp, FileQuestion, ArrowRight, FolderOpen, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 export type SubtopicData = {
   id: string;
@@ -31,153 +31,110 @@ export type UnitData = {
 };
 
 export default function SyllabusList({ units }: { units: UnitData[] }) {
-  const [expandedUnit, setExpandedUnit] = useState<string | null>(null);
-  const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({});
+  const [activeUnitId, setActiveUnitId] = useState<string | null>(null);
 
-  const toggleUnit = (unitId: string) => {
-    setExpandedUnit((prev) => (prev === unitId ? null : unitId));
-  };
+  useEffect(() => {
+    if (units.length > 0 && !activeUnitId) {
+      setActiveUnitId(units[0].id);
+    }
+  }, [units, activeUnitId]);
 
-  const toggleTopic = (topicId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setExpandedTopics((prev) => ({ ...prev, [topicId]: !prev[topicId] }));
-  };
+  const activeUnit = units.find(u => u.id === activeUnitId) || units[0];
 
   return (
-    <div className="space-y-4">
-      {units.map((unit) => {
-        const isExpanded = expandedUnit === unit.id;
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Left Pane: Units */}
+      <div className="w-full lg:w-1/3 shrink-0 flex flex-col gap-3">
+        {units.map((unit) => {
+          const isActive = activeUnitId === unit.id;
 
-        return (
-          <div
-            key={unit.id}
-            className={`bg-white border rounded-xl overflow-hidden transition-all duration-200 ${
-              isExpanded ? 'border-slate-400 shadow-md ring-1 ring-slate-400' : 'border-slate-200 shadow-sm hover:border-slate-300 hover:shadow'
-            }`}
-          >
-            {/* Unit Header */}
+          return (
             <button
-              onClick={() => toggleUnit(unit.id)}
-              className="w-full flex items-start gap-4 p-5 text-left focus:outline-none"
+              key={unit.id}
+              onClick={() => setActiveUnitId(unit.id)}
+              className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${
+                isActive 
+                  ? 'bg-[#FCFAF8] border-[#E8DEC8] shadow-[0_4px_20px_-10px_rgba(217,119,6,0.15)] ring-1 ring-[#F3E8D6]' 
+                  : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+              }`}
             >
-              <div
-                className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-colors ${
-                  isExpanded ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
-                }`}
-              >
-                {unit.number}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div
-                  dir="rtl"
-                  lang="ar"
-                  className="font-arabic font-bold text-slate-900 text-xl leading-snug text-right mb-1"
-                >
-                  {unit.nameAr}
-                </div>
-                <div className="text-slate-500 text-sm font-medium">{unit.nameEn}</div>
-              </div>
-              
-              <div className="flex flex-col items-end gap-2">
-                <div className="shrink-0 text-slate-400">
-                  {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </div>
-                <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md">
-                  {unit.questionCount} Qs
+              <div className="flex items-center gap-5 min-w-0">
+                <span className={`text-3xl font-light tabular-nums transition-colors ${isActive ? 'text-[#D97706]' : 'text-stone-300 group-hover:text-stone-400'}`}>
+                  {unit.number.toString().padStart(2, '0')}
                 </span>
-              </div>
-            </button>
-
-            {/* Expanded Content */}
-            {isExpanded && (
-              <div className="border-t border-slate-100 bg-slate-50 animate-slide-up">
-                {unit.broadTopics.length > 0 ? (
-                  <div className="flex flex-col divide-y divide-slate-100">
-                    {unit.broadTopics.map((topic) => {
-                      const isTopicExpanded = expandedTopics[topic.id];
-                      return (
-                        <div key={topic.id} className="bg-white">
-                          <button
-                            onClick={(e) => toggleTopic(topic.id, e)}
-                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors text-left"
-                          >
-                            <div className="flex items-center gap-3">
-                              <FolderOpen size={18} className="text-blue-500" />
-                              <div>
-                                <div dir="rtl" lang="ar" className="font-arabic font-bold text-slate-800 text-right text-lg">
-                                  {topic.nameAr}
-                                </div>
-                                <div className="text-slate-500 text-sm">{topic.nameEn}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 text-slate-400">
-                              <span className="text-xs font-medium bg-slate-100 px-2 py-0.5 rounded text-slate-600">
-                                {topic.questionCount} Qs
-                              </span>
-                              {isTopicExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                            </div>
-                          </button>
-
-                          {/* Subtopics */}
-                          {isTopicExpanded && (
-                            <div className="pl-12 pr-4 pb-4 bg-slate-50/50">
-                              {topic.subtopics.length > 0 ? (
-                                <div className="grid gap-2 mt-2">
-                                  {topic.subtopics.map((subtopic) => (
-                                    <div key={subtopic.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                                      <div className="flex-1 min-w-0 pr-4">
-                                        <div dir="rtl" lang="ar" className="font-arabic font-semibold text-slate-700 text-right">
-                                          {subtopic.nameAr}
-                                        </div>
-                                        {subtopic.nameEn && (
-                                          <div className="text-slate-500 text-xs mt-1">{subtopic.nameEn}</div>
-                                        )}
-                                      </div>
-                                      <Link
-                                        href={`/practice?unit=${unit.number}&topic=${topic.slug}&subtopic=${subtopic.slug}`}
-                                        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 rounded hover:bg-slate-50 text-xs font-medium transition-colors"
-                                      >
-                                        <FileQuestion size={14} />
-                                        <span>Browse {subtopic.questionCount} Qs</span>
-                                      </Link>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="mt-2 text-sm text-slate-500 italic">No subtopics available.</div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                <div className="flex-1 min-w-0">
+                  <div dir="rtl" lang="ar" className={`font-arabic font-bold text-lg mb-1 truncate ${isActive ? 'text-stone-900' : 'text-stone-700'}`}>
+                    {unit.nameAr}
                   </div>
-                ) : (
-                  <div className="p-6 text-center text-slate-500 text-sm">
-                    No topics found for this unit.
+                  <div className={`text-[11px] font-bold tracking-wide uppercase truncate ${isActive ? 'text-stone-500' : 'text-stone-400'}`}>
+                    {unit.nameEn}
                   </div>
-                )}
-                
-                {/* Unit level browse button */}
-                <div className="p-4 bg-slate-100 border-t border-slate-200 flex justify-end">
-                  <Link
-                    href={`/practice?unit=${unit.number}`}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm ${
-                      unit.questionCount > 0
-                        ? 'bg-slate-900 text-white hover:bg-slate-800'
-                        : 'bg-slate-200 text-slate-400 pointer-events-none'
-                    }`}
-                  >
-                    Browse All {unit.questionCount} Questions in Unit
-                    <ArrowRight size={16} />
-                  </Link>
                 </div>
-
               </div>
-            )}
+              <ChevronRight size={20} className={isActive ? 'text-[#D97706]' : 'text-stone-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0'} />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Right Pane: Topics */}
+      <div className="flex-1 bg-white border border-stone-200 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+        
+        {/* Decorative SVG Pattern Top Right */}
+        <svg className="absolute top-0 right-0 text-stone-100 opacity-50 pointer-events-none" width="200" height="200" viewBox="0 0 100 100" fill="currentColor">
+           <path d="M0,0 L100,0 L100,100 Z" opacity="0.3"/>
+           <path d="M50,0 L100,0 L100,50 Z" opacity="0.5"/>
+        </svg>
+
+        <div className="relative z-10">
+          <div className="mb-8">
+            <h2 className="text-xl font-extrabold text-stone-900">Topics in this Unit</h2>
+            <div className="h-1 w-12 bg-[#107A53] mt-4 rounded-full"></div>
           </div>
-        );
-      })}
+
+          {activeUnit?.broadTopics && activeUnit.broadTopics.length > 0 ? (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {activeUnit.broadTopics.map((topic, index) => (
+                <Link
+                  href={`/syllabus/${activeUnit.number}/${topic.slug}`}
+                  key={topic.id}
+                  className="group block p-5 bg-white border border-stone-200 rounded-xl hover:border-[#107A53]/30 hover:shadow-md transition-all relative overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#107A53] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-8 h-8 rounded bg-[#107A53] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-inner">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div dir="rtl" lang="ar" className="font-arabic font-bold text-stone-900 text-lg leading-snug mb-1">
+                        {topic.nameAr}
+                      </div>
+                      <div className="text-stone-500 text-[11px] font-bold tracking-wide uppercase leading-tight">
+                        {topic.nameEn}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-[11px] font-bold text-stone-400 bg-stone-50 px-3 py-2 rounded-lg mt-auto">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-stone-800 text-[12px]">{topic.subtopics.length}</span> Nodes
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-stone-300"></div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-stone-800 text-[12px]">{topic.questionCount}</span> Questions
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center text-stone-500 font-medium">
+              <p>No topics found for this unit yet.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

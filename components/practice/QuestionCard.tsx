@@ -71,26 +71,26 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
   });
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fade-in">
+    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden animate-fade-in">
 
       {/* ── Metadata / Syllabus Hierarchy ──────────────── */}
       {(question.unit || question.broad_topic) && (
-        <div className="bg-slate-50 border-b border-slate-200 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-2 text-slate-500 font-medium">
+        <div className="bg-stone-50 border-b border-stone-200 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-stone-500 font-medium">
             {question.unit && (
-              <span className="bg-slate-200/50 px-2 py-1 rounded-md text-slate-700">
+              <span className="bg-stone-200/50 px-2 py-1 rounded-md text-stone-700 font-bold">
                 Unit {question.unit.unit_number}: {question.unit.name_english}
               </span>
             )}
             {question.broad_topic && (
-              <span className="text-slate-400">/ {question.broad_topic.name_english}</span>
+              <span className="text-stone-400 font-bold">/ {question.broad_topic.name_english}</span>
             )}
             {question.subtopic && (
-              <span className="text-slate-400">/ {question.subtopic.name_english}</span>
+              <span className="text-stone-400">/ {question.subtopic.name_english}</span>
             )}
           </div>
           {(question.question_micro_focus_arabic || question.specific_entity_name_arabic) && (
-            <div dir="rtl" lang="ar" className="font-arabic text-sm text-slate-600 bg-slate-200/40 px-2.5 py-0.5 rounded border border-slate-200">
+            <div dir="rtl" lang="ar" className="font-arabic text-sm text-stone-600 bg-stone-200/40 px-2.5 py-0.5 rounded border border-stone-200">
               {question.question_micro_focus_arabic || question.specific_entity_name_arabic}
             </div>
           )}
@@ -99,18 +99,18 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
 
       {/* ── Context Paragraph ─────────────────────────────── */}
       {(question.context_paragraph_arabic || question.context_paragraph_english) && (
-        <div className="border-b border-slate-100 bg-blue-50/40 px-5 py-4 sm:px-6">
+        <div className="border-b border-stone-100 bg-[#FCFAF8] px-5 py-4 sm:px-6">
           {question.context_paragraph_arabic && (
             <div
               dir="rtl"
               lang="ar"
-              className="text-slate-800 leading-[2] font-arabic text-lg text-right whitespace-pre-wrap"
+              className="text-stone-800 leading-[2] font-arabic text-lg text-right whitespace-pre-wrap font-bold"
             >
               {question.context_paragraph_arabic}
             </div>
           )}
           {question.context_paragraph_english && (
-            <div className="text-slate-600 text-sm leading-relaxed mt-3 border-t border-slate-200 pt-3">
+            <div className="text-stone-600 text-sm leading-relaxed mt-3 border-t border-stone-200 pt-3">
               {question.context_paragraph_english}
             </div>
           )}
@@ -127,7 +127,7 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
                 href={`https://www.google.com/search?q=${encodeURIComponent(question.question_arabic)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 shrink-0 text-slate-300 hover:text-blue-500 transition-colors"
+                className="mt-2 shrink-0 text-stone-300 hover:text-[#107A53] transition-colors"
                 title="Search this question on Google"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -135,20 +135,20 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
               <div
                 dir="rtl"
                 lang="ar"
-                className="text-slate-900 font-arabic font-bold leading-[2] text-[22px] sm:text-[26px] text-right"
+                className="text-stone-900 font-arabic font-extrabold leading-[2] text-[22px] sm:text-[26px] text-right"
               >
                 {question.question_arabic}
               </div>
             </div>
           )}
           {question.question_english && (
-            <div className="mt-2 text-slate-500 text-[15px] leading-relaxed border-l-4 border-emerald-400 pl-3 ml-0.5">
+            <div className="mt-2 text-stone-500 text-[15px] leading-relaxed border-l-4 border-[#107A53] pl-3 ml-0.5">
               {question.question_english}
             </div>
           )}
         </div>
 
-        <div className="border-t border-slate-100 mb-5" />
+        <div className="border-t border-stone-100 mb-5" />
 
         {/* ── Options ────────────────────────────────────── */}
         <div className="space-y-2.5">
@@ -160,29 +160,29 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
             const isWrong = isSelected && isEval && !isCorrect;
 
             let containerCls =
-              'w-full flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400';
+              'w-full flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 group';
             let badgeCls =
               'shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold transition-colors';
 
             if (isEval) {
               containerCls += ' cursor-default';
               if (isCorrect) {
-                containerCls += ' border-emerald-500 bg-emerald-50';
-                badgeCls += ' bg-emerald-500 text-white';
+                containerCls += ' border-[#107A53] bg-[#107A53]/5';
+                badgeCls += ' bg-[#107A53] text-white';
               } else if (isWrong) {
                 containerCls += ' border-rose-400 bg-rose-50';
                 badgeCls += ' bg-rose-400 text-white';
               } else {
-                containerCls += ' border-slate-100 bg-white opacity-50';
-                badgeCls += ' bg-slate-100 text-slate-400';
+                containerCls += ' border-stone-100 bg-white opacity-50';
+                badgeCls += ' bg-stone-100 text-stone-400';
               }
             } else {
               if (isSelected) {
-                containerCls += ' border-slate-900 bg-slate-900/5';
-                badgeCls += ' bg-slate-900 text-white';
+                containerCls += ' border-[#107A53] bg-[#107A53]/5';
+                badgeCls += ' bg-[#107A53] text-white';
               } else {
-                containerCls += ' border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50';
-                badgeCls += ' bg-slate-100 text-slate-600';
+                containerCls += ' border-stone-200 bg-white hover:border-[#107A53]/30 hover:bg-[#FCFAF8]';
+                badgeCls += ' bg-stone-100 text-stone-600 group-hover:bg-[#107A53]/10 group-hover:text-[#107A53]';
               }
             }
 
@@ -200,11 +200,11 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
                 {/* Option content — Arabic first (larger), English below if exists */}
                 <div className="flex-1 min-w-0">
                   {arabic && (
-                    <div
+                   <div
                       dir="rtl"
                       lang="ar"
-                      className={`font-arabic leading-[1.9] text-[18px] text-right w-full ${
-                        isEval && isCorrect ? 'text-emerald-900' : 'text-slate-800'
+                      className={`font-arabic leading-[1.9] text-[18px] text-right w-full font-bold ${
+                        isEval && isCorrect ? 'text-[#107A53]' : 'text-stone-800'
                       }`}
                     >
                       {arabic}
@@ -213,7 +213,7 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
                   {english && (
                     <div
                       className={`text-sm leading-snug mt-0.5 ${
-                        isEval && isCorrect ? 'text-emerald-700' : 'text-slate-500'
+                        isEval && isCorrect ? 'text-[#107A53]' : 'text-stone-500'
                       }`}
                     >
                       {english}
@@ -223,7 +223,7 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
 
                 {/* Status icon */}
                 {isEval && isCorrect && (
-                  <CheckCircle2 size={18} className="shrink-0 text-emerald-500 mt-0.5" />
+                  <CheckCircle2 size={18} className="shrink-0 text-[#107A53] mt-0.5" />
                 )}
                 {isEval && isWrong && (
                   <XCircle size={18} className="shrink-0 text-rose-400 mt-0.5" />
@@ -235,11 +235,11 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
 
         {/* ── Answer Explanation ─────────────────────────── */}
         {isEval && (
-          <div className="mt-6 rounded-xl border border-slate-200 overflow-hidden animate-slide-up">
+          <div className="mt-6 rounded-xl border border-stone-200 overflow-hidden animate-slide-up">
             {/* Result header */}
             <div
               className={`px-5 py-3 flex items-center gap-2.5 ${
-                evaluation.isCorrect ? 'bg-emerald-600' : 'bg-rose-500'
+                evaluation.isCorrect ? 'bg-[#107A53]' : 'bg-rose-500'
               }`}
             >
               {evaluation.isCorrect ? (
@@ -247,22 +247,22 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
               ) : (
                 <AlertCircle size={18} className="text-white shrink-0" />
               )}
-              <span className="text-white font-semibold text-sm">
+              <span className="text-white font-bold text-sm">
                 {evaluation.isCorrect ? 'Correct!' : 'Incorrect'}
               </span>
             </div>
 
-            <div className="p-5 bg-slate-50 space-y-4">
+            <div className="p-5 bg-[#FCFAF8] space-y-4">
               {/* Correct answer text */}
               {evaluation.correctText && (
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 text-right" dir="rtl">
+                  <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5 text-right" dir="rtl">
                     الإجابة الصحيحة
                   </p>
                   <div
                     dir="rtl"
                     lang="ar"
-                    className="text-emerald-800 font-arabic font-bold text-xl leading-[2] text-right"
+                    className="text-[#107A53] font-arabic font-bold text-xl leading-[2] text-right"
                   >
                     {evaluation.correctText}
                   </div>
@@ -271,14 +271,14 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
 
               {/* Explanation */}
               {evaluation.explanation && (
-                <div className={evaluation.correctText ? 'border-t border-slate-200 pt-4' : ''}>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                <div className={evaluation.correctText ? 'border-t border-stone-200 pt-4' : ''}>
+                  <p className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">
                     Explanation
                   </p>
                   <div
                     dir="rtl"
                     lang="ar"
-                    className="text-slate-700 font-arabic text-base leading-[2] text-right"
+                    className="text-stone-700 font-arabic text-base font-bold leading-[2] text-right"
                   >
                     {evaluation.explanation}
                   </div>
@@ -286,7 +286,7 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
               )}
 
               {!evaluation.correctText && !evaluation.explanation && (
-                <p className="text-slate-400 text-sm italic text-center">
+                <p className="text-stone-400 text-sm italic text-center">
                   No explanation available for this question.
                 </p>
               )}

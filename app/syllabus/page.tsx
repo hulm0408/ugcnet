@@ -73,39 +73,18 @@ export default async function SyllabusPage() {
   }));
 
   return (
-    <div className="flex-1 bg-slate-50 min-h-screen">
-      
-      {/* ── Header Section ── */}
-      <section className="relative bg-slate-950 text-white overflow-hidden py-16">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-950 to-slate-950 pointer-events-none" />
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none" />
+    <div className="flex-1 min-h-screen pt-12 pb-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm font-medium mb-6 backdrop-blur-md">
-            <Layers size={16} className="text-blue-400" />
-            <span className="text-slate-300">Official NTA Structure</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
-            UGC NET Arabic <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Syllabus</span>
-          </h1>
-          <p dir="rtl" lang="ar" className="font-arabic text-2xl text-slate-300 mb-2">
-            وحدات المنهج الرسمية وتفرعاتها
-          </p>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Explore all 10 official units and browse questions systematically by topic and subtopic.
-          </p>
+        {/* ── Header Section ── */}
+        <div className="mb-12">
+          <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight">Syllabus</h1>
+          <p className="text-stone-500 text-sm font-semibold mt-1">Official UGC NET Arabic Syllabus</p>
         </div>
-      </section>
 
-      {/* ── Content Section ── */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <Sparkles size={20} className="text-blue-500" />
-          <h2 className="text-xl font-bold text-slate-900">Syllabus Explorer</h2>
-        </div>
-        
+        {/* ── Content Section ── */}
         <SyllabusList units={hierarchicalUnits as any} />
+        
       </div>
     </div>
   );
