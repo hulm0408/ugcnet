@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User } from 'lucide-react';
+import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search } from 'lucide-react';
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/pyq', label: 'PYQs' },
-  { href: '/syllabus', label: 'Syllabus' },
-  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/pyq', label: 'PYQs', icon: BookMarked },
+  { href: '/syllabus', label: 'Syllabus', icon: GraduationCap },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
 export default function Header({ user }: { user: { name?: string | null, email?: string | null } | null }) {
