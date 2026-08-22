@@ -46,7 +46,7 @@ function PracticeContent() {
     async function loadQuestions() {
       try {
         setLoading(true);
-        let url = '/api/questions?published=true';
+        let url = '/api/questions?published=true&limit=200';
         if (year) url += `&year=${year}`;
         if (unit) url += `&unit=${unit}`;
         if (paperId) url += `&paperId=${paperId}`;
@@ -55,7 +55,7 @@ function PracticeContent() {
         if (!res.ok) throw new Error('Failed to load questions');
         
         const data = await res.json();
-        setQuestions(data.questions || []);
+        setQuestions(data.data || []);
       } catch (err: any) {
         setError(err.message);
       } finally {
