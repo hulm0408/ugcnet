@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookMarked, GraduationCap, Calendar, Search, ChevronRight, Award, Brain, Zap } from 'lucide-react';
+import { BookMarked, GraduationCap, Calendar, Search, ChevronRight, Award, Brain, Zap, BookOpen } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Arabic NET/JRF Practice — UGC NET Arabic Previous Year Questions 2004–2023',
@@ -80,20 +80,21 @@ export default function HomePage() {
               {/* Primary CTAs */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 <Link
-                  href="/practice"
-                  className="group relative inline-flex items-center gap-2 px-8 py-4 bg-emerald-500 text-slate-950 font-bold text-lg rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] w-full sm:w-auto justify-center"
+                  href="/pyq"
+                  className="group relative inline-flex items-center gap-3 px-8 py-4 bg-emerald-700 text-white font-bold text-lg rounded-xl overflow-hidden transition-all hover:scale-105 hover:bg-emerald-600 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] w-full sm:w-auto justify-center"
                 >
-                  <span className="relative z-10">Start Mock Test</span>
-                  <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                  <BookOpen size={22} className="relative z-10" />
+                  <span className="relative z-10">Explore PYQs</span>
                   {/* Shine effect */}
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
                 </Link>
                 
                 <Link
                   href="/syllabus"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-semibold text-lg rounded-2xl transition-all border border-white/10 hover:border-white/20 w-full sm:w-auto"
+                  className="inline-flex items-center gap-3 justify-center px-8 py-4 bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-lg rounded-xl transition-all border border-slate-800 hover:border-slate-700 w-full sm:w-auto"
                 >
-                  Explore Syllabus
+                  <GraduationCap size={22} />
+                  Browse Syllabus
                 </Link>
               </div>
             </div>
@@ -101,63 +102,86 @@ export default function HomePage() {
             {/* RHS: SVG Illustration */}
             <div className="hidden lg:flex justify-center items-center relative w-full">
               {/* Glow backdrop */}
-              <div className="absolute inset-0 bg-emerald-500/10 blur-[100px] rounded-full"></div>
+              <div className="absolute inset-0 bg-emerald-500/10 blur-[120px] rounded-full"></div>
               
-              <svg viewBox="0 -80 460 500" className="w-full h-auto max-w-[460px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="-20 -70 420 500" className="w-full h-auto max-w-[500px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <linearGradient id="gradStair" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#064e3b" />
-                  </linearGradient>
-                  <linearGradient id="gradJrf" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#fde047" />
-                    <stop offset="50%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#b45309" />
-                  </linearGradient>
+                  {/* Defs for glow */}
+                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="12" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
                 </defs>
+                
+                {/* The dashed connection line */}
+                <polyline points="30,320 110,260 190,190 270,110 350,-10" fill="none" stroke="#eab308" strokeWidth="3" strokeDasharray="8,8" className="animate-[pulse_2s_infinite]" />
+                
+                {/* 3D Pillars */}
+                <g className="transition-transform duration-700 hover:-translate-y-2 cursor-default">
+                  {/* P1 */}
+                  <g transform="translate(0, 320)">
+                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
+                    <polygon points="0,0 30,15 30,75 0,60" fill="#10b981" />
+                    <polygon points="30,15 60,0 60,60 30,75" fill="#047857" />
+                  </g>
+                  
+                  {/* P2 */}
+                  <g transform="translate(80, 260)">
+                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
+                    <polygon points="0,0 30,15 30,105 0,90" fill="#10b981" />
+                    <polygon points="30,15 60,0 60,90 30,105" fill="#047857" />
+                  </g>
 
-                {/* Connection Line (Progress) */}
-                <path d="M 80 310 C 180 290, 280 180, 380 50" stroke="#fbbf24" strokeWidth="5" strokeDasharray="12,12" strokeLinecap="round" fill="transparent" className="animate-[pulse_2s_infinite]" />
+                  {/* P3 */}
+                  <g transform="translate(160, 190)">
+                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
+                    <polygon points="0,0 30,15 30,145 0,130" fill="#10b981" />
+                    <polygon points="30,15 60,0 60,130 30,145" fill="#047857" />
+                  </g>
 
-                {/* Target/Goal at the top right, directly resting on Step 4 */}
-                <g transform="translate(380, 25)" className="group cursor-pointer">
-                  {/* Subtle float animation instead of bounce */}
-                  <g className="animate-[pulse_3s_infinite]">
-                    <circle cx="0" cy="0" r="55" fill="url(#gradJrf)" className="drop-shadow-[0_0_40px_rgba(251,191,36,0.6)]" />
-                    <circle cx="0" cy="0" r="45" fill="#020617" />
-                    
-                    {/* Default JRF Text */}
-                    <text x="0" y="12" fontFamily="sans-serif" fontSize="34" fontWeight="900" fill="#fbbf24" textAnchor="middle" letterSpacing="2" className="group-hover:opacity-0 transition-opacity duration-300">JRF</text>
-                    
-                    {/* Hover "PARHLE BHAI" Text */}
-                    <text x="0" y="2" fontFamily="sans-serif" fontSize="14" fontWeight="900" fill="#fbbf24" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <tspan x="0" dy="0">PARHLE</tspan>
-                      <tspan x="0" dy="18">BHAI</tspan>
-                    </text>
-                    
-                    {/* Sparkles */}
-                    <path d="M -65 -45 L -60 -30 L -45 -25 L -60 -20 L -65 -5 L -70 -20 L -85 -25 L -70 -30 Z" fill="#fbbf24" opacity="0.8" />
-                    <path d="M 55 -55 L 58 -45 L 68 -42 L 58 -39 L 55 -29 L 52 -39 L 42 -42 L 52 -45 Z" fill="#fbbf24" opacity="0.9" />
+                  {/* P4 */}
+                  <g transform="translate(240, 110)">
+                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
+                    <polygon points="0,0 30,15 30,195 0,180" fill="#10b981" />
+                    <polygon points="30,15 60,0 60,180 30,195" fill="#047857" />
+                  </g>
+
+                  {/* P5 */}
+                  <g transform="translate(320, 10)">
+                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
+                    <polygon points="0,0 30,15 30,265 0,250" fill="#10b981" />
+                    <polygon points="30,15 60,0 60,250 30,265" fill="#047857" />
                   </g>
                 </g>
 
-                {/* Stairs Ascending Right */}
-                <g className="transition-transform duration-700 hover:-translate-y-2 cursor-default">
-                  {/* Step 1 */}
-                  <rect x="40" y="320" width="80" height="100" fill="url(#gradStair)" rx="4" />
-                  <rect x="40" y="320" width="80" height="20" fill="#34d399" rx="4" />
+                {/* JRF Sunburst Logo */}
+                <g transform="translate(350, -10)" className="group cursor-pointer">
+                  {/* Outer Glow */}
+                  <circle cx="0" cy="0" r="34" fill="#eab308" filter="url(#glow)" opacity="0.5" className="animate-pulse" />
                   
-                  {/* Step 2 */}
-                  <rect x="140" y="240" width="80" height="180" fill="url(#gradStair)" rx="4" />
-                  <rect x="140" y="240" width="80" height="20" fill="#34d399" rx="4" />
+                  {/* Sunburst Rays */}
+                  <g stroke="#eab308" strokeWidth="2.5" strokeLinecap="round" className="animate-[spin_10s_linear_infinite]">
+                    <line x1="0" y1="-42" x2="0" y2="-52" />
+                    <line x1="0" y1="42" x2="0" y2="52" />
+                    <line x1="-42" y1="0" x2="-52" y2="0" />
+                    <line x1="42" y1="0" x2="52" y2="0" />
+                    <line x1="-30" y1="-30" x2="-37" y2="-37" />
+                    <line x1="30" y1="30" x2="37" y2="37" />
+                    <line x1="-30" y1="30" x2="-37" y2="37" />
+                    <line x1="30" y1="-30" x2="37" y2="-37" />
+                  </g>
 
-                  {/* Step 3 */}
-                  <rect x="240" y="160" width="80" height="260" fill="url(#gradStair)" rx="4" />
-                  <rect x="240" y="160" width="80" height="20" fill="#34d399" rx="4" />
-
-                  {/* Step 4 */}
-                  <rect x="340" y="80" width="80" height="340" fill="url(#gradStair)" rx="4" />
-                  <rect x="340" y="80" width="80" height="20" fill="#10b981" rx="4" />
+                  {/* Center Circle */}
+                  <circle cx="0" cy="0" r="32" fill="#020617" stroke="#eab308" strokeWidth="3" />
+                  
+                  {/* Default JRF Text */}
+                  <text x="0" y="7" fontFamily="sans-serif" fontSize="20" fontWeight="900" fill="#eab308" textAnchor="middle" letterSpacing="1" className="group-hover:opacity-0 transition-opacity duration-300">JRF</text>
+                  
+                  {/* Hover "PARHLE BHAI" Text */}
+                  <text x="0" y="2" fontFamily="sans-serif" fontSize="10" fontWeight="900" fill="#eab308" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <tspan x="0" dy="-4">PARHLE</tspan>
+                    <tspan x="0" dy="12">BHAI</tspan>
+                  </text>
                 </g>
               </svg>
             </div>
