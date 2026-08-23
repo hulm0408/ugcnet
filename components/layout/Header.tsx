@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search, LogOut } from 'lucide-react';
 import { logoutAction } from '@/app/actions/auth';
+import ProfileSidePanel from '@/components/layout/ProfileSidePanel';
 
 const navLinks = [
   { href: '/', label: 'Home', icon: Home },
@@ -13,7 +14,7 @@ const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
-export default function Header({ user }: { user: { name?: string | null, email?: string | null } | null }) {
+export default function Header({ user }: { user: { name?: string | null, email?: string | null, role?: string | null } | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,6 +58,9 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                 </Link>
               );
             })}
+            {user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? (
+              <Link href="/admin" className={`text-[14px] font-semibold transition-all duration-200 ${pathname.startsWith('/admin') ? 'text-stone-900 border-b-2 border-primary pb-1' : 'text-primary hover:text-primary-dark hover:border-b-2 hover:border-primary/40 pb-1'}`}>Admin</Link>
+            ) : null}
           </nav>
 
           {/* Actions */}
@@ -69,30 +73,17 @@ export default function Header({ user }: { user: { name?: string | null, email?:
             </div>
 
             {user ? (
-              <div className="relative hidden sm:block">
+              <div className="hidden sm:block">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-3 bg-stone-50/80 backdrop-blur-md border border-stone-200 px-3 py-1.5 rounded-full shadow-inner hover:bg-stone-100 transition-colors"
                 >
-                  <div className="w-7 h-7 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-                    <User size={14} />
+                  <div className="w-7 h-7 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold text-sm select-none">
+                    {user.name?.trim().charAt(0).toUpperCase() || <User size={14} />}
                   </div>
                   <span className="text-sm font-bold text-stone-700 pr-1">{user.name?.split(' ')[0] || 'User'}</span>
                 </button>
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-stone-200 rounded-2xl shadow-xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-stone-100">
-                      <p className="text-xs font-semibold text-stone-900 truncate">{user.name || 'User'}</p>
-                      <p className="text-xs text-stone-500 truncate">{user.email}</p>
-                    </div>
-                    <form action={logoutAction}>
-                      <button type="submit" className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
-                        <LogOut size={15} />
-                        Log out
-                      </button>
-                    </form>
-                  </div>
-                )}
+                <ProfileSidePanel user={user} isOpen={userMenuOpen} onClose={() => setUserMenuOpen(false)} />
               </div>
             ) : (
               <div className="flex items-center gap-4">
@@ -145,6 +136,19 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                 </Link>
               );
             })}
+            {user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? (
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-colors ${
+                  pathname.startsWith('/admin')
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-primary hover:bg-primary/10 hover:text-primary-dark'
+                }`}
+              >
+                Admin
+              </Link>
+            ) : null}
             
             <div className="border-t border-slate-100 my-2 pt-4 flex flex-col gap-3">
               {user ? (

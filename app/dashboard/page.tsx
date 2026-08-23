@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, LogOut, Sparkles } from 'lucide-react';
-import { auth, signOut } from '@/lib/auth';
+import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, Sparkles } from 'lucide-react';
+import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
 import prisma from '@/lib/db';
 
@@ -25,25 +25,26 @@ export default async function DashboardPage() {
   let incorrectCount = 0;
 
   if (session?.user?.id) {
-    const stats = await prisma.practiceSession.aggregate({
-      where: { user_id: session.user.id },
-      _sum: {
-        total_questions: true,
-        correct_count: true,
-      },
-    });
+    // Count actual answered attempts (not session.total_questions which = session size)
+    const [totalAttempted, correctCount, incorrectCountDb, bookmarkedCountDb] = await Promise.all([
+      prisma.practiceAttempt.count({
+        where: { user_id: session.user.id },
+      }),
+      prisma.practiceAttempt.count({
+        where: { user_id: session.user.id, is_correct: true },
+      }),
+      prisma.practiceAttempt.count({
+        where: { user_id: session.user.id, is_correct: false, is_skipped: false },
+      }),
+      prisma.bookmark.count({
+        where: { user_id: session.user.id },
+      }),
+    ]);
 
-    questionsAttempted = stats._sum.total_questions || 0;
-    const correct = stats._sum.correct_count || 0;
-    accuracyRate = questionsAttempted > 0 ? Math.round((correct / questionsAttempted) * 100) : 0;
-
-    bookmarkedCount = await prisma.bookmark.count({
-      where: { user_id: session.user.id },
-    });
-
-    incorrectCount = await prisma.practiceAttempt.count({
-      where: { user_id: session.user.id, is_correct: false, is_skipped: false },
-    });
+    questionsAttempted = totalAttempted;
+    accuracyRate = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
+    incorrectCount = incorrectCountDb;
+    bookmarkedCount = bookmarkedCountDb;
   }
 
   // Fetch recent sessions
@@ -68,20 +69,6 @@ export default async function DashboardPage() {
             </h1>
             <p className="text-stone-500 text-base mt-2">Track your NET/JRF Arabic preparation progress</p>
           </div>
-          {session && (
-            <form action={async () => {
-              'use server';
-              await signOut();
-            }}>
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-stone-600 bg-white border border-stone-200 shadow-sm hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 rounded-xl transition-all"
-              >
-                <LogOut size={16} />
-                Sign out
-              </button>
-            </form>
-          )}
         </div>
 
         {/* Stats Grid */}
@@ -90,7 +77,7 @@ export default async function DashboardPage() {
             { label: 'Questions Attempted', value: questionsAttempted.toString(), icon: Target, color: 'text-blue-600 bg-blue-50 border-blue-100', href: null },
             { label: 'Accuracy Rate', value: `${accuracyRate}%`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', href: null },
             { label: 'Mistakes', value: incorrectCount.toString(), icon: AlertCircle, color: 'text-red-600 bg-red-50 border-red-100', href: '/dashboard/incorrect' },
-            { label: 'Time Spent', value: '0h', icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100', href: null },
+            { label: 'Time Spent', value: '—', icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100', href: null },
             { label: 'Bookmarked', value: bookmarkedCount.toString(), icon: BookMarked, color: 'text-purple-600 bg-purple-50 border-purple-100', href: '/dashboard/bookmarks' },
           ].map(({ label, value, icon: Icon, color, href }) => {
             const CardWrapper = href ? Link : 'div';
@@ -143,7 +130,7 @@ export default async function DashboardPage() {
                     <div>
                       <div className="font-semibold text-stone-900 capitalize text-sm mb-1">{rs.mode.replace('_', ' ')} Practice</div>
                       <div className="text-xs text-stone-500">
-                        {rs.total_questions} Questions • {rs.completed_at?.toLocaleDateString()}
+                        {rs.total_questions} Questions • {(rs.completed_at ?? rs.started_at)?.toLocaleDateString() ?? 'In progress'}
                       </div>
                     </div>
                     <div className="text-right">
@@ -185,9 +172,14 @@ export default async function DashboardPage() {
 
         {session && (
           <div className="mt-12 pt-10 border-t border-stone-200">
-            <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
-            <p className="text-stone-500 text-sm">Once you delete your account, there is no going back. Please be certain.</p>
-            <DeleteAccountButton />
+            <details>
+              <summary className="text-sm font-semibold text-stone-500 cursor-pointer hover:text-stone-700">Account Settings ›</summary>
+              <div className="mt-4">
+                <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
+                <p className="text-stone-500 text-sm">Once you delete your account, there is no going back. Please be certain.</p>
+                <DeleteAccountButton />
+              </div>
+            </details>
           </div>
         )}
 

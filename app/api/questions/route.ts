@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       where.subtopic = { slug: subtopic };
     }
 
-    if (year) {
+    if (year && !paperId) {
       where.exam_paper = {
         year: parseInt(year, 10),
       };
