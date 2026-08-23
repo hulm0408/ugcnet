@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState } from 'react';
-import { loginAction } from '@/app/actions/auth';
+import { loginAction, googleSignInAction } from '@/app/actions/auth';
 import { AlertCircle } from 'lucide-react';
 
 export default function LoginForm() {
@@ -19,7 +19,7 @@ export default function LoginForm() {
 
       {/* Google Login form is unchanged as it's separate, but usually needs a separate action. 
           For now, just using a simple form for Google. */}
-      <form action="/api/auth/signin/google" method="POST">
+      <form action={googleSignInAction}>
         <button
           type="submit"
           className="w-full flex items-center justify-center gap-3 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
