@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, PlayCircle, BookOpen, Target, Layers } from 'lucide-react';
 import prisma from '@/lib/db';
 import QuillInkPotIcon from '@/components/ui/QuillInkPotIcon';
-import HierarchyTreeExplorer, { HierarchyNode } from '@/components/syllabus/HierarchyTreeExplorer';
+import HierarchyTreeExplorer, { HierarchyNode, SubNodeEntity } from '@/components/syllabus/HierarchyTreeExplorer';
 
 export async function generateMetadata({
   params,
@@ -83,20 +83,28 @@ export default async function TopicPage({
 
   if (!topic) return notFound();
 
-  // Group into deep multi-level hierarchy: Node -> Sub-nodes (Entities) -> Questions
+  // Group into deep multi-level hierarchy: Node (L3) -> Entities (L4) -> MicroFocuses (L5) -> Questions (L6)
   let totalQuestionsCount = 0;
   let totalSubNodesCount = 0;
 
   const structuredNodes: HierarchyNode[] = topic.subtopics.map((st) => {
     totalQuestionsCount += st.questions.length;
 
-    // Group questions by Entity / Sub-Node
+    // Group questions by Entity / Sub-Node (Level 4)
     const entityMap = new Map<
       string,
       {
         nameAr: string;
         nameEn: string;
-        questions: typeof st.questions;
+        totalQuestions: number;
+        microFocusMap: Map<
+          string,
+          {
+            nameAr: string;
+            nameEn: string;
+            questions: typeof st.questions;
+          }
+        >;
       }
     >();
 
@@ -108,13 +116,36 @@ export default async function TopicPage({
         entityMap.set(entityAr, {
           nameAr: entityAr,
           nameEn: entityEn,
+          totalQuestions: 0,
+          microFocusMap: new Map(),
+        });
+      }
+
+      const entity = entityMap.get(entityAr)!;
+      entity.totalQuestions += 1;
+
+      // Group questions by Micro Focus (Level 5)
+      const microAr = q.question_micro_focus_arabic?.trim() || 'أسئلة عامة';
+      const microEn = q.question_micro_focus_english?.trim() || 'General Questions';
+
+      if (!entity.microFocusMap.has(microAr)) {
+        entity.microFocusMap.set(microAr, {
+          nameAr: microAr,
+          nameEn: microEn,
           questions: [],
         });
       }
-      entityMap.get(entityAr)!.questions.push(q);
+
+      entity.microFocusMap.get(microAr)!.questions.push(q);
     }
 
-    const entities = Array.from(entityMap.values());
+    const entities: SubNodeEntity[] = Array.from(entityMap.values()).map((e) => ({
+      nameAr: e.nameAr,
+      nameEn: e.nameEn,
+      totalQuestions: e.totalQuestions,
+      microFocuses: Array.from(e.microFocusMap.values()),
+    }));
+
     totalSubNodesCount += entities.length;
 
     return {

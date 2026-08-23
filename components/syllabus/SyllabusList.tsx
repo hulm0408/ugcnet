@@ -130,22 +130,10 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
                     </div>
                   </div>
 
-                  {/* Nodes List */}
-                  {topic.subtopics.length > 0 && (
-                    <div className="space-y-2 mt-auto border-t border-stone-100 pt-4">
-                      <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 flex items-center gap-2">Learning Nodes <div className="h-px bg-stone-100 flex-1"></div></div>
-                      {topic.subtopics.map(node => (
-                        <div key={node.id} className="flex justify-between items-center text-xs p-2 -mx-2 rounded-lg transition-colors hover:bg-stone-50">
-                          <span className="truncate pr-3 font-semibold text-stone-600 transition-colors" title={node.nameEn}>
-                            {node.nameEn}
-                          </span>
-                          <span className="shrink-0 font-bold text-primary-dark bg-primary-surface px-2.5 py-1 rounded-md text-[10px] shadow-sm">
-                            {node.questionCount}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-primary group-hover:text-primary-dark">
+                    <span>Explore Hierarchy Tree</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
                 </Link>
               ))}
             </div>
