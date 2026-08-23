@@ -38,74 +38,74 @@ export default function ResultSummaryView({
 
         {/* 07. RESULT SUMMARY CARD */}
         <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
-          <div className="p-8 md:p-10 flex-1 border-b md:border-b-0 md:border-r border-stone-200">
-            <div className="flex items-start justify-between mb-8">
+          <div className="p-6 sm:p-8 md:p-10 flex-1 border-b md:border-b-0 md:border-r border-stone-200">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
               <div>
                 <div className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-1">Your Score</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-extrabold text-stone-900">{correctCount * 2}</span>
-                  <span className="text-xl font-bold text-stone-400">/ {totalQuestions * 2}</span>
+                  <span className="text-4xl sm:text-5xl font-extrabold text-stone-900">{correctCount * 2}</span>
+                  <span className="text-lg sm:text-xl font-bold text-stone-400">/ {totalQuestions * 2}</span>
                 </div>
                 <div className="text-sm font-medium text-[#107A53] mt-2">Good Job! Keep Improving.</div>
               </div>
               
-              <div className="flex gap-4">
-                <div className="text-center px-4">
-                  <div className="text-2xl font-bold text-[#107A53] mb-1">{correctCount}</div>
-                  <div className="text-xs font-bold text-stone-500 uppercase tracking-wider">Correct</div>
+              <div className="flex flex-wrap gap-3 sm:gap-4">
+                <div className="text-center px-2 sm:px-4">
+                  <div className="text-xl sm:text-2xl font-bold text-[#107A53] mb-1">{correctCount}</div>
+                  <div className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wider">Correct</div>
                 </div>
-                <div className="text-center px-4">
-                  <div className="text-2xl font-bold text-rose-600 mb-1">{incorrectCount}</div>
-                  <div className="text-xs font-bold text-stone-500 uppercase tracking-wider">Incorrect</div>
+                <div className="text-center px-2 sm:px-4">
+                  <div className="text-xl sm:text-2xl font-bold text-rose-600 mb-1">{incorrectCount}</div>
+                  <div className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wider">Incorrect</div>
                 </div>
-                <div className="text-center px-4">
-                  <div className="text-2xl font-bold text-stone-900 mb-1">{unattemptedCount}</div>
-                  <div className="text-xs font-bold text-stone-500 uppercase tracking-wider">Unattempted</div>
+                <div className="text-center px-2 sm:px-4">
+                  <div className="text-xl sm:text-2xl font-bold text-stone-900 mb-1">{unattemptedCount}</div>
+                  <div className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wider">Unattempted</div>
                 </div>
-                <div className="text-center px-4">
-                  <div className="text-2xl font-bold text-stone-900 mb-1">{percentage.toFixed(2)}%</div>
-                  <div className="text-xs font-bold text-stone-500 uppercase tracking-wider">Accuracy</div>
+                <div className="text-center px-2 sm:px-4">
+                  <div className="text-xl sm:text-2xl font-bold text-stone-900 mb-1">{percentage.toFixed(0)}%</div>
+                  <div className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wider">Accuracy</div>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-4 py-6 border-t border-b border-stone-100 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 py-6 border-t border-b border-stone-100 mb-8">
               <div>
-                <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Percentage</div>
-                <div className="text-lg font-bold text-stone-900">{percentage.toFixed(0)}%</div>
+                <div className="text-[10px] sm:text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Percentage</div>
+                <div className="text-base sm:text-lg font-bold text-stone-900">{percentage.toFixed(0)}%</div>
               </div>
               <div>
-                <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Rank <span className="lowercase normal-case font-normal">(If available)</span></div>
-                <div className="text-lg font-bold text-stone-900">—</div>
+                <div className="text-[10px] sm:text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Rank <span className="lowercase normal-case font-normal hidden sm:inline">(If available)</span></div>
+                <div className="text-base sm:text-lg font-bold text-stone-900">—</div>
               </div>
               <div>
-                <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Time Taken</div>
-                <div className="text-lg font-bold text-stone-900">{timeTaken}</div>
+                <div className="text-[10px] sm:text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Time Taken</div>
+                <div className="text-base sm:text-lg font-bold text-stone-900">{timeTaken}</div>
               </div>
               <div>
-                <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Total Questions</div>
-                <div className="text-lg font-bold text-stone-900">{totalQuestions}</div>
+                <div className="text-[10px] sm:text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Total Questions</div>
+                <div className="text-base sm:text-lg font-bold text-stone-900">{totalQuestions}</div>
               </div>
               <div>
-                <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Positive Marks</div>
-                <div className="text-lg font-bold text-stone-900">{correctCount * 2}</div>
+                <div className="text-[10px] sm:text-xs font-bold text-stone-400 uppercase tracking-wider mb-1">Positive Marks</div>
+                <div className="text-base sm:text-lg font-bold text-stone-900">{correctCount * 2}</div>
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={onViewReview}
-                className="px-6 py-3 bg-[#107A53] text-white font-bold rounded-xl shadow-md hover:bg-[#0c5c3e] transition-colors"
+                className="w-full sm:w-auto px-6 py-3 bg-[#107A53] text-white font-bold rounded-xl shadow-md hover:bg-[#0c5c3e] transition-colors"
               >
                 View Question Review
               </button>
-              <Link href="/dashboard" className="px-6 py-3 bg-white text-stone-600 border border-stone-200 font-bold rounded-xl hover:bg-stone-50 transition-colors">
+              <Link href="/dashboard" className="w-full sm:w-auto text-center px-6 py-3 bg-white text-stone-600 border border-stone-200 font-bold rounded-xl hover:bg-stone-50 transition-colors">
                 Go to Dashboard
               </Link>
             </div>
           </div>
-          <div className="w-full md:w-[350px] bg-[#FCFAF8] flex items-center justify-center p-10 shrink-0">
-            <ResultTrophySvg className="w-full h-auto drop-shadow-2xl" />
+          <div className="w-full md:w-[350px] bg-[#FCFAF8] flex items-center justify-center p-8 sm:p-10 shrink-0">
+            <ResultTrophySvg className="w-48 sm:w-full h-auto drop-shadow-2xl" />
           </div>
         </div>
 

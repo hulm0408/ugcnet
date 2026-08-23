@@ -70,16 +70,14 @@ async function runImport() {
     const questions = Array.isArray(jsonData) ? jsonData : (jsonData.questions || []);
 
     for (const q of questions) {
-      if (q.classification && q.classification.unit_number) {
-        const c = q.classification;
-        const unitNum = c.unit_number;
-        
+      const unitNum = q.unit_number || (q.classification && q.classification.unit_number);
+      if (unitNum) {
         if (!hierarchyMap.has(unitNum)) {
           hierarchyMap.set(unitNum, {
             data: {
               unit_number: unitNum,
-              name_arabic: c.unit_title_arabic || `الوحدة ${unitNum}`,
-              name_english: c.unit_title_english || `Unit ${unitNum}`,
+              name_arabic: q.unit_name_arabic || (q.classification && q.classification.unit_title_arabic) || `الوحدة ${unitNum}`,
+              name_english: q.unit_name_english || (q.classification && q.classification.unit_title_english) || `Unit ${unitNum}`,
               slug: `unit-${unitNum}`,
               order_index: unitNum
             },
@@ -89,13 +87,16 @@ async function runImport() {
         
         const unitObj = hierarchyMap.get(unitNum);
 
-        if (c.broad_topic_arabic || c.broad_topic_english) {
-          const btSlug = generateSlug(c.broad_topic_english || c.broad_topic_arabic);
+        const btArabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
+        const btEnglish = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
+
+        if (btArabic || btEnglish) {
+          const btSlug = generateSlug(btEnglish || btArabic);
           if (!unitObj.broadTopics.has(btSlug)) {
             unitObj.broadTopics.set(btSlug, {
               data: {
-                name_arabic: c.broad_topic_arabic || c.broad_topic_english || '',
-                name_english: c.broad_topic_english || c.broad_topic_arabic || '',
+                name_arabic: btArabic || btEnglish || '',
+                name_english: btEnglish || btArabic || '',
                 slug: btSlug,
                 order_index: unitObj.broadTopics.size + 1
               },
@@ -105,12 +106,15 @@ async function runImport() {
 
           const btObj = unitObj.broadTopics.get(btSlug);
 
-          if (c.subtopic_arabic || c.subtopic_english) {
-            const stSlug = generateSlug(c.subtopic_english || c.subtopic_arabic);
+          const stArabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
+          const stEnglish = q.subtopic_english || (q.classification && q.classification.subtopic_english);
+
+          if (stArabic || stEnglish) {
+            const stSlug = generateSlug(stEnglish || stArabic);
             if (!btObj.subtopics.has(stSlug)) {
               btObj.subtopics.set(stSlug, {
-                name_arabic: c.subtopic_arabic || c.subtopic_english || '',
-                name_english: c.subtopic_english || c.subtopic_arabic || '',
+                name_arabic: stArabic || stEnglish || '',
+                name_english: stEnglish || stArabic || '',
                 slug: stSlug,
                 node_type: 'official_topic',
                 node_source: 'official',
@@ -209,17 +213,23 @@ async function runImport() {
       let broad_topic_id = null;
       let subtopic_id = null;
 
-      if (q.classification && q.classification.unit_number) {
-        const unit = dbUnits.find((u: any) => u.unit_number === q.classification.unit_number);
+      const unitNum = q.unit_number || (q.classification && q.classification.unit_number);
+      const btArabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
+      const btEnglish = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
+      const stArabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
+      const stEnglish = q.subtopic_english || (q.classification && q.classification.subtopic_english);
+
+      if (unitNum) {
+        const unit = dbUnits.find((u: any) => u.unit_number === unitNum);
         if (unit) {
           unit_id = unit.id;
-          if (q.classification.broad_topic_arabic || q.classification.broad_topic_english) {
-            const btSlug = generateSlug(q.classification.broad_topic_english || q.classification.broad_topic_arabic);
+          if (btArabic || btEnglish) {
+            const btSlug = generateSlug(btEnglish || btArabic);
             const bt = unit.broad_topics.find((b: any) => b.slug === btSlug);
             if (bt) {
               broad_topic_id = bt.id;
-              if (q.classification.subtopic_arabic || q.classification.subtopic_english) {
-                const stSlug = generateSlug(q.classification.subtopic_english || q.classification.subtopic_arabic);
+              if (stArabic || stEnglish) {
+                const stSlug = generateSlug(stEnglish || stArabic);
                 const st = bt.subtopics.find((s: any) => s.slug === stSlug);
                 if (st) subtopic_id = st.id;
               }
