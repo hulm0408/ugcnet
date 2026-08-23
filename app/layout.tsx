@@ -3,6 +3,7 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import AuthSessionProvider from '@/components/AuthSessionProvider';
+import ToastHandler from '@/components/ui/ToastHandler';
 import { auth } from '@/lib/auth';
 import { Inter, Amiri } from 'next/font/google';
 import prisma from '@/lib/db';
@@ -82,6 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </div>
           <Footer />
+          <ToastHandler />
         </AuthSessionProvider>
       </body>
     </html>

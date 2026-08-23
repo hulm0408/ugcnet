@@ -13,7 +13,7 @@ export default function LoginForm() {
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
     try {
-      await signIn('google', { callbackUrl: '/dashboard' });
+      await signIn('google', { callbackUrl: '/dashboard?login=success' });
     } catch {
       setGoogleLoading(false);
     }

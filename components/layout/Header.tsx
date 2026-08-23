@@ -25,6 +25,7 @@ export default function Header({ user }: { user: { name?: string | null, email?:
   // Let's check if we are on home page to use a different style, or just keep it global white. The home page currently uses this header and it looks fine.
   
   return (
+    <>
     <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-stone-200/50 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -83,7 +84,6 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                   </div>
                   <span className="text-sm font-bold text-stone-700 pr-1">{user.name?.split(' ')[0] || 'User'}</span>
                 </button>
-                <ProfileSidePanel user={user} isOpen={userMenuOpen} onClose={() => setUserMenuOpen(false)} />
               </div>
             ) : (
               <div className="flex items-center gap-4">
@@ -192,5 +192,9 @@ export default function Header({ user }: { user: { name?: string | null, email?:
         </div>
       )}
     </header>
+    {user && (
+      <ProfileSidePanel user={user} isOpen={userMenuOpen} onClose={() => setUserMenuOpen(false)} />
+    )}
+    </>
   );
 }

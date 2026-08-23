@@ -17,7 +17,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: '/dashboard',
+      redirectTo: '/dashboard?login=success',
     });
     return { error: null }; // Should redirect, not return here on success
   } catch (error) {
@@ -74,7 +74,7 @@ export async function signupAction(prevState: any, formData: FormData) {
     await signIn('credentials', {
       email: normalizedEmail,
       password,
-      redirectTo: '/dashboard',
+      redirectTo: '/dashboard?login=success',
     });
     return { error: null };
   } catch (error) {
@@ -86,9 +86,9 @@ export async function signupAction(prevState: any, formData: FormData) {
 }
 
 export async function googleSignInAction() {
-  await signIn('google', { redirectTo: '/dashboard' });
+  await signIn('google', { redirectTo: '/dashboard?login=success' });
 }
 
 export async function logoutAction() {
-  await signOut({ redirectTo: '/' });
+  await signOut({ redirectTo: '/?logout=success' });
 }
