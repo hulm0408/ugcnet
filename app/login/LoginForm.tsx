@@ -95,7 +95,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full py-3.5 bg-gradient-to-r from-primary-dark to-primary text-white text-sm font-bold rounded-2xl hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300 shadow-sm mt-4 disabled:opacity-70 disabled:hover:translate-y-0 flex justify-center items-center"
+          className="w-full py-3.5 bg-gradient-to-r from-[#0C6240] to-[#107A53] hover:from-[#094d32] hover:to-[#0C6240] text-white hover:text-white text-sm font-bold rounded-2xl hover:shadow-lg hover:shadow-emerald-950/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 shadow-sm mt-4 disabled:opacity-70 disabled:hover:translate-y-0 flex justify-center items-center"
         >
           {isPending ? (
             <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>

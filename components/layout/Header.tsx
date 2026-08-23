@@ -86,16 +86,16 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Link
                   href="/login"
-                  className="hidden sm:inline-flex items-center text-sm font-bold text-stone-700 hover:text-stone-900 transition-colors"
+                  className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-full transition-all duration-200"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/signup"
-                  className="inline-flex items-center px-5 py-2 text-sm font-bold text-white bg-[#107A53] hover:bg-[#0C6240] rounded-full transition-all shadow-sm"
+                  className="inline-flex items-center px-5 py-2 text-sm font-bold text-white hover:text-white bg-[#107A53] hover:bg-[#0C6240] rounded-full transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
                 >
                   Sign Up
                 </Link>
@@ -189,14 +189,14 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="w-full text-center py-3 text-base font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    className="w-full text-center py-3 text-base font-bold text-stone-800 bg-stone-100 hover:bg-stone-200 hover:text-stone-900 rounded-xl transition-all duration-200"
                   >
                     Log In
                   </Link>
                   <Link
                     href="/signup"
                     onClick={() => setMobileOpen(false)}
-                    className="w-full text-center py-3 text-base font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-md"
+                    className="w-full text-center py-3 text-base font-bold text-white hover:text-white bg-[#107A53] hover:bg-[#0C6240] rounded-xl transition-all duration-200 shadow-md active:scale-95"
                   >
                     Sign Up
                   </Link>

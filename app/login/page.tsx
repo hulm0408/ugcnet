@@ -50,9 +50,9 @@ export default async function LoginPage({
 
         <LoginForm />
 
-        <p className="text-center text-sm text-slate-500 mt-5">
+        <p className="text-center text-sm text-stone-500 mt-5">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-slate-900 font-semibold hover:underline">
+          <Link href="/signup" className="text-emerald-700 hover:text-emerald-900 font-bold hover:underline">
             Sign up free
           </Link>
         </p>

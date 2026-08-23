@@ -1,12 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
-import { signupAction, googleSignInAction } from '@/app/actions/auth';
+import { useState, useActionState } from 'react';
+import { signIn } from 'next-auth/react';
+import { signupAction } from '@/app/actions/auth';
 import { AlertCircle } from 'lucide-react';
 
 export default function SignupForm() {
   const [state, formAction, isPending] = useActionState(signupAction, { error: null });
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogleSignUp() {
+    setGoogleLoading(true);
+    try {
+      await signIn('google', { callbackUrl: '/dashboard?login=success' });
+    } catch {
+      setGoogleLoading(false);
+    }
+  }
 
   return (
     <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] p-8">
@@ -17,13 +28,16 @@ export default function SignupForm() {
         </div>
       )}
 
-      {/* Google Signup form is unchanged as it's separate, but usually needs a separate action. 
-          For now, just using a simple form for Google. */}
-      <form action={googleSignInAction}>
-        <button
-          type="submit"
-          className="w-full flex items-center justify-center gap-3 py-3 bg-white border border-stone-200 text-stone-700 text-sm font-bold rounded-2xl hover:bg-stone-50 hover:shadow-md transition-all duration-300 shadow-sm group"
-        >
+      {/* Google Signup */}
+      <button
+        type="button"
+        onClick={handleGoogleSignUp}
+        disabled={googleLoading}
+        className="w-full flex items-center justify-center gap-3 py-3 bg-white border border-stone-200 text-stone-700 hover:text-stone-900 text-sm font-bold rounded-2xl hover:bg-stone-50 hover:border-stone-300 hover:shadow-md transition-all duration-300 shadow-sm group disabled:opacity-60 disabled:cursor-wait"
+      >
+        {googleLoading ? (
+          <span className="w-5 h-5 border-2 border-stone-300 border-t-stone-700 rounded-full animate-spin" />
+        ) : (
           <svg className="group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
             <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
               <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.419 L -8.284 53.419 C -8.554 54.819 -9.414 55.979 -10.564 56.769 L -10.564 59.469 L -6.704 59.469 C -4.434 57.379 -3.264 54.719 -3.264 51.509 Z"/>
@@ -32,9 +46,9 @@ export default function SignupForm() {
               <path fill="#EA4335" d="M -14.754 43.569 C -12.984 43.569 -11.404 44.179 -10.154 45.369 L -6.634 41.849 C -8.814 39.819 -11.514 38.269 -14.754 38.269 C -19.414 38.269 -23.464 41.409 -25.434 45.369 L -21.414 48.489 C -20.494 45.649 -17.864 43.569 -14.754 43.569 Z"/>
             </g>
           </svg>
-          Sign up with Google
-        </button>
-      </form>
+        )}
+        {googleLoading ? 'Redirecting to Google...' : 'Sign up with Google'}
+      </button>
 
       <div className="flex items-center gap-3 my-8">
         <div className="flex-1 h-px bg-stone-100"></div>
@@ -92,7 +106,7 @@ export default function SignupForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full py-3.5 bg-gradient-to-r from-primary-dark to-primary text-white text-sm font-bold rounded-2xl hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300 shadow-sm mt-4 disabled:opacity-70 disabled:hover:translate-y-0 flex justify-center items-center"
+          className="w-full py-3.5 bg-gradient-to-r from-[#0C6240] to-[#107A53] hover:from-[#094d32] hover:to-[#0C6240] text-white hover:text-white text-sm font-bold rounded-2xl hover:shadow-lg hover:shadow-emerald-950/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all duration-200 shadow-sm mt-4 disabled:opacity-70 disabled:hover:translate-y-0 flex justify-center items-center"
         >
           {isPending ? (
             <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
@@ -102,11 +116,11 @@ export default function SignupForm() {
         </button>
       </form>
 
-      <p className="text-xs text-slate-400 text-center mt-4 leading-relaxed">
+      <p className="text-xs text-stone-500 text-center mt-4 leading-relaxed">
         By signing up you agree to our{' '}
-        <Link href="/terms" className="text-slate-600 hover:underline">Terms</Link>
+        <Link href="/terms" className="text-stone-800 font-medium hover:underline hover:text-stone-950">Terms</Link>
         {' '}and{' '}
-        <Link href="/privacy" className="text-slate-600 hover:underline">Privacy Policy</Link>.
+        <Link href="/privacy" className="text-stone-800 font-medium hover:underline hover:text-stone-950">Privacy Policy</Link>.
       </p>
     </div>
   );
