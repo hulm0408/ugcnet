@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
 
 export const authConfig = {
   trustHost: true,
@@ -47,5 +48,11 @@ export const authConfig = {
       return true;
     },
   },
-  providers: [], // Providers are populated in auth.ts (which requires DB)
+  providers: [
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
+  ], // Database-dependent providers are appended in auth.ts
 } satisfies NextAuthConfig;

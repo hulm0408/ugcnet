@@ -12,7 +12,6 @@
 
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/db';
@@ -60,6 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   providers: [
+    ...(authConfig.providers as any[]),
     CredentialsProvider({
       id: 'credentials',
       name: 'Email & Password',
@@ -98,11 +98,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           image: null,
         };
       },
-    }),
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
   ],
 });
