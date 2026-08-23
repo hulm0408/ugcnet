@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import AuthSessionProvider from '@/components/AuthSessionProvider';
 import { auth } from '@/lib/auth';
 import { Inter, Amiri } from 'next/font/google';
 import prisma from '@/lib/db';
@@ -73,13 +74,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className={`bg-[#FCFAF8] text-stone-900 min-h-screen flex flex-col antialiased ${inter.variable} ${amiri.variable}`}>
-        {/* Sticky header — always on top via z-50 */}
-        <Header user={session?.user || null} />
-        {/* Page content fills remaining viewport height */}
-        <div className="flex-1 flex flex-col">
-          {children}
-        </div>
-        <Footer />
+        <AuthSessionProvider session={session}>
+          {/* Sticky header — always on top via z-50 */}
+          <Header user={session?.user || null} />
+          {/* Page content fills remaining viewport height */}
+          <div className="flex-1 flex flex-col">
+            {children}
+          </div>
+          <Footer />
+        </AuthSessionProvider>
       </body>
     </html>
   );
