@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        arabic: ['var(--font-noto-kufi)', 'sans-serif'],
+        arabic: ['var(--font-amiri)', 'serif'],
         sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         ui: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },

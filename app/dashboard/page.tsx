@@ -22,6 +22,7 @@ export default async function DashboardPage() {
   let questionsAttempted = 0;
   let accuracyRate = 0;
   let bookmarkedCount = 0;
+  let incorrectCount = 0;
 
   if (session?.user?.id) {
     const stats = await prisma.practiceSession.aggregate({
@@ -38,6 +39,20 @@ export default async function DashboardPage() {
 
     bookmarkedCount = await prisma.bookmark.count({
       where: { user_id: session.user.id },
+    });
+
+    incorrectCount = await prisma.practiceAttempt.count({
+      where: { user_id: session.user.id, is_correct: false, is_skipped: false },
+    });
+  }
+
+  // Fetch recent sessions
+  let recentSessions: any[] = [];
+  if (session?.user?.id) {
+    recentSessions = await prisma.practiceSession.findMany({
+      where: { user_id: session.user.id },
+      orderBy: { completed_at: 'desc' },
+      take: 3,
     });
   }
 
@@ -70,22 +85,27 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-10">
           {[
-            { label: 'Questions Attempted', value: questionsAttempted.toString(), icon: Target, color: 'text-blue-600 bg-blue-50 border-blue-100' },
-            { label: 'Accuracy Rate', value: `${accuracyRate}%`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-            { label: 'Time Spent', value: '0h', icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100' },
-            { label: 'Bookmarked', value: bookmarkedCount.toString(), icon: BookMarked, color: 'text-purple-600 bg-purple-50 border-purple-100' },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hover:shadow-md transition-shadow relative overflow-hidden group">
+            { label: 'Questions Attempted', value: questionsAttempted.toString(), icon: Target, color: 'text-blue-600 bg-blue-50 border-blue-100', href: null },
+            { label: 'Accuracy Rate', value: `${accuracyRate}%`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', href: null },
+            { label: 'Mistakes', value: incorrectCount.toString(), icon: AlertCircle, color: 'text-red-600 bg-red-50 border-red-100', href: '/dashboard/incorrect' },
+            { label: 'Time Spent', value: '0h', icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100', href: null },
+            { label: 'Bookmarked', value: bookmarkedCount.toString(), icon: BookMarked, color: 'text-purple-600 bg-purple-50 border-purple-100', href: '/dashboard/bookmarks' },
+          ].map(({ label, value, icon: Icon, color, href }) => {
+            const CardWrapper = href ? Link : 'div';
+            return (
+              // @ts-ignore (dynamic component typing)
+              <CardWrapper key={label} href={href || undefined} className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-6 transition-shadow relative overflow-hidden group ${href ? 'hover:shadow-md cursor-pointer hover:border-slate-300' : ''}`}>
               <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-slate-50 opacity-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${color}`}>
                 <Icon size={24} />
               </div>
               <div className="text-3xl font-black text-slate-900">{value}</div>
               <div className="text-sm text-slate-500 font-medium mt-1 uppercase tracking-wider">{label}</div>
-            </div>
-          ))}
+              </CardWrapper>
+            );
+          })}
         </div>
 
         {/* Quick Actions */}
@@ -113,6 +133,33 @@ export default async function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* Recent Activity */}
+        {session && recentSessions.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Recent Activity</h2>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="divide-y divide-slate-100">
+                {recentSessions.map((rs) => (
+                  <div key={rs.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div>
+                      <div className="font-semibold text-slate-900 capitalize text-sm mb-1">{rs.mode.replace('_', ' ')} Practice</div>
+                      <div className="text-xs text-slate-500">
+                        {rs.total_questions} Questions • {rs.completed_at?.toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-emerald-600">
+                        {Math.round((rs.correct_count / rs.total_questions) * 100)}%
+                      </div>
+                      <div className="text-xs text-slate-400 font-medium uppercase tracking-wider mt-0.5">Accuracy</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Sign In Prompt */}
         {!session && (

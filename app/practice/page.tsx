@@ -89,25 +89,61 @@ function PracticeContent() {
     }
   };
 
-  const handleToggleBookmark = (qId: string) => {
+  const handleToggleBookmark = async (qId: string) => {
+    const isNowBookmarked = !bookmarked.has(qId);
+    
+    // Update local state immediately for snappy UI
     setBookmarked(prev => {
       const next = new Set(prev);
       if (next.has(qId)) next.delete(qId);
       else next.add(qId);
       return next;
     });
+
+    // Fire API call in background
+    try {
+      await fetch('/api/bookmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId: qId, bookmarked: isNowBookmarked })
+      });
+    } catch (err) {
+      console.warn('Failed to save bookmark. User may be guest:', err);
+    }
   };
 
   const submitTest = async () => {
     setSubmitting(true);
     try {
+      let finalEvaluations = evaluations;
+
       if (sessionMode === 'mock') {
         const newEvals: Record<string, any> = {};
         for (const qId of Object.keys(answers)) {
           newEvals[qId] = await evaluateAnswer(qId, answers[qId]);
         }
+        finalEvaluations = newEvals;
         setEvaluations(newEvals);
       }
+
+      // Save session to database (fails silently if unauthenticated)
+      const qIds = questions.map(q => q.id);
+      try {
+        await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: sessionMode,
+            filters: { year, unit, topic, subtopic, paperId },
+            questionIds: qIds,
+            answers: answers,
+            evaluations: finalEvaluations
+          })
+        });
+      } catch (err) {
+        console.warn('Failed to save session, user might be guest:', err);
+      }
+
       setTestStatus('summary'); // go to summary directly after submit
     } catch (err) {
       console.error(err);
