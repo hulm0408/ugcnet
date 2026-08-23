@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, Info } from 'lucide-react';
 import YearFolderSvg from '@/components/ui/YearFolderSvg';
+import { notFound } from 'next/navigation';
 import prisma from '@/lib/db';
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
   const resolvedParams = await params;
   const { year } = resolvedParams;
   const yearInt = parseInt(year);
+  if (isNaN(yearInt)) return notFound();
 
   // Fetch actual papers for this year from the database
   const dbPapers = await prisma.examPaper.findMany({

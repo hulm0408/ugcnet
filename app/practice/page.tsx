@@ -48,18 +48,28 @@ function PracticeContent() {
     async function loadQuestions() {
       try {
         setLoading(true);
-        let url = '/api/questions?published=true&limit=200';
-        if (year) url += `&year=${year}`;
-        if (unit) url += `&unit=${unit}`;
-        if (topic) url += `&topic=${topic}`;
-        if (subtopic) url += `&subtopic=${subtopic}`;
-        if (paperId) url += `&paperId=${paperId}`;
+        let baseUrl = '/api/questions?published=true&limit=250';
+        if (year) baseUrl += `&year=${year}`;
+        if (unit) baseUrl += `&unit=${unit}`;
+        if (topic) baseUrl += `&topic=${topic}`;
+        if (subtopic) baseUrl += `&subtopic=${subtopic}`;
+        if (paperId) baseUrl += `&paperId=${paperId}`;
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to load questions');
-        
-        const data = await res.json();
-        setQuestions(data.data || []);
+        let allQuestions: any[] = [];
+        let page = 1;
+        let totalPages = 1;
+
+        do {
+          const res = await fetch(`${baseUrl}&page=${page}`);
+          if (!res.ok) throw new Error('Failed to load questions');
+          
+          const data = await res.json();
+          allQuestions = [...allQuestions, ...(data.data || [])];
+          totalPages = data.meta?.totalPages || 1;
+          page++;
+        } while (page <= totalPages);
+
+        setQuestions(allQuestions);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -67,7 +77,7 @@ function PracticeContent() {
       }
     }
     loadQuestions();
-  }, [year, unit, paperId]);
+  }, [year, unit, topic, subtopic, paperId]);
 
   useEffect(() => {
     if (questions.length > 0 && testStatus === 'in-progress') {

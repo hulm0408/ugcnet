@@ -204,42 +204,43 @@ async function runImport() {
 
     let importedForFile = 0;
 
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      const originalNum = q.question_number?.toString() || (i + 1).toString();
-      const sourceId = `${file}_Q${originalNum}`;
+    const CHUNK_SIZE = 25;
+    for (let i = 0; i < questions.length; i += CHUNK_SIZE) {
+      const chunk = questions.slice(i, i + CHUNK_SIZE);
+      const upsertPromises = chunk.map((q: any, chunkIndex: number) => {
+        const originalNum = q.question_number?.toString() || (i + chunkIndex + 1).toString();
+        const sourceId = `${file}_Q${originalNum}`;
 
-      let unit_id = null;
-      let broad_topic_id = null;
-      let subtopic_id = null;
+        let unit_id = null;
+        let broad_topic_id = null;
+        let subtopic_id = null;
 
-      const unitNum = q.unit_number || (q.classification && q.classification.unit_number);
-      const btArabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
-      const btEnglish = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
-      const stArabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
-      const stEnglish = q.subtopic_english || (q.classification && q.classification.subtopic_english);
+        const unitNum = q.unit_number || (q.classification && q.classification.unit_number);
+        const btArabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
+        const btEnglish = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
+        const stArabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
+        const stEnglish = q.subtopic_english || (q.classification && q.classification.subtopic_english);
 
-      if (unitNum) {
-        const unit = dbUnits.find((u: any) => u.unit_number === unitNum);
-        if (unit) {
-          unit_id = unit.id;
-          if (btArabic || btEnglish) {
-            const btSlug = generateSlug(btEnglish || btArabic);
-            const bt = unit.broad_topics.find((b: any) => b.slug === btSlug);
-            if (bt) {
-              broad_topic_id = bt.id;
-              if (stArabic || stEnglish) {
-                const stSlug = generateSlug(stEnglish || stArabic);
-                const st = bt.subtopics.find((s: any) => s.slug === stSlug);
-                if (st) subtopic_id = st.id;
+        if (unitNum) {
+          const unit = dbUnits.find((u: any) => u.unit_number === unitNum);
+          if (unit) {
+            unit_id = unit.id;
+            if (btArabic || btEnglish) {
+              const btSlug = generateSlug(btEnglish || btArabic);
+              const bt = unit.broad_topics.find((b: any) => b.slug === btSlug);
+              if (bt) {
+                broad_topic_id = bt.id;
+                if (stArabic || stEnglish) {
+                  const stSlug = generateSlug(stEnglish || stArabic);
+                  const st = bt.subtopics.find((s: any) => s.slug === stSlug);
+                  if (st) subtopic_id = st.id;
+                }
               }
             }
           }
         }
-      }
 
-      try {
-        await prisma.question.upsert({
+        return prisma.question.upsert({
           where: { source_question_id: sourceId },
           update: {
             question_arabic: q.question_text_arabic || q.question_arabic || 'No question text',
@@ -289,14 +290,18 @@ async function runImport() {
             import_job_id: job.id
           }
         });
-        importedForFile++;
+      });
+
+      try {
+        await prisma.$transaction(upsertPromises);
+        importedForFile += chunk.length;
       } catch (err) {
-        console.error(`Error importing ${sourceId}:`, err);
+        console.error(`Error importing chunk starting at index ${i}:`, err);
         await prisma.importError.create({
           data: {
             job_id: job.id,
             row_number: i,
-            error_type: 'upsert_failed',
+            error_type: 'chunk_upsert_failed',
             error_message: err instanceof Error ? err.message : String(err)
           }
         });

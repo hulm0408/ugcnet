@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const topic = searchParams.get('topic');
     const subtopic = searchParams.get('subtopic');
     const year = searchParams.get('year');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100);
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 250);
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
 
     // Filter construction — always scope to PUBLISHED

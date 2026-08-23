@@ -93,6 +93,7 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
             
             <div className="border-t border-stone-200 pt-8">
               <label className="flex items-center gap-3 cursor-pointer mb-6 group">
+                <input type="checkbox" className="hidden" checked={isChecked} onChange={() => setIsChecked(!isChecked)} />
                 <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${isChecked ? 'bg-[#107A53] border-[#107A53]' : 'bg-white border-stone-300 group-hover:border-[#107A53]'}`}>
                   {isChecked && (
                     <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
