@@ -54,12 +54,11 @@ export default async function SyllabusPage() {
 
   let totalTopics = 0;
   let totalNodes = 0;
-  let totalQuestions = 0;
+  const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
   
   // Map database records to the structure expected by SyllabusList
   const hierarchicalUnits = units.map((unit: any) => {
     const unitQCount = unitCountMap.get(unit.id) || 0;
-    totalQuestions += unitQCount;
     totalTopics += unit.broad_topics.length;
     
     return {
