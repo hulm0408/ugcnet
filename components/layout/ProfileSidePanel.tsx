@@ -30,16 +30,18 @@ export default function ProfileSidePanel({ user, isOpen, onClose }: ProfileSideP
 
   return (
     <>
-      {/* Backdrop — full screen dark overlay */}
+      {/* Backdrop — glassmorphism blur over the page body */}
       <div
-        className={`fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 z-[60] transition-all duration-300 ${
+          isOpen
+            ? 'opacity-100 pointer-events-auto bg-black/30 backdrop-blur-md'
+            : 'opacity-0 pointer-events-none backdrop-blur-none'
         }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Panel — slides in from right, full viewport height */}
+      {/* Panel — fixed to top-0 right-0, full viewport height, above backdrop */}
       <div
         role="dialog"
         aria-modal="true"
