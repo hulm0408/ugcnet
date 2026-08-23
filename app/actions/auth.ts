@@ -90,5 +90,5 @@ export async function googleSignInAction() {
 }
 
 export async function logoutAction() {
-  await signOut({ redirectTo: '/?logout=success' });
+  await signOut({ redirectTo: '/' });
 }

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search, LogOut } from 'lucide-react';
-import { logoutAction } from '@/app/actions/auth';
+import { signOut } from 'next-auth/react';
 import ProfileSidePanel from '@/components/layout/ProfileSidePanel';
 
 const navLinks = [
@@ -162,12 +162,20 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                       <div className="text-xs font-medium text-slate-500">{user.email}</div>
                     </div>
                   </div>
-                  <form action={logoutAction}>
-                    <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
-                      <LogOut size={16} />
-                      Log out
-                    </button>
-                  </form>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setMobileOpen(false);
+                      window.dispatchEvent(new CustomEvent('app:logout-start'));
+                      setTimeout(async () => {
+                        await signOut({ callbackUrl: '/' });
+                      }, 1200);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                  >
+                    <LogOut size={16} />
+                    Log out
+                  </button>
                 </div>
               ) : (
                 <>

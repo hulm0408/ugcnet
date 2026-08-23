@@ -8,7 +8,7 @@ import {
   LogOut, Shield, ChevronRight, BookOpen,
   Settings, Trophy
 } from 'lucide-react';
-import { logoutAction } from '@/app/actions/auth';
+import { signOut } from 'next-auth/react';
 
 interface ProfileSidePanelProps {
   user: { name?: string | null; email?: string | null; role?: string | null; image?: string | null } | null;
@@ -173,15 +173,20 @@ export default function ProfileSidePanel({ user, isOpen, onClose }: ProfileSideP
             Account Settings
           </Link>
 
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors text-sm font-semibold"
-            >
-              <LogOut size={16} />
-              Sign Out
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={async () => {
+              onClose();
+              window.dispatchEvent(new CustomEvent('app:logout-start'));
+              setTimeout(async () => {
+                await signOut({ callbackUrl: '/' });
+              }, 1200);
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors text-sm font-semibold text-left"
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
         </div>
       </div>
     </>

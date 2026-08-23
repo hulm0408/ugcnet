@@ -13,6 +13,18 @@ export default function ToastHandler() {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
+    const handleLogoutStart = () => {
+      setModalType('logout');
+      setIsClosing(false);
+    };
+
+    window.addEventListener('app:logout-start', handleLogoutStart);
+    return () => {
+      window.removeEventListener('app:logout-start', handleLogoutStart);
+    };
+  }, []);
+
+  useEffect(() => {
     if (handledRef.current) return;
 
     const loginParam = searchParams.get('login');
