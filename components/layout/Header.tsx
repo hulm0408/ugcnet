@@ -166,10 +166,17 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                     type="button"
                     onClick={async () => {
                       setMobileOpen(false);
-                      window.dispatchEvent(new CustomEvent('app:logout-start'));
-                      setTimeout(async () => {
+                      try {
+                        if (typeof window !== 'undefined') {
+                          sessionStorage.setItem('auth_logout_success', '1');
+                        }
                         await signOut({ callbackUrl: '/' });
-                      }, 1200);
+                      } catch (e) {
+                        console.error('Logout error:', e);
+                        if (typeof window !== 'undefined') {
+                          sessionStorage.removeItem('auth_logout_success');
+                        }
+                      }
                     }}
                     className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
                   >

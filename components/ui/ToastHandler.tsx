@@ -13,18 +13,18 @@ export default function ToastHandler() {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    const handleLogoutStart = () => {
-      setModalType('logout');
-      setIsClosing(false);
-    };
+    // 1. Check if user just successfully arrived after logout
+    if (typeof window !== 'undefined') {
+      const justLoggedOut = sessionStorage.getItem('auth_logout_success');
+      if (justLoggedOut) {
+        sessionStorage.removeItem('auth_logout_success');
+        setModalType('logout');
+        setIsClosing(false);
+        cleanUrl();
+        return;
+      }
+    }
 
-    window.addEventListener('app:logout-start', handleLogoutStart);
-    return () => {
-      window.removeEventListener('app:logout-start', handleLogoutStart);
-    };
-  }, []);
-
-  useEffect(() => {
     if (handledRef.current) return;
 
     const loginParam = searchParams.get('login');
@@ -33,22 +33,26 @@ export default function ToastHandler() {
     if (loginParam === 'success') {
       handledRef.current = true;
       setModalType('login');
+      setIsClosing(false);
       cleanUrl();
     } else if (logoutParam === 'success') {
       handledRef.current = true;
       setModalType('logout');
+      setIsClosing(false);
       cleanUrl();
     }
 
     function cleanUrl() {
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.delete('login');
-      newParams.delete('logout');
-      const search = newParams.toString();
-      const newUrl = search ? `${pathname}?${search}` : pathname;
-      router.replace(newUrl, { scroll: false });
+      if (typeof window !== 'undefined') {
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.delete('login');
+        newParams.delete('logout');
+        const search = newParams.toString();
+        const cleanPath = search ? `${window.location.pathname}?${search}` : window.location.pathname;
+        window.history.replaceState({}, '', cleanPath);
+      }
     }
-  }, [searchParams, pathname, router]);
+  }, [searchParams]);
 
   // Auto dismiss after 2.8 seconds
   useEffect(() => {

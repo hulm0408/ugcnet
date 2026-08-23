@@ -177,10 +177,17 @@ export default function ProfileSidePanel({ user, isOpen, onClose }: ProfileSideP
             type="button"
             onClick={async () => {
               onClose();
-              window.dispatchEvent(new CustomEvent('app:logout-start'));
-              setTimeout(async () => {
+              try {
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('auth_logout_success', '1');
+                }
                 await signOut({ callbackUrl: '/' });
-              }, 1200);
+              } catch (e) {
+                console.error('Logout error:', e);
+                if (typeof window !== 'undefined') {
+                  sessionStorage.removeItem('auth_logout_success');
+                }
+              }
             }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors text-sm font-semibold text-left"
           >
