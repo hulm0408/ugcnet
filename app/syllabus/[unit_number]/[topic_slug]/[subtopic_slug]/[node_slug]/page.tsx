@@ -5,13 +5,7 @@ import SyllabusBreadcrumb from '@/components/syllabus/SyllabusBreadcrumb';
 import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
 import NodeQuestionsView from '@/components/syllabus/NodeQuestionsView';
 import { Layers, BookOpen, Target, Compass } from 'lucide-react';
-
-function slugify(text: string): string {
-  return (text || 'unnamed')
-    .toLowerCase()
-    .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
+import { resolveCanonicalEntity, slugify } from '@/lib/syllabusHierarchy';
 
 export async function generateMetadata({
   params,
@@ -27,23 +21,17 @@ export async function generateMetadata({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return { title: 'Node Not Found' };
 
-  const subtopic = await prisma.subtopic.findFirst({
+  const topic = await prisma.broadTopic.findFirst({
     where: {
-      slug: resolvedParams.subtopic_slug,
-      broad_topic: {
-        slug: resolvedParams.topic_slug,
-        unit: { unit_number: unitNum },
-      },
-    },
-    include: {
-      broad_topic: { include: { unit: true } },
+      slug: resolvedParams.topic_slug,
+      unit: { unit_number: unitNum },
     },
   });
 
-  if (!subtopic) return { title: 'Node Not Found' };
+  if (!topic) return { title: 'Topic Not Found' };
 
   return {
-    title: `Questions for ${resolvedParams.node_slug} — ${subtopic.name_english} | Syllabus`,
+    title: `Questions for ${resolvedParams.node_slug} — ${topic.name_english} | Syllabus`,
     description: `Browse official UGC NET Arabic previous year questions categorized under ${resolvedParams.node_slug}.`,
   };
 }
@@ -62,17 +50,14 @@ export default async function NodeQuestionsPage({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return notFound();
 
-  // Fetch the subtopic and its questions
-  const subtopic = await prisma.subtopic.findFirst({
+  // Fetch Topic and all its published questions
+  const topic = await prisma.broadTopic.findFirst({
     where: {
-      slug: resolvedParams.subtopic_slug,
-      broad_topic: {
-        slug: resolvedParams.topic_slug,
-        unit: { unit_number: unitNum },
-      },
+      slug: resolvedParams.topic_slug,
+      unit: { unit_number: unitNum },
     },
     include: {
-      broad_topic: { include: { unit: true } },
+      unit: true,
       questions: {
         where: { content_status: 'PUBLISHED' },
         orderBy: { exam_paper: { year: 'desc' } },
@@ -102,41 +87,49 @@ export default async function NodeQuestionsPage({
     },
   });
 
-  if (!subtopic) return notFound();
+  if (!topic) return notFound();
 
-  // Filter questions matching this node slug
-  const targetSlug = decodeURIComponent(resolvedParams.node_slug).toLowerCase();
+  const targetSubSlug = decodeURIComponent(resolvedParams.subtopic_slug).toLowerCase();
+  const targetNodeSlug = decodeURIComponent(resolvedParams.node_slug).toLowerCase();
 
-  const matchingQuestions = subtopic.questions.filter((q) => {
-    const entityAr = q.specific_entity_name_arabic?.trim() || 'عام / متفرقات';
-    const entityEn = q.specific_entity_name_english?.trim() || 'General / Unclassified';
-    const slugEn = slugify(entityEn);
-    const slugAr = slugify(entityAr);
+  // 1. Filter by canonical subtopic
+  const subtopicQuestions: typeof topic.questions = [];
+  let subtopicNameAr = '';
+  let subtopicNameEn = '';
+
+  for (const q of topic.questions) {
+    const canonical = resolveCanonicalEntity(q);
+    if (canonical.slug === targetSubSlug) {
+      subtopicQuestions.push(q);
+      subtopicNameAr = canonical.nameAr;
+      subtopicNameEn = canonical.nameEn;
+    }
+  }
+
+  const pool = subtopicQuestions.length > 0 ? subtopicQuestions : topic.questions;
+
+  // 2. Filter by node slug
+  const matchingQuestions = pool.filter((q) => {
+    const nodeAr = q.question_micro_focus_arabic?.trim() || 'أسئلة عامة وتطبيقات';
+    const nodeEn = q.question_micro_focus_english?.trim() || 'General Questions & Analysis';
+    const slugEn = slugify(nodeEn);
+    const slugAr = slugify(nodeAr);
 
     return (
-      slugEn === targetSlug ||
-      slugAr === targetSlug ||
-      entityEn.toLowerCase() === targetSlug ||
-      entityAr === targetSlug
+      slugEn === targetNodeSlug ||
+      slugAr === targetNodeSlug ||
+      nodeEn.toLowerCase() === targetNodeSlug ||
+      nodeAr === targetNodeSlug
     );
   });
 
-  // Fallback: If no exact slug match, take all questions if target is 'all' or default
-  const questionsToDisplay = matchingQuestions.length > 0 ? matchingQuestions : subtopic.questions;
+  const questionsToDisplay = matchingQuestions.length > 0 ? matchingQuestions : pool;
 
   const firstQ = questionsToDisplay[0];
-  const nodeNameAr = firstQ?.specific_entity_name_arabic || subtopic.name_arabic;
-  const nodeNameEn = firstQ?.specific_entity_name_english || subtopic.name_english;
+  const nodeTitleAr = firstQ?.question_micro_focus_arabic || subtopicNameAr || 'أسئلة عامة';
+  const nodeTitleEn = firstQ?.question_micro_focus_english || subtopicNameEn || 'General Questions';
 
-  const distinctThemes = Array.from(
-    new Set(
-      questionsToDisplay
-        .map((q) => q.question_micro_focus_arabic)
-        .filter(Boolean) as string[]
-    )
-  );
-
-  const practiceUrl = `/practice?unit=${subtopic.broad_topic.unit.unit_number}&topic=${subtopic.broad_topic.slug}&subtopic=${subtopic.slug}&entity=${encodeURIComponent(nodeNameAr)}`;
+  const practiceUrl = `/practice?unit=${topic.unit.unit_number}&topic=${topic.slug}&subtopic=${targetSubSlug}&node=${targetNodeSlug}`;
 
   return (
     <div className="flex-1 min-h-screen pt-10 pb-24 bg-[#FCFAF8]">
@@ -146,23 +139,23 @@ export default async function NodeQuestionsPage({
         <SyllabusBreadcrumb
           items={[
             {
-              label: `Unit ${subtopic.broad_topic.unit.unit_number}: ${subtopic.broad_topic.unit.name_english}`,
-              labelAr: subtopic.broad_topic.unit.name_arabic,
-              href: `/syllabus/${subtopic.broad_topic.unit.unit_number}`,
+              label: `Unit ${topic.unit.unit_number}: ${topic.unit.name_english}`,
+              labelAr: topic.unit.name_arabic,
+              href: `/syllabus/${topic.unit.unit_number}`,
             },
             {
-              label: subtopic.broad_topic.name_english,
-              labelAr: subtopic.broad_topic.name_arabic,
-              href: `/syllabus/${subtopic.broad_topic.unit.unit_number}/${subtopic.broad_topic.slug}`,
+              label: topic.name_english,
+              labelAr: topic.name_arabic,
+              href: `/syllabus/${topic.unit.unit_number}/${topic.slug}`,
             },
             {
-              label: subtopic.name_english,
-              labelAr: subtopic.name_arabic,
-              href: `/syllabus/${subtopic.broad_topic.unit.unit_number}/${subtopic.broad_topic.slug}/${subtopic.slug}`,
+              label: subtopicNameEn || 'Sub-topic',
+              labelAr: subtopicNameAr,
+              href: `/syllabus/${topic.unit.unit_number}/${topic.slug}/${targetSubSlug}`,
             },
             {
-              label: nodeNameEn,
-              labelAr: nodeNameAr,
+              label: nodeTitleEn,
+              labelAr: nodeTitleAr,
             },
           ]}
         />
@@ -175,25 +168,25 @@ export default async function NodeQuestionsPage({
             {/* Node Title Header Card */}
             <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 mb-8 shadow-sm">
               <div className="text-xs font-bold text-primary uppercase tracking-widest mb-1.5">
-                Unit {subtopic.broad_topic.unit.unit_number} • {subtopic.name_english} Node
+                {subtopicNameEn || topic.name_english} • Learning Node
               </div>
               <h1
                 dir="rtl"
                 lang="ar"
-                className="font-arabic font-extrabold text-3xl sm:text-4xl text-stone-900 leading-snug mb-2"
+                className="font-arabic font-extrabold text-2xl sm:text-3xl text-stone-900 leading-snug mb-2"
               >
-                {nodeNameAr}
+                {nodeTitleAr}
               </h1>
-              <p className="text-stone-500 font-semibold text-base sm:text-lg">
-                {nodeNameEn}
+              <p className="text-stone-500 font-semibold text-sm sm:text-base">
+                {nodeTitleEn}
               </p>
             </div>
 
             {/* Questions View Client Component */}
             <NodeQuestionsView
               questions={questionsToDisplay}
-              nodeNameAr={nodeNameAr}
-              nodeNameEn={nodeNameEn}
+              nodeNameAr={nodeTitleAr}
+              nodeNameEn={nodeTitleEn}
               practiceHref={practiceUrl}
             />
           </main>
@@ -201,13 +194,13 @@ export default async function NodeQuestionsPage({
           {/* Right Column: Contextual Sidebar */}
           <SyllabusContextSidebar
             levelBadge="Node Context"
-            titleAr={nodeNameAr}
-            title={nodeNameEn}
+            titleAr={nodeTitleAr}
+            title={nodeTitleEn}
             subtitle={`Targeted question set containing ${questionsToDisplay.length} questions sourced from NTA previous year exams.`}
             metrics={[
               { label: 'Total Questions', value: questionsToDisplay.length, icon: BookOpen },
-              { label: 'Micro Themes', value: distinctThemes.length || 1, icon: Target },
-              { label: 'Unit', value: `Unit ${subtopic.broad_topic.unit.unit_number}`, icon: Layers },
+              { label: 'Sub-topic', value: subtopicNameEn || 'General', icon: Target },
+              { label: 'Unit', value: `Unit ${topic.unit.unit_number}`, icon: Layers },
             ]}
             practiceHref={practiceUrl}
             practiceLabel="Practice These Questions"
