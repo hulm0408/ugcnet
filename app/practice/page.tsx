@@ -23,6 +23,8 @@ const evaluateAnswer = async (questionId: string, selectedOption: string) => {
 function PracticeContent() {
   const searchParams = useSearchParams();
   const unit = searchParams.get('unit');
+  const topic = searchParams.get('topic');
+  const subtopic = searchParams.get('subtopic');
   const year = searchParams.get('year') || (unit ? null : '2009');
   const paperId = searchParams.get('paperId');
   const paperTitle = searchParams.get('paperTitle');
@@ -49,6 +51,8 @@ function PracticeContent() {
         let url = '/api/questions?published=true&limit=200';
         if (year) url += `&year=${year}`;
         if (unit) url += `&unit=${unit}`;
+        if (topic) url += `&topic=${topic}`;
+        if (subtopic) url += `&subtopic=${subtopic}`;
         if (paperId) url += `&paperId=${paperId}`;
 
         const res = await fetch(url);
