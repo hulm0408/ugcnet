@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search, LogOut } from 'lucide-react';
+import { logoutAction } from '@/app/actions/auth';
 
 const navLinks = [
   { href: '/', label: 'Home', icon: Home },
@@ -14,7 +15,9 @@ const navLinks = [
 
 export default function Header({ user }: { user: { name?: string | null, email?: string | null } | null }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Do not show header on Home page if we want a different one, but usually it's global.
   // Actually, the mockup shows the header on the home page too with the same style but transparent maybe? No, the home page in the mockup has a white rounded pill navbar. Wait, the user said "HOME PAGE CHOR KAR ISKI STYLES KO COPY KARO".
@@ -60,21 +63,36 @@ export default function Header({ user }: { user: { name?: string | null, email?:
           <div className="flex items-center gap-5">
             {/* Icons */}
             <div className="hidden sm:flex items-center gap-4 text-stone-500">
-              <button className="hover:text-stone-900 transition-colors">
+              <Link href="/search" className="hover:text-stone-900 transition-colors">
                 <Search size={18} strokeWidth={2.5} />
-              </button>
-              <button className="hover:text-stone-900 transition-colors relative">
-                <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full border border-white"></span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-              </button>
+              </Link>
             </div>
 
             {user ? (
-              <div className="hidden sm:flex items-center gap-3 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full shadow-inner">
-                <div className="w-7 h-7 bg-[#107A53]/10 text-[#107A53] rounded-full flex items-center justify-center">
-                  <User size={14} />
-                </div>
-                <span className="text-sm font-bold text-stone-700 pr-1">{user.name?.split(' ')[0] || 'User'}</span>
+              <div className="relative hidden sm:block">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-3 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full shadow-inner hover:bg-stone-100 transition-colors"
+                >
+                  <div className="w-7 h-7 bg-[#107A53]/10 text-[#107A53] rounded-full flex items-center justify-center">
+                    <User size={14} />
+                  </div>
+                  <span className="text-sm font-bold text-stone-700 pr-1">{user.name?.split(' ')[0] || 'User'}</span>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-stone-200 rounded-2xl shadow-xl py-2 z-50">
+                    <div className="px-4 py-2 border-b border-stone-100">
+                      <p className="text-xs font-semibold text-stone-900 truncate">{user.name || 'User'}</p>
+                      <p className="text-xs text-stone-500 truncate">{user.email}</p>
+                    </div>
+                    <form action={logoutAction}>
+                      <button type="submit" className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                        <LogOut size={15} />
+                        Log out
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-4">
@@ -130,14 +148,22 @@ export default function Header({ user }: { user: { name?: string | null, email?:
             
             <div className="border-t border-slate-100 my-2 pt-4 flex flex-col gap-3">
               {user ? (
-                <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-200">
-                   <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center">
-                    <User size={20} />
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center">
+                      <User size={20} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">{user.name || 'User'}</div>
+                      <div className="text-xs font-medium text-slate-500">{user.email}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900">{user.name || 'User'}</div>
-                    <div className="text-xs font-medium text-slate-500">{user.email}</div>
-                  </div>
+                  <form action={logoutAction}>
+                    <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
+                      <LogOut size={16} />
+                      Log out
+                    </button>
+                  </form>
                 </div>
               ) : (
                 <>

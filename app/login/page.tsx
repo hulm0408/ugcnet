@@ -1,12 +1,31 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import LoginForm from './LoginForm';
+import { AlertCircle } from 'lucide-react';
+
 export const metadata: Metadata = {
   title: 'Log In',
   description: 'Log in to your Arabic NET/JRF Practice account.',
 };
 
-export default function LoginPage() {
+const errorMessages: Record<string, string> = {
+  Configuration: 'Server configuration error. Please contact support.',
+  AccessDenied: 'Access was denied. Please try again.',
+  Verification: 'Verification failed. Please try again.',
+  OAuthCallback: 'Google sign-in failed. Please try again.',
+  OAuthAccountNotLinked: 'This email is already registered. Please log in with email & password.',
+  MissingCSRF: 'Session expired. Please refresh and try again.',
+  Default: 'An error occurred. Please try again.',
+};
+
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
+  const error = searchParams?.error;
+  const errorMsg = error ? (errorMessages[error] ?? errorMessages.Default) : null;
+
   return (
     <div className="flex-1 flex items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-sm">
@@ -20,6 +39,13 @@ export default function LoginPage() {
           <p className="text-slate-500 text-sm mt-1">Log in to continue your preparation</p>
         </div>
 
+        {errorMsg && (
+          <div className="mb-5 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 text-sm font-medium">
+            <AlertCircle size={18} className="shrink-0" />
+            {errorMsg}
+          </div>
+        )}
+
         <LoginForm />
 
         <p className="text-center text-sm text-slate-500 mt-5">
@@ -32,3 +58,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

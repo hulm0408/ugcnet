@@ -1,6 +1,6 @@
 'use server';
 
-import { signIn } from '@/lib/auth';
+import { signIn, signOut } from '@/lib/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/db';
@@ -82,4 +82,12 @@ export async function signupAction(prevState: any, formData: FormData) {
     }
     throw error;
   }
+}
+
+export async function googleSignInAction() {
+  await signIn('google', { redirectTo: '/dashboard' });
+}
+
+export async function logoutAction() {
+  await signOut({ redirectTo: '/' });
 }
