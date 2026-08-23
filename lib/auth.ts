@@ -81,19 +81,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const user = await prisma.user.findUnique({ where: { email } });
 
-        if (!user || !user.password_hash) return null;
-        if (!user.is_active) return null;
+        if (!user || !user.passwordHash) return null;
+        if (!user.isActive) return null;
 
-        const isValid = await bcrypt.compare(password, user.password_hash);
+        const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) return null;
 
-        if (!user.email_verified) {
+        if (!user.emailVerified) {
           throw new Error('EMAIL_NOT_VERIFIED');
         }
 
         await prisma.user.update({
           where: { id: user.id },
-          data: { last_active_at: new Date() },
+          data: { lastActiveAt: new Date() },
         });
 
         return {

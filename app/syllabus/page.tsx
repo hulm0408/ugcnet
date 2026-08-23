@@ -88,13 +88,13 @@ export default async function SyllabusPage() {
   });
 
   return (
-    <div className="flex-1 min-h-screen pt-12 pb-24 bg-stone-50">
+    <div className="flex-1 min-h-screen pt-12 pb-24 bg-gradient-to-b from-primary-surface to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* ✨ Header Section ✨ */}
+        {/* Header Section */}
         <div className="mb-10 text-center md:text-left">
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-stone-900 tracking-tight">Syllabus</h1>
-          <p className="text-stone-500 text-base font-medium mt-2">Official UGC NET Arabic Syllabus</p>
+          <h1 className="text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 tracking-tight mb-3">Syllabus</h1>
+          <p className="text-stone-500 text-lg font-medium">Official UGC NET Arabic Syllabus</p>
         </div>
 
         {/* Dynamic Stats Grid */}

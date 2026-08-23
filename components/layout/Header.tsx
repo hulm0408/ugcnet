@@ -24,13 +24,13 @@ export default function Header({ user }: { user: { name?: string | null, email?:
   // Let's check if we are on home page to use a different style, or just keep it global white. The home page currently uses this header and it looks fine.
   
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-stone-200/80 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300">
+    <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-stone-200/50 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Brand */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-9 h-9 bg-[#107A53] rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-all">
+            <div className="w-9 h-9 bg-gradient-to-tr from-primary-dark to-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-105 group-hover:shadow-primary/30 transition-all duration-300">
               <span className="text-white font-bold text-lg font-arabic">ع</span>
             </div>
             <div className="hidden sm:flex flex-col leading-none">
@@ -49,7 +49,7 @@ export default function Header({ user }: { user: { name?: string | null, email?:
                   href={href}
                   className={`text-[14px] font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'text-stone-900 border-b-2 border-[#107A53] pb-1'
+                      ? 'text-stone-900 border-b-2 border-primary pb-1'
                       : 'text-stone-500 hover:text-stone-900 hover:border-b-2 hover:border-stone-300 pb-1'
                   }`}
                 >
@@ -72,9 +72,9 @@ export default function Header({ user }: { user: { name?: string | null, email?:
               <div className="relative hidden sm:block">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-3 bg-stone-50 border border-stone-200 px-3 py-1.5 rounded-full shadow-inner hover:bg-stone-100 transition-colors"
+                  className="flex items-center gap-3 bg-stone-50/80 backdrop-blur-md border border-stone-200 px-3 py-1.5 rounded-full shadow-inner hover:bg-stone-100 transition-colors"
                 >
-                  <div className="w-7 h-7 bg-[#107A53]/10 text-[#107A53] rounded-full flex items-center justify-center">
+                  <div className="w-7 h-7 bg-primary/10 text-primary rounded-full flex items-center justify-center">
                     <User size={14} />
                   </div>
                   <span className="text-sm font-bold text-stone-700 pr-1">{user.name?.split(' ')[0] || 'User'}</span>

@@ -52,10 +52,10 @@ export default async function IncorrectQuestionsPage() {
   const questionsToReview = Array.from(uniqueIncorrect.values());
 
   return (
-    <div className="flex-1 bg-slate-50 min-h-screen">
+    <div className="flex-1 bg-stone-50 min-h-screen">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 transition-colors">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-medium text-stone-500 hover:text-stone-900 mb-6 transition-colors">
           <ChevronLeft size={16} /> Back to Dashboard
         </Link>
         
@@ -64,16 +64,16 @@ export default async function IncorrectQuestionsPage() {
             <XCircle size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Mistakes & Review</h1>
-            <p className="text-sm text-slate-500">Review {questionsToReview.length} questions you answered incorrectly</p>
+            <h1 className="text-2xl font-bold text-stone-900">Mistakes & Review</h1>
+            <p className="text-sm text-stone-500">Review {questionsToReview.length} questions you answered incorrectly</p>
           </div>
         </div>
 
         {questionsToReview.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
-            <XCircle size={48} className="mx-auto text-slate-300 mb-4" />
-            <h3 className="text-lg font-bold text-slate-900 mb-1">No Mistakes Yet</h3>
-            <p className="text-sm text-slate-500">
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-stone-200/60 shadow-sm p-12 text-center">
+            <XCircle size={48} className="mx-auto text-stone-300 mb-4" />
+            <h3 className="text-lg font-bold text-stone-900 mb-1">No Mistakes Yet</h3>
+            <p className="text-sm text-stone-500">
               Keep practicing! Questions you answer incorrectly will appear here for you to review.
             </p>
           </div>
@@ -83,32 +83,32 @@ export default async function IncorrectQuestionsPage() {
               const q = attempt.question;
               const options = q.options_arabic as Record<string, string>;
               return (
-                <div key={attempt.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div key={attempt.id} className="bg-white/80 backdrop-blur-xl rounded-2xl border border-stone-200/60 shadow-sm overflow-hidden">
                   <div className="p-6">
                     <div className="flex justify-between items-start gap-4 mb-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
                         {q.exam_paper.year} • {q.exam_paper.paper_number}
                       </span>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-stone-400">
                         Attempted {attempt.attempted_at.toLocaleDateString()}
                       </span>
                     </div>
                     
-                    <p dir="rtl" className="font-arabic text-xl leading-relaxed text-slate-900 mb-4">
+                    <p dir="rtl" className="font-arabic text-xl leading-relaxed text-stone-900 mb-4">
                       {q.question_arabic}
                     </p>
                     
-                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mb-4">
+                    <div className="bg-stone-50/80 rounded-xl p-4 border border-stone-200/40 mb-4">
                       <div className="flex flex-col gap-2 text-sm">
                         <div className="flex items-start gap-3">
                           <span className="font-bold text-red-600 shrink-0">Your Answer:</span>
-                          <span dir="rtl" className="font-arabic text-base text-slate-700">
+                          <span dir="rtl" className="font-arabic text-base text-stone-700">
                             {attempt.selected_option ? options[attempt.selected_option] : 'No Answer'}
                           </span>
                         </div>
                         <div className="flex items-start gap-3">
                           <span className="font-bold text-emerald-600 shrink-0">Correct Answer:</span>
-                          <span dir="rtl" className="font-arabic text-base text-slate-900 font-bold">
+                          <span dir="rtl" className="font-arabic text-base text-stone-900 font-bold">
                             {options[q.correct_answer] || q.correct_answer_text_arabic}
                           </span>
                         </div>
@@ -116,13 +116,13 @@ export default async function IncorrectQuestionsPage() {
                     </div>
 
                     {(q.explanation_arabic || q.explanation_english) && (
-                      <div className="mt-4 pt-4 border-t border-slate-100">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Explanation</h4>
+                      <div className="mt-4 pt-4 border-t border-stone-100">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Explanation</h4>
                         {q.explanation_arabic && (
-                          <p dir="rtl" className="font-arabic text-sm text-slate-600 mb-2">{q.explanation_arabic}</p>
+                          <p dir="rtl" className="font-arabic text-sm text-stone-600 mb-2">{q.explanation_arabic}</p>
                         )}
                         {q.explanation_english && (
-                          <p className="text-sm text-slate-600">{q.explanation_english}</p>
+                          <p className="text-sm text-stone-600">{q.explanation_english}</p>
                         )}
                       </div>
                     )}

@@ -71,18 +71,19 @@ export default function ResultSummaryView({
   }, null as any);
 
   return (
-    <div className="flex-1 bg-stone-50 overflow-y-auto font-sans p-6 lg:p-12">
+    <div className="flex-1 bg-gradient-to-b from-primary-surface to-white overflow-y-auto font-sans p-6 lg:p-12">
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
         
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">UGC NET Arabic – {year} {paper}</h1>
-          <p className="text-sm text-stone-500 font-medium mt-1">Test Completed on {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} – {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 tracking-tight">UGC NET Arabic – {year} {paper}</h1>
+          <p className="text-sm text-stone-500 font-medium mt-2">Test Completed on {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} – {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
         </div>
 
         {/* 07. RESULT SUMMARY CARD */}
-        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
-          <div className="p-6 sm:p-8 md:p-10 flex-1 border-b md:border-b-0 md:border-r border-stone-200">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col md:flex-row relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="p-6 sm:p-8 md:p-10 flex-1 border-b md:border-b-0 md:border-r border-stone-200/60 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
               <div>
                 <div className="text-sm font-bold text-stone-500 uppercase tracking-widest mb-1">Your Score</div>
@@ -90,12 +91,12 @@ export default function ResultSummaryView({
                   <span className="text-4xl sm:text-5xl font-extrabold text-stone-900">{correctCount * 2}</span>
                   <span className="text-lg sm:text-xl font-bold text-stone-400">/ {totalQuestions * 2}</span>
                 </div>
-                <div className="text-sm font-medium text-[#107A53] mt-2">Good Job! Keep Improving.</div>
+                <div className="text-sm font-medium text-primary mt-2">Good Job! Keep Improving.</div>
               </div>
               
               <div className="flex flex-wrap gap-3 sm:gap-4">
                 <div className="text-center px-2 sm:px-4">
-                  <div className="text-xl sm:text-2xl font-bold text-[#107A53] mb-1">{correctCount}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-primary mb-1">{correctCount}</div>
                   <div className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wider">Correct</div>
                 </div>
                 <div className="text-center px-2 sm:px-4">
@@ -136,27 +137,27 @@ export default function ResultSummaryView({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8">
               <button
                 onClick={onViewReview}
-                className="w-full sm:w-auto px-6 py-3 bg-[#107A53] text-white font-bold rounded-xl shadow-md hover:bg-[#0c5c3e] transition-colors"
+                className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-[0_8px_20px_-8px_rgba(16,122,83,0.5)] hover:bg-primary-dark hover:-translate-y-0.5 transition-all"
               >
                 View Question Review
               </button>
-              <Link href="/dashboard" className="w-full sm:w-auto text-center px-6 py-3 bg-white text-stone-600 border border-stone-200 font-bold rounded-xl hover:bg-stone-50 transition-colors">
+              <Link href="/dashboard" className="w-full sm:w-auto text-center px-8 py-3.5 bg-white text-stone-600 border border-stone-200 font-bold rounded-xl hover:bg-stone-50 hover:shadow-sm transition-all">
                 Go to Dashboard
               </Link>
             </div>
           </div>
-          <div className="w-full md:w-[350px] bg-[#FCFAF8] flex items-center justify-center p-8 sm:p-10 shrink-0">
+          <div className="w-full md:w-[350px] bg-primary-surface/30 flex items-center justify-center p-8 sm:p-10 shrink-0 relative z-10">
             <ResultTrophySvg className="w-48 sm:w-full h-auto drop-shadow-2xl" />
           </div>
         </div>
 
         {/* 08. SECTIONAL ANALYSIS CARD */}
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8">
-            <h3 className="text-lg font-bold text-stone-900 mb-6">Sectional Analysis</h3>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-sm p-8">
+            <h3 className="text-xl font-bold text-stone-900 mb-6">Sectional Analysis</h3>
             
             <table className="w-full text-sm text-left">
               <thead>
@@ -179,7 +180,7 @@ export default function ResultSummaryView({
                           <div className="text-stone-500 text-xs">{section.name_english}</div>
                         </td>
                         <td className="py-4 text-center font-bold text-stone-900">{section.total}</td>
-                        <td className="py-4 text-center font-bold text-[#107A53]">{section.correct}</td>
+                        <td className="py-4 text-center font-bold text-primary">{section.correct}</td>
                         <td className="py-4 text-center font-bold text-rose-600">{section.incorrect}</td>
                         <td className="py-4 text-right font-bold text-stone-900">{secAccuracy}%</td>
                       </tr>
@@ -194,8 +195,8 @@ export default function ResultSummaryView({
             </table>
           </div>
 
-          <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 flex flex-col">
-            <h3 className="text-lg font-bold text-stone-900 mb-6">Performance Overview</h3>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-sm p-8 flex flex-col">
+            <h3 className="text-xl font-bold text-stone-900 mb-6">Performance Overview</h3>
             <div className="flex-1 flex flex-col items-center justify-center">
               <PieChartSvg percentage={percentage} className="w-48 h-48 mb-8" />
               

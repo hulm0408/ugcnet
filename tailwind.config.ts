@@ -15,15 +15,15 @@ const config: Config = {
       },
       colors: {
         primary: {
-          DEFAULT: 'hsl(220, 85%, 45%)',
-          dark: 'hsl(220, 85%, 35%)',
-          light: 'hsl(220, 85%, 95%)',
-          surface: 'hsl(220, 85%, 97%)',
+          DEFAULT: 'hsl(160, 75%, 35%)',
+          dark: 'hsl(160, 75%, 25%)',
+          light: 'hsl(160, 75%, 95%)',
+          surface: 'hsl(160, 75%, 97%)',
         },
         accent: {
-          DEFAULT: 'hsl(35, 90%, 50%)',
-          dark: 'hsl(35, 90%, 40%)',
-          light: 'hsl(35, 90%, 95%)',
+          DEFAULT: 'hsl(40, 95%, 55%)',
+          dark: 'hsl(40, 95%, 45%)',
+          light: 'hsl(40, 95%, 95%)',
         },
       },
       animation: {

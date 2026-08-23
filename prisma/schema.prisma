@@ -162,51 +162,56 @@ model Question {
 // ═══════════════════════════════════════════════════
 
 model User {
-  id              String    @id @default(cuid())
-  name            String?
-  email           String    @unique
-  email_verified  DateTime?
-  image           String?
-  password_hash   String?
-  role            String    @default("USER")  // USER | ADMIN | SUPER_ADMIN
-  is_active       Boolean   @default(true)
-  created_at      DateTime  @default(now())
-  last_active_at  DateTime?
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  passwordHash  String?   @map("password_hash")
+  role          String    @default("USER")  // USER | ADMIN | SUPER_ADMIN
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastActiveAt  DateTime? @map("last_active_at")
 
-  accounts        Account[]
-  sessions        Session[]
+  accounts      Account[]
+  sessions      Session[]
   
   practice_sessions PracticeSession[]
   bookmarks       Bookmark[]
   reports         QuestionReport[]
   audit_logs      AuditLog[]
   classification_history ClassificationHistory[]
+
+  @@map("User")
 }
 
 model Account {
-  id                  String  @id @default(cuid())
-  user_id             String
-  user                User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  type                String
-  provider            String
-  provider_account_id String
-  refresh_token       String?
-  access_token        String?
-  expires_at          Int?
-  token_type          String?
-  scope               String?
-  id_token            String?
-  session_state       String?
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
-  @@unique([provider, provider_account_id])
+  @@unique([provider, providerAccountId])
+  @@map("Account")
 }
 
 model Session {
-  id            String   @id @default(cuid())
-  session_token String   @unique
-  user_id       String
-  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  expires       DateTime
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  @@map("Session")
 }
 
 model VerificationToken {
@@ -215,6 +220,7 @@ model VerificationToken {
   expires     DateTime
 
   @@unique([identifier, token])
+  @@map("VerificationToken")
 }
 
 // ═══════════════════════════════════════════════════

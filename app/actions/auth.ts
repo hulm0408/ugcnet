@@ -52,15 +52,16 @@ export async function signupAction(prevState: any, formData: FormData) {
       return { error: 'An account with this email already exists.' };
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    const passwordHash = await bcrypt.hash(password, 12);
+
     await prisma.user.create({
       data: {
-        name: name ? name.trim() : null,
-        email: normalizedEmail,
-        password_hash,
+        name,
+        email,
+        passwordHash,
         role: 'USER',
-        email_verified: new Date(),
-      }
+        emailVerified: new Date(),
+      },
     });
 
   } catch (err) {

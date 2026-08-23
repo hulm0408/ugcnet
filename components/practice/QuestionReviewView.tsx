@@ -50,7 +50,7 @@ export default function QuestionReviewView({
   const userAnswer = currentQ ? answers[currentQ.id] : null;
 
   return (
-    <div className="flex flex-col h-screen bg-[#FCFAF8] font-sans overflow-hidden">
+    <div className="flex flex-col h-screen bg-gradient-to-b from-primary-surface to-white font-sans overflow-hidden">
       
       {/* Top Header */}
       <header className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-stone-200 shrink-0 shadow-sm z-20 relative">
@@ -107,7 +107,7 @@ export default function QuestionReviewView({
               </button>
               <button 
                 onClick={() => setFilter('correct')}
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors ${filter === 'correct' ? 'bg-[#107A53] text-white' : 'hover:bg-[#107A53]/10 bg-white border border-stone-200 text-[#107A53]'}`}
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors ${filter === 'correct' ? 'bg-primary text-white' : 'hover:bg-primary-surface bg-white border border-stone-200 text-primary'}`}
               >
                 Correct ({correctCount})
               </button>
@@ -146,10 +146,10 @@ export default function QuestionReviewView({
               if (isAns) {
                 if (isCorr) {
                   statusText = 'Correct';
-                  statusColor = 'text-[#107A53]';
-                  bgColor = isSelected ? 'bg-[#107A53]/10 border-[#107A53]' : 'bg-[#107A53]/5 border-[#107A53]/20 hover:border-[#107A53]/40';
+                  statusColor = 'text-primary';
+                  bgColor = isSelected ? 'bg-primary-surface border-primary/50' : 'bg-primary/5 border-primary/20 hover:border-primary/40';
                   icon = (
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#107A53] border-2 border-white shadow-sm flex items-center justify-center shrink-0">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary border-2 border-white shadow-sm flex items-center justify-center shrink-0">
                       <svg width="8" height="6" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
@@ -197,7 +197,7 @@ export default function QuestionReviewView({
         </aside>
 
         {/* Right Pane: Question Details */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#FCFAF8] z-0">
+        <div className="flex-1 flex flex-col min-w-0 bg-transparent z-0">
           {currentQ ? (
             <>
               <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-12">
@@ -207,7 +207,7 @@ export default function QuestionReviewView({
                     <h2 className="text-lg sm:text-xl font-bold text-stone-900">Question {activeIndex + 1}</h2>
                     {userAnswer ? (
                       evalRes?.isCorrect ? (
-                        <div className="px-2 py-1 sm:px-3 sm:py-1 bg-[#107A53]/10 text-[#107A53] text-xs sm:text-sm font-bold rounded uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="px-2 py-1 sm:px-3 sm:py-1 bg-primary-surface text-primary-dark text-xs sm:text-sm font-bold rounded-md uppercase tracking-wider flex items-center gap-1.5 border border-primary/20">
                           <svg width="12" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 5L5 9L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
@@ -250,15 +250,15 @@ export default function QuestionReviewView({
                       let badge = null;
 
                       if (isCorrectAns) {
-                        optBg = 'bg-[#107A53]/10 border-[#107A53] ring-1 ring-[#107A53]';
+                        optBg = 'bg-primary-surface border-primary ring-1 ring-primary/30';
                         optIcon = (
-                          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[#107A53] text-white flex items-center justify-center shrink-0">
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-white flex items-center justify-center shrink-0">
                             <svg width="10" height="8" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M1 5L5 9L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                           </div>
                         );
-                        badge = <span className="text-[#107A53] text-xs sm:text-sm font-bold ml-2">(Correct Answer)</span>;
+                        badge = <span className="text-primary text-xs sm:text-sm font-bold ml-2">(Correct Answer)</span>;
                       } else if (isUserAns && !isCorrectAns) {
                         optBg = 'bg-rose-50 border-rose-300 ring-1 ring-rose-300';
                         optIcon = (
@@ -298,9 +298,9 @@ export default function QuestionReviewView({
 
                   {/* Explanation Section */}
                   {evalRes?.explanation && (
-                    <div className="bg-[#107A53]/5 border border-[#107A53]/20 rounded-2xl p-5 sm:p-8 mb-8">
+                    <div className="bg-primary-surface border border-primary/20 rounded-2xl p-5 sm:p-8 mb-8">
                       <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold text-stone-900 mb-3 sm:mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#107A53" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-primary sm:w-6 sm:h-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10"></circle>
                           <line x1="12" y1="16" x2="12" y2="12"></line>
                           <line x1="12" y1="8" x2="12.01" y2="8"></line>

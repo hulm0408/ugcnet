@@ -52,6 +52,80 @@ function generateSlug(text: string): string {
     .replace(/^-|-$/g, '');
 }
 
+function extractClassification(q: any) {
+  const hierarchy = q.classification_hierarchy || [];
+  
+  let unit_number = q.unit_number || (q.classification && q.classification.unit_number);
+  let unit_name_arabic = q.unit_name_arabic || (q.classification && q.classification.unit_title_arabic);
+  let unit_name_english = q.unit_name_english || (q.classification && q.classification.unit_title_english);
+  
+  let bt_arabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
+  let bt_english = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
+  
+  let st_arabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
+  let st_english = q.subtopic_english || (q.classification && q.classification.subtopic_english);
+
+  if (hierarchy.length > 0) {
+    const unitNode = hierarchy.find((h: any) => h.type === 'unit');
+    if (unitNode) {
+      unit_name_arabic = unitNode.title_arabic || unit_name_arabic;
+      unit_name_english = unitNode.title_english || unit_name_english;
+    }
+    
+    const btNode = hierarchy.find((h: any) => h.type === 'official_topic');
+    if (btNode) {
+      bt_arabic = btNode.title_arabic || bt_arabic;
+      bt_english = btNode.title_english || bt_english;
+    }
+
+    const stNode = hierarchy.find((h: any) => h.type === 'subtopic');
+    if (stNode) {
+      st_arabic = stNode.title_arabic || st_arabic;
+      st_english = stNode.title_english || st_english;
+    }
+  }
+
+  // Fallback map if unit_number is totally missing but name is present (edge case)
+  if (!unit_number && unit_name_english) {
+    const unitMatch = unit_name_english.match(/Unit\s+(\d+)/i);
+    if (unitMatch) unit_number = parseInt(unitMatch[1], 10);
+    // Hardcoded fallback based on standard syllabus if needed:
+    else if (unit_name_english.includes("Pre-Islamic")) unit_number = 1;
+    else if (unit_name_english.includes("Umayyad")) unit_number = 2;
+    else if (unit_name_english.includes("Abbasid")) unit_number = 3;
+    else if (unit_name_english.includes("Andalusian")) unit_number = 4;
+    else if (unit_name_english.includes("Modern")) unit_number = 5;
+    else if (unit_name_english.includes("Prose")) unit_number = 6;
+    else if (unit_name_english.includes("Criticism")) unit_number = 7;
+    else if (unit_name_english.includes("Rhetoric")) unit_number = 8;
+    else if (unit_name_english.includes("Translation")) unit_number = 9;
+    else if (unit_name_english.includes("Indo-Arab")) unit_number = 10;
+  }
+  if (!unit_number && unit_name_arabic) {
+    if (unit_name_arabic.includes("الجاهلي")) unit_number = 1;
+    else if (unit_name_arabic.includes("الأموي")) unit_number = 2;
+    else if (unit_name_arabic.includes("العباسي")) unit_number = 3;
+    else if (unit_name_arabic.includes("الأندلسي")) unit_number = 4;
+    else if (unit_name_arabic.includes("الحديث")) unit_number = 5;
+    else if (unit_name_arabic.includes("النثر")) unit_number = 6;
+    else if (unit_name_arabic.includes("النقد")) unit_number = 7;
+    else if (unit_name_arabic.includes("البلاغة")) unit_number = 8;
+    else if (unit_name_arabic.includes("الترجمة")) unit_number = 9;
+    else if (unit_name_arabic.includes("الهند")) unit_number = 10;
+  }
+
+  return {
+    unit_number: unit_number ? parseInt(unit_number.toString(), 10) : null,
+    unit_name_arabic,
+    unit_name_english,
+    bt_arabic,
+    bt_english,
+    st_arabic,
+    st_english
+  };
+}
+
+
 async function runImport() {
   console.log('Starting full database import pipeline...');
   const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.json') && !f.includes('package'));
@@ -70,14 +144,16 @@ async function runImport() {
     const questions = Array.isArray(jsonData) ? jsonData : (jsonData.questions || []);
 
     for (const q of questions) {
-      const unitNum = q.unit_number || (q.classification && q.classification.unit_number);
+      const cls = extractClassification(q);
+      const unitNum = cls.unit_number;
+
       if (unitNum) {
         if (!hierarchyMap.has(unitNum)) {
           hierarchyMap.set(unitNum, {
             data: {
               unit_number: unitNum,
-              name_arabic: q.unit_name_arabic || (q.classification && q.classification.unit_title_arabic) || `الوحدة ${unitNum}`,
-              name_english: q.unit_name_english || (q.classification && q.classification.unit_title_english) || `Unit ${unitNum}`,
+              name_arabic: cls.unit_name_arabic || `الوحدة ${unitNum}`,
+              name_english: cls.unit_name_english || `Unit ${unitNum}`,
               slug: `unit-${unitNum}`,
               order_index: unitNum
             },
@@ -87,8 +163,8 @@ async function runImport() {
         
         const unitObj = hierarchyMap.get(unitNum);
 
-        const btArabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
-        const btEnglish = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
+        const btArabic = cls.bt_arabic;
+        const btEnglish = cls.bt_english;
 
         if (btArabic || btEnglish) {
           const btSlug = generateSlug(btEnglish || btArabic);
@@ -106,8 +182,8 @@ async function runImport() {
 
           const btObj = unitObj.broadTopics.get(btSlug);
 
-          const stArabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
-          const stEnglish = q.subtopic_english || (q.classification && q.classification.subtopic_english);
+          const stArabic = cls.st_arabic;
+          const stEnglish = cls.st_english;
 
           if (stArabic || stEnglish) {
             const stSlug = generateSlug(stEnglish || stArabic);
@@ -215,11 +291,12 @@ async function runImport() {
         let broad_topic_id = null;
         let subtopic_id = null;
 
-        const unitNum = q.unit_number || (q.classification && q.classification.unit_number);
-        const btArabic = q.broad_topic_arabic || (q.classification && q.classification.broad_topic_arabic);
-        const btEnglish = q.broad_topic_english || (q.classification && q.classification.broad_topic_english);
-        const stArabic = q.subtopic_arabic || (q.classification && q.classification.subtopic_arabic);
-        const stEnglish = q.subtopic_english || (q.classification && q.classification.subtopic_english);
+        const cls = extractClassification(q);
+        const unitNum = cls.unit_number;
+        const btArabic = cls.bt_arabic;
+        const btEnglish = cls.bt_english;
+        const stArabic = cls.st_arabic;
+        const stEnglish = cls.st_english;
 
         if (unitNum) {
           const unit = dbUnits.find((u: any) => u.unit_number === unitNum);
@@ -247,7 +324,7 @@ async function runImport() {
             question_english: q.question_text_english || q.question_english || null,
             options_arabic: q.options || q.options_arabic || {},
             options_english: q.options_english || null,
-            correct_answer: q.correct_answer || 'A',
+            correct_answer: Array.isArray(q.correct_answer) ? String(q.correct_answer[0]) : (q.correct_answer ? String(q.correct_answer) : 'A'),
             correct_answer_text_arabic: q.correct_answer_text_arabic || null,
             correct_answer_text_english: q.correct_answer_text_english || null,
             explanation_arabic: q.explanation_arabic || null,
@@ -275,7 +352,7 @@ async function runImport() {
             options_arabic: q.options || q.options_arabic || {},
             options_english: q.options_english || null,
             options_generated: q.options_generated || false,
-            correct_answer: q.correct_answer || 'A',
+            correct_answer: Array.isArray(q.correct_answer) ? String(q.correct_answer[0]) : (q.correct_answer ? String(q.correct_answer) : 'A'),
             correct_answer_text_arabic: q.correct_answer_text_arabic || null,
             correct_answer_text_english: q.correct_answer_text_english || null,
             explanation_arabic: q.explanation_arabic || null,
@@ -293,7 +370,7 @@ async function runImport() {
       });
 
       try {
-        await prisma.$transaction(upsertPromises);
+        await Promise.all(upsertPromises);
         importedForFile += chunk.length;
       } catch (err) {
         console.error(`Error importing chunk starting at index ${i}:`, err);

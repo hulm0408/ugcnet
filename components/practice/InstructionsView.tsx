@@ -13,22 +13,22 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
   const [isChecked, setIsChecked] = useState(false);
 
   return (
-    <div className="flex-1 bg-[#FCFAF8] overflow-y-auto font-sans" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="flex-1 bg-gradient-to-b from-primary-surface to-white overflow-y-auto font-sans" style={{ height: 'calc(100vh - 64px)' }}>
       <div className="max-w-6xl mx-auto px-4 py-8 lg:py-12 animate-fade-in">
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-900">UGC NET Arabic – {year}</h1>
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600">UGC NET Arabic – {year}</h1>
           <h2 className="text-2xl font-semibold text-stone-700 mt-1">{paper}</h2>
-          <p dir="rtl" className="text-xl font-arabic font-bold text-[#D97706] mt-2">تعليمات الامتحان</p>
+          <p dir="rtl" className="text-xl font-arabic font-bold text-accent mt-2">تعليمات الامتحان</p>
         </div>
 
         <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col lg:flex-row">
           
           {/* Left Graphic */}
-          <div className="lg:w-1/3 bg-[#F0F9F6] p-10 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-stone-200 relative overflow-hidden">
+          <div className="lg:w-1/3 bg-primary-surface/50 p-10 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-stone-200 relative overflow-hidden">
             <InstructionsSvg className="w-full max-w-[280px] drop-shadow-2xl relative z-10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
           </div>
           
           {/* Right Content */}
@@ -94,7 +94,7 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
             <div className="border-t border-stone-200 pt-8">
               <label className="flex items-center gap-3 cursor-pointer mb-6 group">
                 <input type="checkbox" className="hidden" checked={isChecked} onChange={() => setIsChecked(!isChecked)} />
-                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${isChecked ? 'bg-[#107A53] border-[#107A53]' : 'bg-white border-stone-300 group-hover:border-[#107A53]'}`}>
+                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${isChecked ? 'bg-primary border-primary' : 'bg-white border-stone-300 group-hover:border-primary'}`}>
                   {isChecked && (
                     <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -116,7 +116,7 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
                   disabled={!isChecked}
                   className={`flex-1 px-8 py-3.5 font-bold text-white rounded-xl shadow-md transition-all ${
                     isChecked 
-                      ? 'bg-[#107A53] hover:bg-[#0c5c3e] hover:shadow-lg hover:-translate-y-0.5' 
+                      ? 'bg-primary hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5' 
                       : 'bg-stone-300 cursor-not-allowed'
                   }`}
                 >

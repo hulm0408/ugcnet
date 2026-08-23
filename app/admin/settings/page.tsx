@@ -31,15 +31,15 @@ export default async function AdminSettingsPage() {
   };
 
   return (
-    <div className="flex-1 bg-slate-50 min-h-screen py-10">
+    <div className="flex-1 bg-transparent min-h-screen py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center gap-3">
-          <div className="w-12 h-12 bg-slate-800 text-white rounded-xl flex items-center justify-center shadow-md">
+          <div className="w-12 h-12 bg-primary/10 text-primary-dark rounded-xl flex items-center justify-center shadow-sm">
             <Settings size={24} />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Platform Settings</h1>
-            <p className="text-slate-500 mt-1">Manage global configuration, SEO metadata, and security rules.</p>
+            <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight">Platform Settings</h1>
+            <p className="text-stone-500 mt-1">Manage global configuration, SEO metadata, and security rules.</p>
           </div>
         </div>
 

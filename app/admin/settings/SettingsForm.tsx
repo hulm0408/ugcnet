@@ -41,62 +41,62 @@ export default function SettingsForm({ initialSettings }: { initialSettings: Set
     <form onSubmit={handleSave} className="space-y-8">
       
       {/* SEO Settings */}
-      <div className="bg-white border border-slate-200 shadow-sm rounded-3xl overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-          <Globe className="text-blue-500" size={20} />
-          <h2 className="font-bold text-slate-900 text-lg">SEO Metadata</h2>
+      <div className="bg-white/80 backdrop-blur-xl border border-stone-200/60 shadow-sm rounded-3xl overflow-hidden">
+        <div className="bg-stone-50/80 backdrop-blur-sm border-b border-stone-200/60 px-6 py-4 flex items-center gap-3">
+          <Globe className="text-primary" size={20} />
+          <h2 className="font-bold text-stone-900 text-lg">SEO Metadata</h2>
         </div>
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Site Title</label>
+            <label className="block text-sm font-semibold text-stone-700 mb-1">Site Title</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-white/50 backdrop-blur-sm"
               value={settings.seo_title}
               onChange={e => setSettings({ ...settings, seo_title: e.target.value })}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Meta Description</label>
+            <label className="block text-sm font-semibold text-stone-700 mb-1">Meta Description</label>
             <textarea
               rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-white/50 backdrop-blur-sm"
               value={settings.seo_description}
               onChange={e => setSettings({ ...settings, seo_description: e.target.value })}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Keywords</label>
+            <label className="block text-sm font-semibold text-stone-700 mb-1">Keywords</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              className="w-full px-4 py-2 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-white/50 backdrop-blur-sm"
               value={settings.seo_keywords}
               onChange={e => setSettings({ ...settings, seo_keywords: e.target.value })}
             />
-            <p className="text-xs text-slate-500 mt-1">Comma separated keywords.</p>
+            <p className="text-xs text-stone-500 mt-1">Comma separated keywords.</p>
           </div>
         </div>
       </div>
 
       {/* Security & Access */}
-      <div className="bg-white border border-slate-200 shadow-sm rounded-3xl overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-          <Shield className="text-emerald-500" size={20} />
-          <h2 className="font-bold text-slate-900 text-lg">Security & Access</h2>
+      <div className="bg-white/80 backdrop-blur-xl border border-stone-200/60 shadow-sm rounded-3xl overflow-hidden">
+        <div className="bg-stone-50/80 backdrop-blur-sm border-b border-stone-200/60 px-6 py-4 flex items-center gap-3">
+          <Shield className="text-primary-dark" size={20} />
+          <h2 className="font-bold text-stone-900 text-lg">Security & Access</h2>
         </div>
         <div className="p-6 space-y-6">
-          <label className="flex items-start gap-4 p-4 rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+          <label className="flex items-start gap-4 p-4 rounded-2xl border border-stone-200 hover:bg-stone-50 transition-colors cursor-pointer bg-white/50">
             <input
               type="checkbox"
-              className="mt-1 w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+              className="mt-1 w-5 h-5 text-primary-dark rounded border-stone-300 focus:ring-primary"
               checked={settings.allow_registration}
               onChange={e => setSettings({ ...settings, allow_registration: e.target.checked })}
             />
             <div>
-              <div className="font-bold text-slate-900">Allow New User Registrations</div>
-              <div className="text-sm text-slate-500 mt-0.5">When disabled, no new accounts can be created.</div>
+              <div className="font-bold text-stone-900">Allow New User Registrations</div>
+              <div className="text-sm text-stone-500 mt-0.5">When disabled, no new accounts can be created.</div>
             </div>
           </label>
 
@@ -123,13 +123,13 @@ export default function SettingsForm({ initialSettings }: { initialSettings: Set
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <Save size={20} />
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
         {savedMessage && (
-          <span className="text-emerald-600 font-medium text-sm animate-fade-in">{savedMessage}</span>
+          <span className="text-primary-dark font-medium text-sm animate-fade-in">{savedMessage}</span>
         )}
       </div>
 

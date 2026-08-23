@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import prisma from '@/lib/db';
 import { AlertCircle, Clock, FileText, CheckCircle2 } from 'lucide-react';
 
+import InstructionsClient from './InstructionsClient';
+
 export const metadata: Metadata = {
   title: 'Mock Test Instructions — Arabic NET/JRF',
 };
@@ -73,24 +75,8 @@ export default async function InstructionsPage({ params }: PageProps) {
             </ul>
           </div>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 text-sm text-blue-900">
-            <strong>Declaration:</strong> I have read and understood the instructions. I agree that in case I do not follow the instructions, I shall be disqualified.
-          </div>
+          <InstructionsClient paperId={paper.id} />
         </div>
-
-        {/* Footer actions */}
-        <div className="bg-white rounded-b-2xl border border-slate-200 border-t-0 p-6 sm:p-8 flex flex-wrap justify-between items-center gap-4">
-          <Link href="/pyq" className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
-            Cancel
-          </Link>
-          <Link 
-            href={`/practice?paper=${paper.id}`}
-            className="px-8 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2"
-          >
-            I am ready to begin
-          </Link>
-        </div>
-
       </div>
     </div>
   );

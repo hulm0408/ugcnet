@@ -51,21 +51,21 @@ export default async function PYQPage() {
             
             {/* Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto lg:mx-0">
-              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">{totalYears}</div>
-                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Years</div>
+              <div className="bg-primary/20 border border-primary/40 rounded-2xl p-5 text-center backdrop-blur-md shadow-lg">
+                <div className="text-3xl font-black text-white mb-1 drop-shadow-sm">{totalYears}</div>
+                <div className="text-xs text-primary-light/80 uppercase tracking-wider font-semibold">Years</div>
               </div>
-              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">{totalPapers}</div>
-                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Papers</div>
+              <div className="bg-primary/20 border border-primary/40 rounded-2xl p-5 text-center backdrop-blur-md shadow-lg">
+                <div className="text-3xl font-black text-white mb-1 drop-shadow-sm">{totalPapers}</div>
+                <div className="text-xs text-primary-light/80 uppercase tracking-wider font-semibold">Papers</div>
               </div>
-              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">{totalQuestions.toLocaleString()}</div>
-                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Questions</div>
+              <div className="bg-primary/20 border border-primary/40 rounded-2xl p-5 text-center backdrop-blur-md shadow-lg">
+                <div className="text-3xl font-black text-white mb-1 drop-shadow-sm">{totalQuestions.toLocaleString()}</div>
+                <div className="text-xs text-primary-light/80 uppercase tracking-wider font-semibold">Questions</div>
               </div>
-              <div className="bg-[#107A53]/20 border border-[#107A53]/40 rounded-xl p-4 text-center backdrop-blur-sm">
-                <div className="text-3xl font-bold text-white mb-1">100%</div>
-                <div className="text-xs text-emerald-100/70 uppercase tracking-wider">Real Exam</div>
+              <div className="bg-primary/20 border border-primary/40 rounded-2xl p-5 text-center backdrop-blur-md shadow-lg">
+                <div className="text-3xl font-black text-white mb-1 drop-shadow-sm">100%</div>
+                <div className="text-xs text-primary-light/80 uppercase tracking-wider font-semibold">Real Exam</div>
               </div>
             </div>
           </div>
@@ -73,7 +73,7 @@ export default async function PYQPage() {
           {/* Right SVG Graphic */}
           <div className="w-full lg:w-[450px] shrink-0 relative">
             {/* Soft backdrop glow behind SVG */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-600/20 rounded-full blur-[80px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary/30 rounded-full blur-[100px]" />
             <ArchBookQuillSvg className="w-full h-auto drop-shadow-2xl relative z-10" />
           </div>
         </div>
@@ -86,58 +86,58 @@ export default async function PYQPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6">
             
             <div className="flex gap-4">
-              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">1</div>
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary-surface text-primary-dark font-black flex items-center justify-center border border-primary/20 shadow-sm">1</div>
               <div>
-                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
-                  <Calendar size={14} className="text-stone-400" /> Choose Year
+                <div className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <Calendar size={16} className="text-primary" /> Choose Year
                 </div>
-                <div className="text-xs text-stone-500 mt-1">Select the exam year you want to practice.</div>
+                <div className="text-xs text-stone-500 mt-1 font-medium">Select the exam year you want to practice.</div>
               </div>
             </div>
             
             <div className="flex gap-4">
-              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">2</div>
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary-surface text-primary-dark font-black flex items-center justify-center border border-primary/20 shadow-sm">2</div>
               <div>
-                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
-                  <FileText size={14} className="text-stone-400" /> Select Paper
+                <div className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <FileText size={16} className="text-primary" /> Select Paper
                 </div>
-                <div className="text-xs text-stone-500 mt-1">Choose the paper/part/shift available.</div>
+                <div className="text-xs text-stone-500 mt-1 font-medium">Choose the paper/part/shift available.</div>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">3</div>
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary-surface text-primary-dark font-black flex items-center justify-center border border-primary/20 shadow-sm">3</div>
               <div>
-                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
-                  <FileText size={14} className="text-stone-400" /> Read Instructions
+                <div className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <FileText size={16} className="text-primary" /> Read Instructions
                 </div>
-                <div className="text-xs text-stone-500 mt-1">Go through exam instructions & pattern.</div>
+                <div className="text-xs text-stone-500 mt-1 font-medium">Go through exam instructions & pattern.</div>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">4</div>
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary-surface text-primary-dark font-black flex items-center justify-center border border-primary/20 shadow-sm">4</div>
               <div>
-                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
-                  <CheckCircle size={14} className="text-stone-400" /> Start Test
+                <div className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <CheckCircle size={16} className="text-primary" /> Start Test
                 </div>
-                <div className="text-xs text-stone-500 mt-1">Take the test in real CBT mode.</div>
+                <div className="text-xs text-stone-500 mt-1 font-medium">Take the test in real CBT mode.</div>
               </div>
             </div>
 
             <div className="flex gap-4">
-              <div className="shrink-0 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center border border-emerald-200">5</div>
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-primary-surface text-primary-dark font-black flex items-center justify-center border border-primary/20 shadow-sm">5</div>
               <div>
-                <div className="font-semibold text-stone-900 text-sm flex items-center gap-2">
-                  <CheckCircle size={14} className="text-stone-400" /> View Result
+                <div className="font-bold text-stone-900 text-sm flex items-center gap-2">
+                  <CheckCircle size={16} className="text-primary" /> View Result
                 </div>
-                <div className="text-xs text-stone-500 mt-1">Get detailed analysis and review.</div>
+                <div className="text-xs text-stone-500 mt-1 font-medium">Get detailed analysis and review.</div>
               </div>
             </div>
             
           </div>
-          <div className="mt-6 flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-            <CheckCircle size={16} /> All questions are 100% real and based on official UGC NET exams.
+          <div className="mt-8 flex items-center gap-2 text-sm font-semibold text-primary-dark bg-primary-surface p-4 rounded-xl border border-primary/20 shadow-sm">
+            <CheckCircle size={18} className="text-primary" /> All questions are 100% real and based on official UGC NET exams.
           </div>
         </div>
       </div>
@@ -156,13 +156,15 @@ export default async function PYQPage() {
               <Link
                 key={year}
                 href={`/pyq/${year}`}
-                className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-[#107A53] hover:ring-1 hover:ring-[#107A53]/50 transition-all group flex flex-col justify-between"
+                className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-sm hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-primary/40 hover:ring-1 hover:ring-primary/20 transition-all duration-300 group flex flex-col justify-between"
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar size={16} className="text-stone-400 group-hover:text-[#107A53] transition-colors" />
-                  <span className="text-lg font-bold text-stone-900 group-hover:text-[#107A53]">{year}</span>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-stone-50 flex items-center justify-center group-hover:bg-primary-surface transition-colors">
+                    <Calendar size={18} className="text-stone-400 group-hover:text-primary transition-colors" />
+                  </div>
+                  <span className="text-xl font-extrabold text-stone-900 group-hover:text-primary">{year}</span>
                 </div>
-                <div className="text-xs text-stone-500 font-medium bg-stone-50 px-2 py-1 rounded-md inline-block border border-stone-100">
+                <div className="text-xs font-bold text-stone-500 bg-stone-50/80 px-3 py-1.5 rounded-lg inline-flex items-center border border-stone-200/60 w-fit">
                   {paperCount} {paperCount === 1 ? 'Paper' : 'Papers'}
                 </div>
               </Link>

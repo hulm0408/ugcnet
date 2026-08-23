@@ -201,32 +201,32 @@ function PracticeContent() {
 
   if (!sessionMode) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#FCFAF8] p-6" style={{ height: 'calc(100vh - 64px)' }}>
+      <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-primary-surface to-white p-6" style={{ height: 'calc(100vh - 64px)' }}>
         <div className="text-center mb-10 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-4 tracking-tight">Choose Your Mode</h1>
-          <p className="text-stone-500 text-base max-w-lg mx-auto">Select how you want to attempt these {questions.length} questions. Practice at your own pace or simulate the real exam.</p>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 mb-4 tracking-tight">Choose Your Mode</h1>
+          <p className="text-stone-500 text-lg font-medium max-w-lg mx-auto">Select how you want to attempt these {questions.length} questions. Practice at your own pace or simulate the real exam.</p>
         </div>
         
         <div className="grid sm:grid-cols-2 gap-6 w-full max-w-3xl animate-slide-up" style={{ animationDelay: '100ms' }}>
           <button
             onClick={() => setSessionMode('practice')}
-            className="text-left group bg-white rounded-3xl border-2 border-stone-200 hover:border-[#107A53] p-8 transition-all shadow-sm hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#107A53]/20"
+            className="text-left group bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-stone-200/60 hover:border-primary/40 p-8 transition-all duration-300 shadow-sm hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-primary/20"
           >
-            <div className="w-16 h-16 rounded-2xl bg-[#107A53]/10 text-[#107A53] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 rounded-2xl bg-primary-surface text-primary-dark group-hover:bg-primary group-hover:text-white flex items-center justify-center mb-6 transition-all duration-300">
               <Target size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-stone-900 mb-3 group-hover:text-[#107A53] transition-colors">Practice Mode</h2>
+            <h2 className="text-2xl font-bold text-stone-900 mb-3 group-hover:text-primary transition-colors">Practice Mode</h2>
             <p className="text-stone-500 leading-relaxed text-sm font-medium">Get immediate feedback and detailed explanations after answering each question. Best for deep learning and revision.</p>
           </button>
           
           <button
             onClick={() => setSessionMode('instructions')}
-            className="text-left group bg-white rounded-3xl border-2 border-stone-200 hover:border-[#D97706] p-8 transition-all shadow-sm hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#D97706]/20"
+            className="text-left group bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-stone-200/60 hover:border-accent/40 p-8 transition-all duration-300 shadow-sm hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-accent/20"
           >
-            <div className="w-16 h-16 rounded-2xl bg-[#D97706]/10 text-[#D97706] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 rounded-2xl bg-accent/10 text-accent-dark group-hover:bg-accent group-hover:text-white flex items-center justify-center mb-6 transition-all duration-300">
               <CheckCircle2 size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-stone-900 mb-3 group-hover:text-[#D97706] transition-colors">Mock Test</h2>
+            <h2 className="text-2xl font-bold text-stone-900 mb-3 group-hover:text-accent transition-colors">Mock Test</h2>
             <p className="text-stone-500 leading-relaxed text-sm font-medium">CBT-style environment with a timer. Answers are saved, and results are shown only after you submit the full test.</p>
           </button>
         </div>

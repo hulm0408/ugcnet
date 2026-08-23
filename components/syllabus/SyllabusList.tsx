@@ -52,28 +52,28 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
             <button
               key={unit.id}
               onClick={() => setActiveUnitId(unit.id)}
-              className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${
+              className={`w-full text-left p-5 rounded-3xl border transition-all duration-300 flex items-center justify-between group ${
                 isActive 
-                  ? 'bg-[#FCFAF8] border-[#E8DEC8] shadow-[0_4px_20px_-10px_rgba(217,119,6,0.15)] ring-1 ring-[#F3E8D6]' 
-                  : 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                  ? 'bg-gradient-to-r from-primary-surface to-white border-primary/20 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] ring-1 ring-primary/10' 
+                  : 'bg-white border-stone-200 hover:border-primary/30 hover:bg-stone-50 hover:shadow-sm'
               }`}
             >
               <div className="flex items-center gap-5 min-w-0">
-                <span className={`text-3xl font-light tabular-nums transition-colors ${isActive ? 'text-[#D97706]' : 'text-stone-300 group-hover:text-stone-400'}`}>
+                <span className={`text-3xl font-black tabular-nums transition-colors ${isActive ? 'text-accent' : 'text-stone-300 group-hover:text-primary/60'}`}>
                   {unit.number.toString().padStart(2, '0')}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div dir="rtl" lang="ar" className={`font-arabic font-bold text-lg mb-1 truncate ${isActive ? 'text-stone-900' : 'text-stone-700'}`}>
+                  <div dir="rtl" lang="ar" className={`font-arabic font-bold text-lg mb-1 truncate ${isActive ? 'text-stone-900' : 'text-stone-700 group-hover:text-stone-900'}`}>
                     {unit.nameAr}
                   </div>
-                  <div className={`text-[11px] font-bold tracking-wide uppercase truncate ${isActive ? 'text-stone-500' : 'text-stone-400'}`}>
+                  <div className={`text-[11px] font-bold tracking-wide uppercase truncate ${isActive ? 'text-primary' : 'text-stone-400 group-hover:text-stone-500'}`}>
                     {unit.nameEn}
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <ChevronRight size={20} className={isActive ? 'text-[#D97706]' : 'text-stone-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0'} />
-                <div className={`text-[10px] font-bold tracking-widest uppercase mt-2 px-2 py-0.5 rounded-full ${isActive ? 'bg-[#D97706]/10 text-[#D97706]' : 'bg-stone-100 text-stone-500'}`}>
+                <ChevronRight size={20} className={isActive ? 'text-accent' : 'text-stone-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0'} />
+                <div className={`text-[10px] font-bold tracking-widest uppercase mt-2 px-2.5 py-1 rounded-full ${isActive ? 'bg-accent/10 text-accent-dark' : 'bg-stone-100 text-stone-500 group-hover:bg-primary-surface group-hover:text-primary'}`}>
                   {unit.questionCount} Qs
                 </div>
               </div>
@@ -83,18 +83,18 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
       </div>
 
       {/* Right Pane: Topics */}
-      <div className="flex-1 bg-white border border-stone-200 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+      <div className="flex-1 bg-white/80 backdrop-blur-xl border border-stone-200/60 rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.1)] relative overflow-hidden">
         
         {/* Decorative SVG Pattern Top Right */}
-        <svg className="absolute top-0 right-0 text-stone-100 opacity-50 pointer-events-none" width="200" height="200" viewBox="0 0 100 100" fill="currentColor">
-           <path d="M0,0 L100,0 L100,100 Z" opacity="0.3"/>
-           <path d="M50,0 L100,0 L100,50 Z" opacity="0.5"/>
+        <svg className="absolute -top-10 -right-10 text-primary-surface opacity-50 pointer-events-none" width="300" height="300" viewBox="0 0 100 100" fill="currentColor">
+           <path d="M0,0 L100,0 L100,100 Z" opacity="0.8"/>
+           <path d="M50,0 L100,0 L100,50 Z" opacity="1"/>
         </svg>
 
         <div className="relative z-10">
-          <div className="mb-8">
-            <h2 className="text-xl font-extrabold text-stone-900">Topics in this Unit</h2>
-            <div className="h-1 w-12 bg-[#107A53] mt-4 rounded-full"></div>
+          <div className="mb-10">
+            <h2 className="text-2xl font-extrabold text-stone-900">Topics in this Unit</h2>
+            <div className="h-1.5 w-16 bg-gradient-to-r from-primary-dark to-primary mt-4 rounded-full"></div>
           </div>
 
           {activeUnit?.broadTopics && activeUnit.broadTopics.length > 0 ? (
@@ -103,12 +103,12 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
                 <Link
                   href={`/syllabus/${activeUnit.number}/${topic.slug}`}
                   key={topic.id}
-                  className="group block p-5 bg-white border border-stone-200 rounded-xl hover:border-[#107A53]/30 hover:shadow-md transition-all relative overflow-hidden"
+                  className="group block p-6 bg-white border border-stone-200/80 rounded-2xl hover:border-primary/40 hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
                 >
-                  <div className="absolute top-0 left-0 w-1 h-full bg-[#107A53] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-primary-dark to-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-8 h-8 rounded bg-[#107A53] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-inner">
+                  <div className="flex items-start gap-4 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-primary-surface text-primary-dark group-hover:bg-primary group-hover:text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm transition-colors duration-300">
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0 pt-0.5">
@@ -132,14 +132,14 @@ export default function SyllabusList({ units }: { units: UnitData[] }) {
 
                   {/* Nodes List */}
                   {topic.subtopics.length > 0 && (
-                    <div className="space-y-1.5 mt-auto border-t border-stone-100 pt-3">
-                      <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Learning Nodes</div>
+                    <div className="space-y-2 mt-auto border-t border-stone-100 pt-4">
+                      <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 flex items-center gap-2">Learning Nodes <div className="h-px bg-stone-100 flex-1"></div></div>
                       {topic.subtopics.map(node => (
-                        <div key={node.id} className="flex justify-between items-center text-xs group-hover/node:bg-stone-50 p-1.5 -mx-1.5 rounded transition-colors">
-                          <span className="truncate pr-3 text-stone-600 font-medium group-hover:text-stone-900 transition-colors" title={node.nameEn}>
+                        <div key={node.id} className="flex justify-between items-center text-xs p-2 -mx-2 rounded-lg transition-colors hover:bg-stone-50">
+                          <span className="truncate pr-3 font-semibold text-stone-600 transition-colors" title={node.nameEn}>
                             {node.nameEn}
                           </span>
-                          <span className="shrink-0 font-bold text-[#107A53] bg-[#107A53]/10 px-2 py-0.5 rounded-full text-[10px]">
+                          <span className="shrink-0 font-bold text-primary-dark bg-primary-surface px-2.5 py-1 rounded-md text-[10px] shadow-sm">
                             {node.questionCount}
                           </span>
                         </div>

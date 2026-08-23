@@ -15,14 +15,14 @@
 /* ── CSS Custom Properties (Design Tokens) ─────────────────── */
 :root {
   /* Color Palette */
-  --color-primary: hsl(220, 85%, 45%);
-  --color-primary-dark: hsl(220, 85%, 35%);
-  --color-primary-light: hsl(220, 85%, 95%);
-  --color-primary-surface: hsl(220, 85%, 97%);
+  --color-primary: hsl(160, 75%, 35%);
+  --color-primary-dark: hsl(160, 75%, 25%);
+  --color-primary-light: hsl(160, 75%, 95%);
+  --color-primary-surface: hsl(160, 75%, 97%);
 
-  --color-accent: hsl(35, 90%, 50%);
-  --color-accent-dark: hsl(35, 90%, 40%);
-  --color-accent-light: hsl(35, 90%, 95%);
+  --color-accent: hsl(40, 95%, 55%);
+  --color-accent-dark: hsl(40, 95%, 45%);
+  --color-accent-light: hsl(40, 95%, 95%);
 
   --color-success: hsl(142, 72%, 35%);
   --color-success-light: hsl(142, 72%, 94%);

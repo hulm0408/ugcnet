@@ -22,16 +22,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 });
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
       data: {
         name: name ? String(name).trim() : null,
         email: normalizedEmail,
-        password_hash,
+        passwordHash,
         role: 'USER',
         // Mark email as verified immediately for credential signups (no email flow yet)
-        email_verified: new Date(),
+        emailVerified: new Date(),
       },
       select: {
         id: true,

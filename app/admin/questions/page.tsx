@@ -44,15 +44,15 @@ export default async function AdminQuestionsPage(props: {
     <div className="max-w-7xl mx-auto space-y-8">
       
       {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-stone-200/60">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-black text-stone-900 tracking-tight flex items-center gap-3">
             Question Bank
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-700">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-primary/10 text-primary-dark border border-primary/20">
               {totalQuestions.toLocaleString()} Total
             </span>
           </h1>
-          <p className="mt-2 text-base text-slate-500 font-medium">
+          <p className="mt-2 text-base text-stone-500 font-medium">
             Manage, search, and verify the mapped 3,149 UGC NET Arabic questions.
           </p>
         </div>
@@ -60,54 +60,54 @@ export default async function AdminQuestionsPage(props: {
         {/* Search form */}
         <form className="w-full md:w-96 relative group" action="/admin/questions">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+            <Search className="h-5 w-5 text-stone-400 group-focus-within:text-primary transition-colors" />
           </div>
           <input
             type="text"
             name="query"
             defaultValue={query}
             placeholder="Search in Arabic or by ID..."
-            className="block w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-2xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-0 focus:border-blue-500 transition-all text-sm font-medium"
+            className="block w-full pl-11 pr-4 py-3 border-2 border-stone-200 rounded-2xl leading-5 bg-white/50 backdrop-blur-sm placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-0 focus:border-primary transition-all text-sm font-medium"
           />
           <button type="submit" className="hidden" />
         </form>
       </div>
 
       {/* Table Section */}
-      <div className="bg-white shadow-sm rounded-3xl border border-slate-200 overflow-hidden">
+      <div className="bg-white/80 backdrop-blur-xl shadow-sm rounded-3xl border border-stone-200/60 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50/80 backdrop-blur-sm">
+          <table className="min-w-full divide-y divide-stone-200/60">
+            <thead className="bg-stone-50/80 backdrop-blur-sm">
               <tr>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">
                   Question ID / Source
                 </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">
                   Mapping (Unit / Topic)
                 </th>
-                <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider" dir="rtl">
+                <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-stone-500 uppercase tracking-wider" dir="rtl">
                   Question Text (Arabic)
                 </th>
-                <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-stone-500 uppercase tracking-wider">
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-100">
+            <tbody className="bg-transparent divide-y divide-stone-100">
               {questions.map((q) => (
-                <tr key={q.id} className="hover:bg-slate-50/80 transition-colors group">
+                <tr key={q.id} className="hover:bg-stone-50/80 transition-colors group">
                   <td className="px-6 py-5 whitespace-nowrap">
-                    <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{q.source_question_id || 'N/A'}</div>
-                    <div className="text-xs text-slate-400 font-medium truncate max-w-[150px]" title={q.id}>{q.id}</div>
+                    <div className="text-sm font-bold text-stone-900 group-hover:text-primary transition-colors">{q.source_question_id || 'N/A'}</div>
+                    <div className="text-xs text-stone-400 font-medium truncate max-w-[150px]" title={q.id}>{q.id}</div>
                   </td>
                   <td className="px-6 py-5 whitespace-nowrap">
                     <div className="flex flex-col gap-1.5 items-start">
                       {q.unit ? (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 w-max shadow-sm">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-primary/10 text-primary-dark border border-primary/20 w-max shadow-sm">
                           Unit {q.unit.unit_number}: {q.unit.name_english}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 w-max shadow-sm">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200 w-max shadow-sm">
                           Unmapped Unit
                         </span>
                       )}
