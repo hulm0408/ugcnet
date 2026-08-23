@@ -11,6 +11,9 @@ interface ResultSummaryViewProps {
   unattemptedCount: number;
   totalQuestions: number;
   timeTaken?: string;
+  questions?: any[];
+  answers?: Record<string, string>;
+  evaluations?: Record<string, any>;
   onViewReview: () => void;
 }
 
@@ -22,10 +25,51 @@ export default function ResultSummaryView({
   unattemptedCount,
   totalQuestions,
   timeTaken = '01:35:12', // Mocked time taken
+  questions = [],
+  answers = {},
+  evaluations = {},
   onViewReview
 }: ResultSummaryViewProps) {
-  const percentage = (correctCount / totalQuestions) * 100;
+  const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
   
+  // Compute Sectional Analysis
+  const sectionsMap = new Map<string, { name_arabic: string, name_english: string, total: number, correct: number, incorrect: number, unit_number: number }>();
+  
+  questions.forEach(q => {
+    const unit = q.unit || { name_arabic: 'مواضيع أخرى', name_english: 'Other Topics', unit_number: 99 };
+    const key = String(unit.unit_number);
+    
+    if (!sectionsMap.has(key)) {
+      sectionsMap.set(key, { 
+        name_arabic: unit.name_arabic, 
+        name_english: unit.name_english, 
+        total: 0, correct: 0, incorrect: 0, 
+        unit_number: unit.unit_number 
+      });
+    }
+    
+    const stat = sectionsMap.get(key)!;
+    stat.total += 1;
+    
+    if (answers[q.id] !== undefined) {
+      if (evaluations[q.id]?.isCorrect) {
+        stat.correct += 1;
+      } else {
+        stat.incorrect += 1;
+      }
+    }
+  });
+
+  const sections = Array.from(sectionsMap.values()).sort((a, b) => a.unit_number - b.unit_number);
+  
+  // Find weakest section
+  const weakestSection = sections.reduce((weakest, current) => {
+    if (!weakest) return current;
+    // Section with most incorrect answers, or lowest accuracy if tied
+    if (current.incorrect > weakest.incorrect) return current;
+    return weakest;
+  }, null as any);
+
   return (
     <div className="flex-1 bg-stone-50 overflow-y-auto font-sans p-6 lg:p-12">
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
@@ -125,57 +169,27 @@ export default function ResultSummaryView({
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
-                {/* Mocked sections since we can't always compute them live yet */}
-                <tr>
-                  <td className="py-4">
-                    <div dir="rtl" className="font-arabic font-bold text-stone-900 mb-1 text-right">الأدب في العصر الجاهلي</div>
-                    <div className="text-stone-500 text-xs">Pre-Islamic Literature</div>
-                  </td>
-                  <td className="py-4 text-center font-bold text-stone-900">10</td>
-                  <td className="py-4 text-center font-bold text-[#107A53]">8</td>
-                  <td className="py-4 text-center font-bold text-rose-600">2</td>
-                  <td className="py-4 text-right font-bold text-stone-900">80%</td>
-                </tr>
-                <tr>
-                  <td className="py-4">
-                    <div dir="rtl" className="font-arabic font-bold text-stone-900 mb-1 text-right">الأدب في العصر العباسي</div>
-                    <div className="text-stone-500 text-xs">Abbasid Period Literature</div>
-                  </td>
-                  <td className="py-4 text-center font-bold text-stone-900">10</td>
-                  <td className="py-4 text-center font-bold text-[#107A53]">7</td>
-                  <td className="py-4 text-center font-bold text-rose-600">3</td>
-                  <td className="py-4 text-right font-bold text-stone-900">70%</td>
-                </tr>
-                <tr>
-                  <td className="py-4">
-                    <div dir="rtl" className="font-arabic font-bold text-stone-900 mb-1 text-right">النثر</div>
-                    <div className="text-stone-500 text-xs">Prose</div>
-                  </td>
-                  <td className="py-4 text-center font-bold text-stone-900">10</td>
-                  <td className="py-4 text-center font-bold text-[#107A53]">6</td>
-                  <td className="py-4 text-center font-bold text-rose-600">4</td>
-                  <td className="py-4 text-right font-bold text-stone-900">60%</td>
-                </tr>
-                <tr>
-                  <td className="py-4">
-                    <div dir="rtl" className="font-arabic font-bold text-stone-900 mb-1 text-right">النقد الأدبي</div>
-                    <div className="text-stone-500 text-xs">Literary Criticism</div>
-                  </td>
-                  <td className="py-4 text-center font-bold text-stone-900">10</td>
-                  <td className="py-4 text-center font-bold text-[#107A53]">8</td>
-                  <td className="py-4 text-center font-bold text-rose-600">2</td>
-                  <td className="py-4 text-right font-bold text-stone-900">80%</td>
-                </tr>
-                <tr>
-                  <td className="py-4">
-                    <div dir="rtl" className="font-arabic font-bold text-stone-900 mb-1 text-right">اللغة والأسلوب</div>
-                    <div className="text-stone-500 text-xs">Language & Style</div>
-                  </td>
-                  <td className="py-4 text-center font-bold text-stone-900">10</td>
-                  <td className="py-4 text-center font-bold text-[#107A53]">7</td>
-                  <td className="py-4 text-center font-bold text-rose-600">3</td>
-                  <td className="py-4 text-right font-bold text-stone-900">70%</td>
-                </tr>
+                {sections.length > 0 ? (
+                  sections.map((section, idx) => {
+                    const secAccuracy = section.total > 0 ? ((section.correct / section.total) * 100).toFixed(0) : '0';
+                    return (
+                      <tr key={idx}>
+                        <td className="py-4">
+                          <div dir="rtl" className="font-arabic font-bold text-stone-900 mb-1 text-right">{section.name_arabic}</div>
+                          <div className="text-stone-500 text-xs">{section.name_english}</div>
+                        </td>
+                        <td className="py-4 text-center font-bold text-stone-900">{section.total}</td>
+                        <td className="py-4 text-center font-bold text-[#107A53]">{section.correct}</td>
+                        <td className="py-4 text-center font-bold text-rose-600">{section.incorrect}</td>
+                        <td className="py-4 text-right font-bold text-stone-900">{secAccuracy}%</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-stone-500 text-sm">No sectional data available.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -200,12 +214,14 @@ export default function ResultSummaryView({
                 </div>
               </div>
 
-              <div className="w-full bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-center gap-3 text-sm">
-                <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center font-bold text-amber-700 shrink-0">!</div>
-                <div>
-                  <span className="font-bold text-stone-800">Focus more on:</span> <span dir="rtl" className="font-arabic text-stone-900 font-bold mx-1">الأدب في العصر العباسي</span> <span className="text-stone-500">(Prose, Abbasid Literature)</span>
+              {weakestSection && weakestSection.incorrect > 0 && (
+                <div className="w-full bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-center gap-3 text-sm">
+                  <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center font-bold text-amber-700 shrink-0">!</div>
+                  <div>
+                    <span className="font-bold text-stone-800">Focus more on:</span> <span dir="rtl" className="font-arabic text-stone-900 font-bold mx-1">{weakestSection.name_arabic}</span> <span className="text-stone-500">({weakestSection.name_english})</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

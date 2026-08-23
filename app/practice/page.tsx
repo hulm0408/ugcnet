@@ -290,6 +290,9 @@ function PracticeContent() {
         incorrectCount={incorrectCount}
         unattemptedCount={unattemptedCount}
         totalQuestions={questions.length}
+        questions={questions}
+        answers={answers}
+        evaluations={evaluations}
         onViewReview={() => setTestStatus('review')}
       />
     );
