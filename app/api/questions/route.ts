@@ -40,6 +40,14 @@ export async function GET(request: Request) {
       where.subtopic = { slug: subtopic };
     }
 
+    const entity = searchParams.get('entity');
+    if (entity) {
+      where.OR = [
+        { specific_entity_name_arabic: entity },
+        { specific_entity_name_english: entity },
+      ];
+    }
+
     if (year && !paperId) {
       where.exam_paper = {
         year: parseInt(year, 10),

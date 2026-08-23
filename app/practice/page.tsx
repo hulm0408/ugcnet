@@ -25,6 +25,7 @@ function PracticeContent() {
   const unit = searchParams.get('unit');
   const topic = searchParams.get('topic');
   const subtopic = searchParams.get('subtopic');
+  const entity = searchParams.get('entity');
   const year = searchParams.get('year') || (unit ? null : '2009');
   const paperId = searchParams.get('paperId');
   const paperTitle = searchParams.get('paperTitle');
@@ -53,6 +54,7 @@ function PracticeContent() {
         if (unit) baseUrl += `&unit=${unit}`;
         if (topic) baseUrl += `&topic=${topic}`;
         if (subtopic) baseUrl += `&subtopic=${subtopic}`;
+        if (entity) baseUrl += `&entity=${encodeURIComponent(entity)}`;
         if (paperId) baseUrl += `&paperId=${paperId}`;
 
         let allQuestions: any[] = [];
@@ -77,7 +79,7 @@ function PracticeContent() {
       }
     }
     loadQuestions();
-  }, [year, unit, topic, subtopic, paperId]);
+  }, [year, unit, topic, subtopic, entity, paperId]);
 
   useEffect(() => {
     if (questions.length > 0 && testStatus === 'in-progress') {

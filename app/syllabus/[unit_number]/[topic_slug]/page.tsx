@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, PlayCircle, BookOpen, Target, Layers } from 'lucide-react';
+import { ChevronRight, Layers, BookOpen, Target, PlayCircle } from 'lucide-react';
 import prisma from '@/lib/db';
-import QuillInkPotIcon from '@/components/ui/QuillInkPotIcon';
-import HierarchyTreeExplorer, { HierarchyNode, SubNodeEntity } from '@/components/syllabus/HierarchyTreeExplorer';
+import SyllabusBreadcrumb from '@/components/syllabus/SyllabusBreadcrumb';
+import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
 
 export async function generateMetadata({
   params,
@@ -12,8 +12,7 @@ export async function generateMetadata({
   params: Promise<{ unit_number: string; topic_slug: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
-  const unitNum = parseInt(resolvedParams.unit_number);
-
+  const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return { title: 'Topic Not Found' };
 
   const topic = await prisma.broadTopic.findFirst({
@@ -27,21 +26,21 @@ export async function generateMetadata({
   if (!topic) return { title: 'Topic Not Found' };
 
   return {
-    title: `${topic.name_english} — Unit ${unitNum} | UGC NET Arabic`,
-    description: `Explore ${topic.name_english} (${topic.name_arabic}) deep hierarchy, learning nodes, targeted entities, and previous year questions.`,
+    title: `${topic.name_english} (${topic.name_arabic}) — Unit ${unitNum} Syllabus`,
+    description: `Browse sub-topics under ${topic.name_english} in the UGC NET Arabic syllabus.`,
   };
 }
 
-export default async function TopicPage({
+export default async function TopicSubtopicsPage({
   params,
 }: {
   params: Promise<{ unit_number: string; topic_slug: string }>;
 }) {
   const resolvedParams = await params;
-  const unitNum = parseInt(resolvedParams.unit_number);
+  const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return notFound();
 
-  // Fetch Topic with its Subtopics and published Questions classified under them
+  // Fetch Topic with its Subtopics and question counts
   const topic = await prisma.broadTopic.findFirst({
     where: {
       slug: resolvedParams.topic_slug,
@@ -52,30 +51,16 @@ export default async function TopicPage({
       subtopics: {
         orderBy: { order_index: 'asc' },
         include: {
-          questions: {
-            where: { content_status: 'PUBLISHED' },
-            orderBy: { created_at: 'asc' },
+          _count: {
             select: {
-              id: true,
-              original_question_number: true,
-              question_arabic: true,
-              question_english: true,
-              options_arabic: true,
-              correct_answer: true,
-              correct_answer_text_arabic: true,
-              specific_entity_name_arabic: true,
-              specific_entity_name_english: true,
-              question_micro_focus_arabic: true,
-              question_micro_focus_english: true,
-              exam_paper: {
-                select: {
-                  year: true,
-                  paper_number: true,
-                  display_name: true,
-                },
-              },
+              questions: true,
             },
           },
+        },
+      },
+      _count: {
+        select: {
+          questions: true,
         },
       },
     },
@@ -83,185 +68,157 @@ export default async function TopicPage({
 
   if (!topic) return notFound();
 
-  // Group into deep multi-level hierarchy: Node (L3) -> Entities (L4) -> MicroFocuses (L5) -> Questions (L6)
-  let totalQuestionsCount = 0;
-  let totalSubNodesCount = 0;
-
-  const structuredNodes: HierarchyNode[] = topic.subtopics.map((st) => {
-    totalQuestionsCount += st.questions.length;
-
-    // Group questions by Entity / Sub-Node (Level 4)
-    const entityMap = new Map<
-      string,
-      {
-        nameAr: string;
-        nameEn: string;
-        totalQuestions: number;
-        microFocusMap: Map<
-          string,
-          {
-            nameAr: string;
-            nameEn: string;
-            questions: typeof st.questions;
-          }
-        >;
-      }
-    >();
-
-    for (const q of st.questions) {
-      const entityAr = q.specific_entity_name_arabic?.trim() || 'عام / متفرقات';
-      const entityEn = q.specific_entity_name_english?.trim() || 'General / Unclassified';
-
-      if (!entityMap.has(entityAr)) {
-        entityMap.set(entityAr, {
-          nameAr: entityAr,
-          nameEn: entityEn,
-          totalQuestions: 0,
-          microFocusMap: new Map(),
-        });
-      }
-
-      const entity = entityMap.get(entityAr)!;
-      entity.totalQuestions += 1;
-
-      // Group questions by Micro Focus (Level 5)
-      const microAr = q.question_micro_focus_arabic?.trim() || 'أسئلة عامة';
-      const microEn = q.question_micro_focus_english?.trim() || 'General Questions';
-
-      if (!entity.microFocusMap.has(microAr)) {
-        entity.microFocusMap.set(microAr, {
-          nameAr: microAr,
-          nameEn: microEn,
-          questions: [],
-        });
-      }
-
-      entity.microFocusMap.get(microAr)!.questions.push(q);
-    }
-
-    const entities: SubNodeEntity[] = Array.from(entityMap.values()).map((e) => ({
-      nameAr: e.nameAr,
-      nameEn: e.nameEn,
-      totalQuestions: e.totalQuestions,
-      microFocuses: Array.from(e.microFocusMap.values()),
-    }));
-
-    totalSubNodesCount += entities.length;
-
-    return {
-      id: st.id,
-      nameAr: st.name_arabic,
-      nameEn: st.name_english,
-      slug: st.slug,
-      totalQuestions: st.questions.length,
-      entities,
-    };
+  // Query distinct specific entity names (Nodes) count per subtopic
+  const distinctEntities = await prisma.question.groupBy({
+    by: ['subtopic_id', 'specific_entity_name_arabic'],
+    where: {
+      broad_topic_id: topic.id,
+      content_status: 'PUBLISHED',
+      specific_entity_name_arabic: { not: null },
+    },
   });
+
+  const subtopicEntityCountMap = new Map<string, number>();
+  for (const item of distinctEntities) {
+    if (item.subtopic_id) {
+      subtopicEntityCountMap.set(
+        item.subtopic_id,
+        (subtopicEntityCountMap.get(item.subtopic_id) || 0) + 1
+      );
+    }
+  }
 
   return (
     <div className="flex-1 min-h-screen pt-10 pb-24 bg-[#FCFAF8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb Navigation */}
-        <div className="mb-8 flex items-center justify-between">
-          <Link
-            href="/syllabus"
-            className="inline-flex items-center gap-2 text-stone-500 hover:text-stone-900 transition-colors font-bold text-sm bg-white border border-stone-200 px-4 py-2 rounded-xl shadow-sm hover:shadow"
-          >
-            <ArrowLeft size={16} />
-            Back to All Units
-          </Link>
+        
+        {/* Breadcrumb */}
+        <SyllabusBreadcrumb
+          items={[
+            {
+              label: `Unit ${topic.unit.unit_number}: ${topic.unit.name_english}`,
+              labelAr: topic.unit.name_arabic,
+              href: `/syllabus/${topic.unit.unit_number}`,
+            },
+            {
+              label: topic.name_english,
+              labelAr: topic.name_arabic,
+            },
+          ]}
+        />
 
-          <div className="text-xs font-bold text-stone-400 uppercase tracking-widest hidden sm:block">
-            Unit {topic.unit.unit_number} • {topic.name_english}
-          </div>
-        </div>
-
+        {/* 2-Column Layout */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Pane: Topic Details (Sticky Overview Card) */}
-          <div className="w-full lg:w-1/3 shrink-0">
-            <div className="sticky top-24">
-              <div className="bg-white border border-stone-200/90 rounded-3xl p-7 sm:p-8 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.08)] relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-2 h-full bg-[#107A53]"></div>
-
-                {/* Topic Icon */}
-                <div className="w-16 h-16 bg-stone-50 border border-stone-100 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-                  <QuillInkPotIcon className="w-12 h-12" />
-                </div>
-
-                <div className="text-[11px] font-bold tracking-widest text-[#107A53] uppercase mb-1.5">
-                  Unit {topic.unit.unit_number} Topic
-                </div>
-
-                <h1
-                  dir="rtl"
-                  lang="ar"
-                  className="font-arabic font-extrabold text-3xl text-stone-900 leading-tight mb-2"
-                >
-                  {topic.name_arabic}
-                </h1>
-
-                <h2 className="text-stone-500 font-bold text-lg leading-snug mb-8">
-                  {topic.name_english}
-                </h2>
-
-                {/* Hierarchy Depth Metrics */}
-                <div className="space-y-3.5 bg-stone-50/70 p-4 rounded-2xl border border-stone-100 mb-6">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-stone-500 font-semibold flex items-center gap-2">
-                      <Target size={15} className="text-primary" />
-                      Learning Nodes
-                    </span>
-                    <span className="text-stone-900 font-bold">{topic.subtopics.length}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-stone-500 font-semibold flex items-center gap-2">
-                      <Layers size={15} className="text-primary" />
-                      Sub-Nodes / Entities
-                    </span>
-                    <span className="text-stone-900 font-bold">{totalSubNodesCount}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-stone-500 font-semibold flex items-center gap-2">
-                      <BookOpen size={15} className="text-primary" />
-                      Classified Questions
-                    </span>
-                    <span className="text-[#107A53] font-black">{totalQuestionsCount}</span>
-                  </div>
-                </div>
-
-                {/* Practice Full Topic Button */}
-                <Link
-                  href={`/practice?unit=${topic.unit.unit_number}&topic=${topic.slug}`}
-                  className="w-full bg-[#107A53] hover:bg-[#0C6240] text-white hover:text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all group/btn shadow-md shadow-[#107A53]/20 active:scale-95"
-                >
-                  <PlayCircle size={20} className="group-hover/btn:scale-110 transition-transform" />
-                  Practice Full Topic
-                </Link>
+          
+          {/* Main Column: Subtopics ONLY */}
+          <main className="flex-1 min-w-0">
+            {/* Topic Header Card */}
+            <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 mb-8 shadow-sm">
+              <div className="text-xs font-bold text-primary uppercase tracking-widest mb-1.5">
+                Unit {topic.unit.unit_number} Topic
               </div>
-            </div>
-          </div>
-
-          {/* Right Pane: Deep Hierarchy Tree Explorer */}
-          <div className="flex-1 min-w-0">
-            <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
-              <div>
-                <h3 className="text-2xl font-extrabold text-stone-900 tracking-tight">
-                  Learning Nodes & Hierarchy Tree
-                </h3>
-                <p className="text-stone-500 text-sm mt-0.5">
-                  Drill down from Node ➔ Sub-Nodes / Poets ➔ Questions Preview
-                </p>
-              </div>
+              <h1
+                dir="rtl"
+                lang="ar"
+                className="font-arabic font-extrabold text-3xl sm:text-4xl text-stone-900 leading-snug mb-2"
+              >
+                {topic.name_arabic}
+              </h1>
+              <p className="text-stone-500 font-semibold text-base sm:text-lg">
+                {topic.name_english}
+              </p>
             </div>
 
-            <HierarchyTreeExplorer
-              unitNumber={unitNum}
-              topicSlug={topic.slug}
-              nodes={structuredNodes}
-            />
-          </div>
+            {/* Sub-topics Section Header */}
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">
+                Sub-topics ({topic.subtopics.length})
+              </h2>
+              <span className="text-xs text-stone-400 font-semibold">
+                Click a sub-topic to view learning nodes
+              </span>
+            </div>
+
+            {/* Subtopics Cards List */}
+            <div className="space-y-4">
+              {topic.subtopics.map((st, idx) => {
+                const nodesCount = subtopicEntityCountMap.get(st.id) || 1;
+
+                return (
+                  <Link
+                    key={st.id}
+                    href={`/syllabus/${topic.unit.unit_number}/${topic.slug}/${st.slug}`}
+                    className="group block p-6 sm:p-7 bg-white border border-stone-200/90 rounded-3xl hover:border-primary/50 hover:shadow-[0_12px_32px_-12px_rgba(16,122,83,0.12)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 w-2 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                      {/* Left: Index & Names */}
+                      <div className="flex items-start gap-4 sm:gap-5 min-w-0 flex-1">
+                        <div className="w-11 h-11 rounded-2xl bg-stone-100 group-hover:bg-primary group-hover:text-white text-stone-700 flex items-center justify-center font-bold text-base shrink-0 transition-colors shadow-inner">
+                          {idx + 1}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div
+                            dir="rtl"
+                            lang="ar"
+                            className="font-arabic font-extrabold text-2xl sm:text-3xl text-stone-900 leading-snug mb-1"
+                          >
+                            {st.name_arabic}
+                          </div>
+                          <div className="text-stone-500 font-semibold text-sm sm:text-base">
+                            {st.name_english}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Nodes Count, Qs Count & Arrow */}
+                      <div className="flex items-center justify-between sm:justify-end gap-5 shrink-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                        <div className="flex items-center gap-2.5 text-xs">
+                          <span className="px-3 py-1.5 rounded-xl bg-stone-100 font-bold text-stone-700">
+                            {nodesCount} Nodes
+                          </span>
+                          <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold border border-emerald-100">
+                            {st._count.questions} Qs
+                          </span>
+                        </div>
+
+                        <div className="w-9 h-9 rounded-full bg-stone-50 group-hover:bg-primary group-hover:text-white text-stone-400 flex items-center justify-center transition-all group-hover:translate-x-1">
+                          <ChevronRight size={18} />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+
+              {topic.subtopics.length === 0 && (
+                <div className="p-12 text-center bg-white rounded-3xl border border-stone-200 text-stone-500 font-medium">
+                  No sub-topics found for this topic.
+                </div>
+              )}
+            </div>
+          </main>
+
+          {/* Right Column: Contextual Sidebar */}
+          <SyllabusContextSidebar
+            levelBadge="Topic Context"
+            titleAr={topic.name_arabic}
+            title={topic.name_english}
+            subtitle={`Unit ${topic.unit.unit_number} contains ${topic.subtopics.length} official sub-topics.`}
+            metrics={[
+              { label: 'Sub-topics', value: topic.subtopics.length, icon: Layers },
+              { label: 'Total Questions', value: topic._count.questions, icon: BookOpen },
+            ]}
+            practiceHref={`/practice?unit=${topic.unit.unit_number}&topic=${topic.slug}`}
+            practiceLabel="Practice This Topic"
+            quickTips={[
+              'Select a sub-topic to view individual author and concept nodes.',
+              'Questions are classified into specific historical entities.',
+            ]}
+          />
+
         </div>
       </div>
     </div>
