@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, Layers, BookOpen, GraduationCap, Compass, Target } from 'lucide-react';
+import { ChevronRight, Layers, BookOpen, GraduationCap, Target } from 'lucide-react';
 import prisma from '@/lib/db';
 import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
 
@@ -34,92 +34,89 @@ export default async function SyllabusLandingPage() {
   const totalQuestions = units.reduce((acc, u) => acc + u._count.questions, 0);
 
   return (
-    <div className="flex-1 min-h-screen pt-10 pb-24 bg-[#FCFAF8]">
+    <div className="flex-1 min-h-screen pt-8 pb-20 bg-[#FAF9F6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header Title Section */}
-        <div className="mb-10 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
-            <GraduationCap size={14} />
-            Official NTA Curriculum
+        {/* Header Title Section: Calm Academic Style */}
+        <div className="mb-8 text-left border-b border-stone-200/80 pb-6">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-stone-100 text-stone-600 text-[11px] font-semibold tracking-wider uppercase mb-2.5">
+            <GraduationCap size={13} className="text-emerald-800" />
+            <span>Official NTA Curriculum</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-stone-900 tracking-tight mb-2">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-1.5">
             Syllabus Units
           </h1>
-          <p className="text-stone-500 text-base font-medium max-w-2xl">
-            Browse the official UGC NET/JRF Arabic syllabus. Select a unit below to drill down into its topics and learning nodes.
+          <p className="text-stone-500 text-xs sm:text-sm font-medium max-w-2xl">
+            Browse the 10 official UGC NET Arabic units. Select a unit to explore its topics, authors, and learning nodes.
           </p>
         </div>
 
         {/* 2-Column Academic Layout */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          {/* Main Column: Units ONLY */}
-          <main className="flex-1 min-w-0">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">
+          {/* Main Column: Units List */}
+          <main className="flex-1 min-w-0 w-full">
+            <div className="mb-3 flex items-center justify-between px-1">
+              <h2 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
                 Official Units (10)
               </h2>
-              <span className="text-xs text-stone-400 font-semibold">
+              <span className="text-[11px] text-stone-400 font-medium">
                 Click a unit to view topics
               </span>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {units.map((unit) => (
                 <Link
                   key={unit.id}
                   href={`/syllabus/${unit.unit_number}`}
-                  className="group block p-6 sm:p-7 bg-white border border-stone-200/90 rounded-3xl hover:border-primary/50 hover:shadow-[0_12px_32px_-12px_rgba(16,122,83,0.12)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  className="group block p-4 sm:p-5 bg-white border border-stone-200/80 rounded-2xl hover:border-emerald-700/40 hover:bg-emerald-50/20 transition-all"
                 >
-                  <div className="absolute top-0 left-0 w-2 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-                    {/* Left: Unit Number & Names */}
-                    <div className="flex items-start gap-5 min-w-0 flex-1">
-                      <div className="w-12 h-12 rounded-2xl bg-stone-100 group-hover:bg-primary group-hover:text-white text-stone-700 flex items-center justify-center font-black text-lg shrink-0 transition-colors shadow-inner">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    
+                    {/* Left: Unit Number & Arabic/English Titles */}
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-xl bg-stone-100 text-stone-600 group-hover:bg-emerald-800 group-hover:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors">
                         {unit.unit_number.toString().padStart(2, '0')}
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[11px] font-bold text-primary uppercase tracking-widest mb-1">
-                          Unit {unit.unit_number}
-                        </div>
+                      <div className="min-w-0 flex-1 space-y-0.5">
                         <div
                           dir="rtl"
                           lang="ar"
-                          className="font-arabic font-extrabold text-2xl sm:text-3xl text-stone-900 leading-snug mb-1"
+                          className="font-arabic font-bold text-lg sm:text-xl text-stone-900 leading-snug group-hover:text-emerald-950 transition-colors"
                         >
                           {unit.name_arabic}
                         </div>
-                        <div className="text-stone-500 font-semibold text-sm sm:text-base">
+                        <div className="text-stone-500 text-xs sm:text-sm font-medium line-clamp-1">
                           {unit.name_english}
                         </div>
                       </div>
                     </div>
 
-                    {/* Right: Stats & Arrow */}
-                    <div className="flex items-center justify-between sm:justify-end gap-5 shrink-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-stone-100">
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="px-3 py-1.5 rounded-xl bg-stone-100 font-bold text-stone-700">
+                    {/* Right: Metadata Chips & Subtle Chevron */}
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                      <div className="flex items-center gap-2 text-[11px]">
+                        <span className="px-2.5 py-1 rounded-lg bg-stone-100/80 text-stone-600 font-medium">
                           {unit._count.broad_topics} Topics
                         </span>
-                        <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold border border-emerald-100">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 font-semibold border border-emerald-100">
                           {unit._count.questions} Qs
                         </span>
                       </div>
 
-                      <div className="w-9 h-9 rounded-full bg-stone-50 group-hover:bg-primary group-hover:text-white text-stone-400 flex items-center justify-center transition-all group-hover:translate-x-1">
-                        <ChevronRight size={18} />
+                      <div className="text-stone-300 group-hover:text-emerald-800 transition-colors pl-1">
+                        <ChevronRight size={16} />
                       </div>
                     </div>
+
                   </div>
                 </Link>
               ))}
             </div>
           </main>
 
-          {/* Right Column: Contextual Overview Sidebar */}
+          {/* Right Column: Quiet Overview Sidebar */}
           <SyllabusContextSidebar
             levelBadge="Syllabus Overview"
             title="Complete UGC NET Arabic Curriculum"

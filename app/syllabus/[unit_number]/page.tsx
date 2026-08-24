@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Target, BookOpen, Layers, ArrowLeft, PlayCircle } from 'lucide-react';
+import { ChevronRight, Target, BookOpen, Layers } from 'lucide-react';
 import prisma from '@/lib/db';
 import SyllabusBreadcrumb from '@/components/syllabus/SyllabusBreadcrumb';
 import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
@@ -65,7 +65,7 @@ export default async function UnitPage({
   const totalSubtopics = unit.broad_topics.reduce((acc, t) => acc + t._count.subtopics, 0);
 
   return (
-    <div className="flex-1 min-h-screen pt-10 pb-24 bg-[#FCFAF8]">
+    <div className="flex-1 min-h-screen pt-8 pb-20 bg-[#FAF9F6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}
@@ -78,90 +78,90 @@ export default async function UnitPage({
           ]}
         />
 
-        {/* 2-Column Layout */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        {/* 2-Column Academic Layout */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          {/* Main Column: Topics ONLY */}
-          <main className="flex-1 min-w-0">
-            {/* Unit Title Header Card */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 mb-8 shadow-sm">
-              <div className="text-xs font-bold text-primary uppercase tracking-widest mb-1.5">
+          {/* Main Column: Topics List */}
+          <main className="flex-1 min-w-0 w-full">
+            {/* Unit Title Header Panel */}
+            <div className="bg-white border border-stone-200/80 rounded-2xl p-5 sm:p-6 mb-6 space-y-1">
+              <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
                 Unit {unit.unit_number}
               </div>
               <h1
                 dir="rtl"
                 lang="ar"
-                className="font-arabic font-extrabold text-3xl sm:text-4xl text-stone-900 leading-snug mb-2"
+                className="font-arabic font-bold text-2xl sm:text-3xl text-stone-900 leading-snug"
               >
                 {unit.name_arabic}
               </h1>
-              <p className="text-stone-500 font-semibold text-base sm:text-lg">
+              <p className="text-stone-500 font-medium text-xs sm:text-sm">
                 {unit.name_english}
               </p>
             </div>
 
             {/* Topics Section Header */}
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">
+            <div className="mb-3 flex items-center justify-between px-1">
+              <h2 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
                 Topics in Unit {unit.unit_number} ({unit.broad_topics.length})
               </h2>
-              <span className="text-xs text-stone-400 font-semibold">
+              <span className="text-[11px] text-stone-400 font-medium">
                 Click a topic to view sub-topics
               </span>
             </div>
 
             {/* Topics Cards List */}
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {unit.broad_topics.map((topic, idx) => (
                 <Link
                   key={topic.id}
                   href={`/syllabus/${unit.unit_number}/${topic.slug}`}
-                  className="group block p-6 sm:p-7 bg-white border border-stone-200/90 rounded-3xl hover:border-primary/50 hover:shadow-[0_12px_32px_-12px_rgba(16,122,83,0.12)] hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden"
+                  className="group block p-4 sm:p-5 bg-white border border-stone-200/80 rounded-2xl hover:border-emerald-700/40 hover:bg-emerald-50/20 transition-all"
                 >
-                  <div className="absolute top-0 left-0 w-2 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    
                     {/* Left: Index & Names */}
-                    <div className="flex items-start gap-4 sm:gap-5 min-w-0 flex-1">
-                      <div className="w-11 h-11 rounded-2xl bg-stone-100 group-hover:bg-primary group-hover:text-white text-stone-700 flex items-center justify-center font-bold text-base shrink-0 transition-colors shadow-inner">
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="w-8 h-8 rounded-xl bg-stone-100 text-stone-600 group-hover:bg-emerald-800 group-hover:text-white flex items-center justify-center font-bold text-xs shrink-0 transition-colors">
                         {idx + 1}
                       </div>
 
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0 flex-1 space-y-0.5">
                         <div
                           dir="rtl"
                           lang="ar"
-                          className="font-arabic font-extrabold text-2xl sm:text-3xl text-stone-900 leading-snug mb-1"
+                          className="font-arabic font-bold text-base sm:text-lg text-stone-900 leading-snug group-hover:text-emerald-950 transition-colors"
                         >
                           {topic.name_arabic}
                         </div>
-                        <div className="text-stone-500 font-semibold text-sm sm:text-base">
+                        <div className="text-stone-500 font-medium text-xs sm:text-sm line-clamp-1">
                           {topic.name_english}
                         </div>
                       </div>
                     </div>
 
                     {/* Right: Subtopic Count, Qs Count & Arrow */}
-                    <div className="flex items-center justify-between sm:justify-end gap-5 shrink-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-stone-100">
-                      <div className="flex items-center gap-2.5 text-xs">
-                        <span className="px-3 py-1.5 rounded-xl bg-stone-100 font-bold text-stone-700">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                      <div className="flex items-center gap-2 text-[11px]">
+                        <span className="px-2.5 py-1 rounded-lg bg-stone-100/80 text-stone-600 font-medium">
                           {topic._count.subtopics} Sub-topics
                         </span>
-                        <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold border border-emerald-100">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 font-semibold border border-emerald-100">
                           {topic._count.questions} Qs
                         </span>
                       </div>
 
-                      <div className="w-9 h-9 rounded-full bg-stone-50 group-hover:bg-primary group-hover:text-white text-stone-400 flex items-center justify-center transition-all group-hover:translate-x-1">
-                        <ChevronRight size={18} />
+                      <div className="text-stone-300 group-hover:text-emerald-800 transition-colors pl-1">
+                        <ChevronRight size={16} />
                       </div>
                     </div>
+
                   </div>
                 </Link>
               ))}
 
               {unit.broad_topics.length === 0 && (
-                <div className="p-12 text-center bg-white rounded-3xl border border-stone-200 text-stone-500 font-medium">
+                <div className="p-8 text-center bg-white rounded-2xl border border-stone-200 text-stone-500 text-xs font-medium">
                   No topics found for this unit.
                 </div>
               )}

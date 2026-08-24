@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Target, Layers, PlayCircle, Award, Compass, HelpCircle } from 'lucide-react';
+import { PlayCircle, Compass, HelpCircle } from 'lucide-react';
 
 interface MetricItem {
   label: string;
@@ -30,44 +30,44 @@ export default function SyllabusContextSidebar({
   quickTips,
 }: SyllabusContextSidebarProps) {
   return (
-    <aside className="w-full lg:w-80 shrink-0">
-      <div className="sticky top-24 space-y-5">
-        {/* Main Context Card */}
-        <div className="bg-white border border-stone-200/90 rounded-3xl p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.06)] relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-2 h-full bg-[#107A53]"></div>
+    <aside className="w-full lg:w-72 shrink-0">
+      <div className="sticky top-24 space-y-4">
+        {/* Main Context Card: Quiet Academic Style */}
+        <div className="bg-white border border-stone-200/80 rounded-2xl p-5 shadow-sm space-y-4">
+          <div>
+            <div className="text-[10px] font-bold tracking-wider text-emerald-800 uppercase mb-1 flex items-center gap-1">
+              <Compass size={12} />
+              <span>{levelBadge}</span>
+            </div>
 
-          <div className="text-[11px] font-bold tracking-widest text-[#107A53] uppercase mb-1.5 flex items-center gap-1.5">
-            <Compass size={13} />
-            {levelBadge}
+            {titleAr && (
+              <h2 dir="rtl" lang="ar" className="font-arabic font-bold text-lg text-stone-900 leading-snug mb-1">
+                {titleAr}
+              </h2>
+            )}
+
+            {title && (
+              <h3 className="text-stone-800 font-bold text-sm leading-snug">
+                {title}
+              </h3>
+            )}
+
+            {subtitle && (
+              <p className="text-stone-500 text-xs leading-relaxed mt-1 font-medium">
+                {subtitle}
+              </p>
+            )}
           </div>
 
-          {titleAr && (
-            <h2 dir="rtl" lang="ar" className="font-arabic font-extrabold text-2xl text-stone-900 leading-snug mb-1">
-              {titleAr}
-            </h2>
-          )}
-
-          {title && (
-            <h3 className="text-stone-700 font-bold text-base leading-snug mb-4">
-              {title}
-            </h3>
-          )}
-
-          {subtitle && (
-            <p className="text-stone-500 text-xs leading-relaxed mb-5 font-medium">
-              {subtitle}
-            </p>
-          )}
-
           {/* Metrics Grid */}
-          <div className="space-y-2.5 bg-stone-50/80 p-3.5 rounded-2xl border border-stone-100 mb-5">
+          <div className="space-y-1.5 bg-stone-50/70 p-3 rounded-xl border border-stone-200/60">
             {metrics.map((m, idx) => {
               const Icon = m.icon;
               return (
-                <div key={idx} className="flex items-center justify-between text-xs py-1">
-                  <span className="text-stone-500 font-semibold flex items-center gap-2">
-                    <Icon size={14} className="text-primary shrink-0" />
-                    {m.label}
+                <div key={idx} className="flex items-center justify-between text-xs py-0.5">
+                  <span className="text-stone-500 font-medium flex items-center gap-1.5">
+                    <Icon size={13} className="text-stone-400 shrink-0" />
+                    <span>{m.label}</span>
                   </span>
                   <span className="text-stone-900 font-bold tabular-nums">
                     {m.value}
@@ -81,24 +81,27 @@ export default function SyllabusContextSidebar({
           {practiceHref && (
             <Link
               href={practiceHref}
-              className="w-full bg-[#107A53] hover:bg-[#0C6240] text-white hover:text-white px-5 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-[#107A53]/20 active:scale-95 text-center"
+              className="w-full bg-emerald-800 hover:bg-emerald-900 text-white hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 text-center"
             >
-              <PlayCircle size={17} />
-              {practiceLabel}
+              <PlayCircle size={15} />
+              <span>{practiceLabel}</span>
             </Link>
           )}
         </div>
 
         {/* Learning Tips / Info Card */}
         {quickTips && quickTips.length > 0 && (
-          <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-5 text-xs text-stone-600">
-            <div className="font-bold text-stone-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5 text-[11px]">
-              <HelpCircle size={14} className="text-stone-500" />
-              Syllabus Study Tip
+          <div className="bg-stone-50/80 border border-stone-200/70 rounded-2xl p-4 text-xs text-stone-600 space-y-2">
+            <div className="font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5 text-[10px]">
+              <HelpCircle size={12} className="text-stone-400" />
+              <span>Study Guidance</span>
             </div>
-            <ul className="space-y-1.5 list-disc list-inside text-stone-500 font-medium">
+            <ul className="space-y-1 text-stone-500 text-[11px] font-medium">
               {quickTips.map((tip, idx) => (
-                <li key={idx} className="leading-relaxed">{tip}</li>
+                <li key={idx} className="leading-relaxed flex items-start gap-1.5">
+                  <span className="text-stone-400 mt-0.5">•</span>
+                  <span>{tip}</span>
+                </li>
               ))}
             </ul>
           </div>

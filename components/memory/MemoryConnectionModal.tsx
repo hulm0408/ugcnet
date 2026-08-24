@@ -1,24 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Zap,
-  Key,
   BookOpen,
-  Lightbulb,
-  Tag,
-  FileText,
-  Eye,
   Link2,
   Check,
   Trash2,
-  Plus,
   ArrowRight,
   Search,
   ChevronDown,
-  HelpCircle,
-  Clock,
+  Brain,
+  Layers,
 } from 'lucide-react';
 import {
   MEMORY_TYPES,
@@ -27,7 +21,6 @@ import {
   RelationshipType,
   generateSmartMemoryPrompts,
 } from '@/lib/memoryEngine';
-import { BrainSparkIcon, LinkConnectionIcon } from './MemoryIcons';
 
 interface MemoryItem {
   id: string;
@@ -73,151 +66,110 @@ export default function MemoryConnectionModal({
   question,
   onMemorySaved,
 }: MemoryConnectionModalProps) {
-  // Tabs: 'create' | 'connect_question' | 'existing'
-  const [activeTab, setActiveTab] = useState<'create' | 'connect_question'>('create');
-  
-  // Quick trick state
-  const [quickTrick, setQuickTrick] = useState('');
-  const [quickSaving, setQuickSaving] = useState(false);
-  const [quickSavedSuccess, setQuickSavedSuccess] = useState(false);
-
-  // Deep connection state
+  // Mode: 'trick' | 'link_question'
+  const [mode, setMode] = useState<'trick' | 'link_question'>('trick');
   const [selectedType, setSelectedType] = useState<MemoryType>('TRICK');
   const [content, setContent] = useState('');
   const [keywords, setKeywords] = useState('');
-  const [showAdvancedTypes, setShowAdvancedTypes] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Existing memories & connections for this question
+  // Existing memories & connections
   const [savedMemories, setSavedMemories] = useState<MemoryItem[]>([]);
   const [savedConnections, setSavedConnections] = useState<QuestionConnectionItem[]>([]);
-  const [loadingExisting, setLoadingExisting] = useState(false);
 
   // Question linking state
   const [targetSearch, setTargetSearch] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedTargetQuestion, setSelectedTargetQuestion] = useState<any | null>(null);
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>('SAME_AUTHOR');
+  const [connectionNote, setConnectionNote] = useState('');
   const [searching, setSearching] = useState(false);
-  const [selectedTargetQ, setSelectedTargetQ] = useState<any | null>(null);
-  const [relationType, setRelationType] = useState<RelationshipType>('RELATED_CONCEPT');
-  const [relationNote, setRelationNote] = useState('');
-  const [linkingQuestion, setLinkingQuestion] = useState(false);
 
-  // Smart prompts
-  const smartPrompts = generateSmartMemoryPrompts(question);
-
-  // Fetch existing memories when opened
+  // Fetch existing records when modal opens
   useEffect(() => {
-    if (!isOpen || !question?.id) return;
+    if (!isOpen || !question.id) return;
 
     let isMounted = true;
-    async function loadData() {
+    const fetchExisting = async () => {
       try {
-        setLoadingExisting(true);
         const [memRes, connRes] = await Promise.all([
           fetch(`/api/memories?questionId=${question.id}`),
           fetch(`/api/memories/connections?questionId=${question.id}`),
         ]);
 
-        if (memRes.ok) {
-          const json = await memRes.json();
-          if (isMounted) setSavedMemories(json.data || []);
+        if (memRes.ok && isMounted) {
+          const mJson = await memRes.json();
+          setSavedMemories(mJson.data || []);
+          if (mJson.data && mJson.data.length > 0) {
+            setContent(mJson.data[0].content || '');
+            setSelectedType(mJson.data[0].type || 'TRICK');
+          }
         }
-        if (connRes.ok) {
-          const json = await connRes.json();
-          if (isMounted) setSavedConnections(json.data || []);
-        }
-      } catch (e) {
-        console.error('Failed to load memory data:', e);
-      } finally {
-        if (isMounted) setLoadingExisting(false);
-      }
-    }
 
-    loadData();
+        if (connRes.ok && isMounted) {
+          const cJson = await connRes.json();
+          setSavedConnections(cJson.data || []);
+        }
+      } catch (err) {
+        console.error('Failed to load existing memories:', err);
+      }
+    };
+
+    fetchExisting();
     return () => {
       isMounted = false;
     };
-  }, [isOpen, question?.id]);
+  }, [isOpen, question.id]);
 
-  // Search questions to link
+  // Search questions for linking
   useEffect(() => {
-    if (activeTab !== 'connect_question') return;
+    if (mode !== 'link_question' || !targetSearch.trim() || targetSearch.length < 2) {
+      setSearchResults([]);
+      return;
+    }
 
     const timer = setTimeout(async () => {
+      setSearching(true);
       try {
-        setSearching(true);
         const res = await fetch(
-          `/api/memories/search-questions?q=${encodeURIComponent(targetSearch)}&excludeId=${question.id}&limit=8`
+          `/api/memories/search-questions?q=${encodeURIComponent(targetSearch)}&excludeId=${question.id}`
         );
         if (res.ok) {
           const json = await res.json();
-          setSearchResults(json.data || []);
+          setSearchResults(json.questions || []);
         }
       } catch (e) {
-        console.error('Failed to search questions:', e);
+        console.error('Search error:', e);
       } finally {
         setSearching(false);
       }
-    }, 250);
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [targetSearch, activeTab, question.id]);
+  }, [targetSearch, mode, question.id]);
 
-  // Instant Quick Save (One-Line Trick)
-  const handleQuickSave = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!quickTrick.trim()) return;
+  if (!isOpen) return null;
 
-    setQuickSaving(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/memories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questionId: question.id,
-          type: 'TRICK',
-          content: quickTrick.trim(),
-        }),
-      });
+  const smartPrompts = generateSmartMemoryPrompts(question);
 
-      if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.error || 'Failed to save trick');
-      }
-
-      const json = await res.json();
-      setQuickSavedSuccess(true);
-      setSavedMemories((prev) => {
-        const filtered = prev.filter((m) => m.type !== 'TRICK');
-        return [json.memory, ...filtered];
-      });
-      if (onMemorySaved) onMemorySaved(json.memory);
-
-      setTimeout(() => {
-        setQuickSavedSuccess(false);
-      }, 2500);
-    } catch (err: any) {
-      setError(err.message || 'Could not save memory. Please retry.');
-    } finally {
-      setQuickSaving(false);
-    }
-  };
-
-  // Save Full Connection
-  const handleSaveConnection = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveMemory = async () => {
     if (!content.trim()) {
-      setError('Please write your memory connection before saving.');
+      setError('Please enter your memory trick or note');
       return;
     }
 
     setSaving(true);
     setError(null);
+
     try {
-      const kwList = keywords.split(',').map((k) => k.trim()).filter(Boolean);
+      const kwList = keywords
+        .split(',')
+        .map((k) => k.trim())
+        .filter(Boolean);
+
       const res = await fetch('/api/memories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -230,546 +182,346 @@ export default function MemoryConnectionModal({
       });
 
       if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.error || 'Failed to save connection');
+        const json = await res.json();
+        throw new Error(json.error || 'Failed to save memory');
       }
 
       const json = await res.json();
       setSaveSuccess(true);
-      setContent('');
-      setKeywords('');
-      setSavedMemories((prev) => {
-        const filtered = prev.filter((m) => m.type !== selectedType);
-        return [json.memory, ...filtered];
-      });
-      if (onMemorySaved) onMemorySaved(json.memory);
+      if (onMemorySaved) onMemorySaved(json.data);
 
       setTimeout(() => {
-        setSaveSuccess(false);
-      }, 2500);
-    } catch (err: any) {
-      setError(err.message || 'Could not save memory. Please retry.');
+        onClose();
+      }, 700);
+    } catch (e: any) {
+      setError(e.message || 'Error saving memory');
     } finally {
       setSaving(false);
     }
   };
 
-  // Link Question
-  const handleLinkQuestions = async () => {
-    if (!selectedTargetQ) {
-      setError('Please select a question to connect.');
+  const handleCreateConnection = async () => {
+    if (!selectedTargetQuestion) {
+      setError('Please select a question to link');
       return;
     }
 
-    setLinkingQuestion(true);
+    setSaving(true);
     setError(null);
+
     try {
       const res = await fetch('/api/memories/connections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sourceQuestionId: question.id,
-          targetQuestionId: selectedTargetQ.id,
-          relationshipType: relationType,
-          note: relationNote.trim() || null,
+          targetQuestionId: selectedTargetQuestion.id,
+          relationshipType,
+          note: connectionNote.trim() || undefined,
         }),
       });
 
       if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.error || 'Failed to link questions');
+        const json = await res.json();
+        throw new Error(json.error || 'Failed to create connection');
       }
 
       const json = await res.json();
-      setSavedConnections((prev) => [json.connection, ...prev]);
-      setSelectedTargetQ(null);
-      setRelationNote('');
+      setSavedConnections((prev) => [json.data, ...prev]);
+      setSelectedTargetQuestion(null);
+      setConnectionNote('');
       setTargetSearch('');
-      setActiveTab('create');
-      if (onMemorySaved) onMemorySaved(json.connection);
-    } catch (err: any) {
-      setError(err.message || 'Could not connect questions.');
+      setSaveSuccess(true);
+    } catch (e: any) {
+      setError(e.message || 'Error connecting questions');
     } finally {
-      setLinkingQuestion(false);
+      setSaving(false);
     }
   };
-
-  // Delete Memory
-  const handleDeleteMemory = async (memoryId: string) => {
-    try {
-      const res = await fetch(`/api/memories?id=${memoryId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setSavedMemories((prev) => prev.filter((m) => m.id !== memoryId));
-        if (onMemorySaved) onMemorySaved(null);
-      }
-    } catch (err) {
-      console.error('Failed to delete memory:', err);
-    }
-  };
-
-  // Delete Question Connection
-  const handleDeleteConnection = async (connId: string) => {
-    try {
-      const res = await fetch(`/api/memories/connections?id=${connId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setSavedConnections((prev) => prev.filter((c) => c.id !== connId));
-        if (onMemorySaved) onMemorySaved(null);
-      }
-    } catch (err) {
-      console.error('Failed to delete connection:', err);
-    }
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-      <div
-        className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden relative"
-        role="dialog"
-        aria-modal="true"
-      >
-        {/* Top Header */}
-        <div className="px-5 sm:px-7 py-4 bg-gradient-to-r from-stone-900 to-stone-800 text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
-              <BrainSparkIcon size={22} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto relative">
+        
+        {/* Header */}
+        <div className="p-5 sm:p-6 border-b border-stone-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center">
+              <Brain size={18} />
             </div>
             <div>
-              <h2 className="font-extrabold text-base sm:text-lg text-white leading-tight flex items-center gap-2">
-                Personal Memory Connections
-              </h2>
-              <p className="text-stone-400 text-xs mt-0.5">
-                Your private mental triggers, mnemonics & knowledge links
-              </p>
+              <h3 className="text-base font-black text-stone-900">Personal Memory Anchor</h3>
+              <p className="text-[11px] text-stone-500 font-medium">Private to your account</p>
             </div>
           </div>
+
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white flex items-center justify-center transition-colors"
-            aria-label="Close"
+            className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center transition-colors"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Question Context Banner */}
-        <div className="bg-stone-50 border-b border-stone-200 px-5 sm:px-7 py-3 flex items-start gap-3 shrink-0">
-          <div className="text-xs font-bold text-stone-400 shrink-0 mt-1">
-            Q{question.original_question_number || '•'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div
+        <div className="p-5 sm:p-6 space-y-5">
+          {/* Question Preview Box */}
+          <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200/80 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] font-bold text-stone-400">
+              <span>TARGET QUESTION</span>
+              {question.original_question_number && <span>Q{question.original_question_number}</span>}
+            </div>
+            <p
               dir="rtl"
               lang="ar"
-              className="font-arabic font-bold text-stone-900 text-sm sm:text-base leading-relaxed line-clamp-2 text-right"
+              className="font-arabic font-bold text-stone-900 text-sm leading-relaxed text-right line-clamp-2"
             >
               {question.question_arabic}
-            </div>
+            </p>
           </div>
-        </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-5 sm:px-7 pt-3 border-b border-stone-100 bg-white shrink-0">
-          <button
-            onClick={() => setActiveTab('create')}
-            className={`pb-2.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === 'create'
-                ? 'border-emerald-600 text-emerald-800'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
-            }`}
-          >
-            <BrainSparkIcon size={16} />
-            Create Memory Trick
-          </button>
-          <button
-            onClick={() => setActiveTab('connect_question')}
-            className={`pb-2.5 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === 'connect_question'
-                ? 'border-emerald-600 text-emerald-800'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
-            }`}
-          >
-            <LinkConnectionIcon size={16} />
-            Connect Two Questions
-          </button>
-        </div>
+          {/* Simple 2-Mode Selector */}
+          <div className="flex rounded-xl bg-stone-100 p-1 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setMode('trick')}
+              className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                mode === 'trick' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'
+              }`}
+            >
+              <Zap size={14} className="text-amber-500" />
+              <span>Memory Trick / Note</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('link_question')}
+              className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                mode === 'link_question' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'
+              }`}
+            >
+              <Link2 size={14} className="text-emerald-700" />
+              <span>Link Another Question</span>
+            </button>
+          </div>
 
-        {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
-          {error && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl font-medium">
-              {error}
-            </div>
-          )}
-
-          {activeTab === 'create' && (
-            <>
-              {/* ── 1. One-Line Fast Memory Input ── */}
-              <div className="bg-stone-50/80 rounded-2xl p-4 border border-stone-200/80">
-                <div className="text-xs font-extrabold text-stone-700 uppercase tracking-wider mb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Zap size={14} className="text-amber-500" /> Fast Quick Memory
-                  </span>
-                  {quickSavedSuccess && (
-                    <span className="text-emerald-700 text-xs font-bold flex items-center gap-1">
-                      <Check size={14} /> Saved instantly!
-                    </span>
-                  )}
-                </div>
-                <form onSubmit={handleQuickSave} className="flex gap-2">
-                  <input
-                    type="text"
-                    dir="auto"
-                    value={quickTrick}
-                    onChange={(e) => setQuickTrick(e.target.value)}
-                    placeholder="Write your one-sentence memory trick (e.g. Mir = Masnavi)..."
-                    className="flex-1 bg-white border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium"
-                  />
-                  <button
-                    type="submit"
-                    disabled={quickSaving || !quickTrick.trim()}
-                    className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm disabled:opacity-40 flex items-center gap-1.5 shrink-0"
-                  >
-                    {quickSaving ? 'Saving...' : 'Save'}
-                  </button>
-                </form>
-              </div>
-
-              {/* ── 2. Deep Personal Memory Creation ── */}
-              <form onSubmit={handleSaveConnection} className="space-y-4">
-                {/* Type Selection */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Connection Type
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowAdvancedTypes(!showAdvancedTypes)}
-                      className="text-xs font-semibold text-emerald-700 hover:underline"
-                    >
-                      {showAdvancedTypes ? 'Show Fewer Types' : 'Add Another Connection Type ›'}
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {(showAdvancedTypes ? MEMORY_TYPES : MEMORY_TYPES.slice(0, 4)).map((t) => {
-                      const isSelected = selectedType === t.id;
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setSelectedType(t.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
-                            isSelected
-                              ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                              : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
-                          }`}
-                        >
-                          <span>{t.label}</span>
-                          <span className="text-[10px] opacity-75 font-arabic" dir="rtl">
-                            ({t.arabicLabel})
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Smart Prompts Suggestions */}
-                {smartPrompts.length > 0 && (
-                  <div className="bg-amber-50/60 rounded-2xl p-3 border border-amber-200/60">
-                    <div className="text-[11px] font-bold text-amber-900 mb-1.5 flex items-center gap-1.5">
-                      <Lightbulb size={13} className="text-amber-600" />
-                      Try connecting this with:
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {smartPrompts.map((sp) => (
-                        <button
-                          key={sp.id}
-                          type="button"
-                          onClick={() => {
-                            if (!content.includes(sp.template)) {
-                              setContent((prev) => (prev ? `${prev}\n${sp.template}` : sp.template));
-                            }
-                          }}
-                          className="px-2.5 py-1 bg-white hover:bg-amber-100/70 border border-amber-200 text-amber-950 rounded-lg text-xs font-medium transition-colors text-left"
-                          title={sp.hint}
-                        >
-                          + {sp.category}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Core Question Textarea: "How will YOU remember this?" */}
-                <div>
-                  <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1.5">
-                    How will <span className="text-emerald-700 underline">YOU</span> remember this?
-                  </label>
-                  <textarea
-                    dir="auto"
-                    rows={4}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Write your mental association, acronym, memory story or rule in English or Arabic (e.g. مرحلة = مرح + لة)..."
-                    className="w-full bg-white border border-stone-300 rounded-2xl p-4 text-sm sm:text-base text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 font-arabic leading-relaxed resize-y"
-                  />
-                </div>
-
-                {/* Keywords */}
-                <div>
-                  <label className="block text-xs font-semibold text-stone-600 mb-1">
-                    Keywords / Tags (comma separated):
-                  </label>
-                  <input
-                    type="text"
-                    dir="auto"
-                    value={keywords}
-                    onChange={(e) => setKeywords(e.target.value)}
-                    placeholder="e.g. Abbasid, Masnavi, Diwan, Century 4"
-                    className="w-full bg-white border border-stone-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                  />
-                </div>
-
-                {/* Save Button */}
-                <div className="flex items-center justify-between pt-2">
-                  {saveSuccess && (
-                    <span className="text-emerald-700 text-xs font-bold flex items-center gap-1">
-                      <Check size={16} /> Saved to your memory database!
-                    </span>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={saving || !content.trim()}
-                    className="ml-auto px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm disabled:opacity-40 flex items-center gap-2"
-                  >
-                    {saving ? 'Saving...' : 'Save Connection'}
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
-
-          {activeTab === 'connect_question' && (
-            <div className="space-y-5">
-              <div className="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200/70 text-xs text-emerald-950 font-medium leading-relaxed">
-                Connect this question with another question in your knowledge base to forge a personal conceptual graph.
-              </div>
-
-              {/* Search target question */}
+          {/* ── MODE 1: MEMORY TRICK ── */}
+          {mode === 'trick' && (
+            <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
-                  Search Question to Link:
+                <label className="block text-xs font-bold text-stone-700 mb-2">
+                  How do you want to remember this?
                 </label>
-                <div className="relative">
-                  <Search size={16} className="absolute left-3.5 top-3 text-stone-400" />
-                  <input
-                    type="text"
-                    dir="auto"
-                    value={targetSearch}
-                    onChange={(e) => setTargetSearch(e.target.value)}
-                    placeholder="Search by Arabic text, author, book, year or keyword..."
-                    className="w-full bg-white border border-stone-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium"
-                  />
-                </div>
-
-                {/* Search Results */}
-                <div className="mt-2 space-y-1.5 max-h-48 overflow-y-auto">
-                  {searching && (
-                    <div className="p-3 text-xs text-stone-400 text-center">Searching questions...</div>
-                  )}
-                  {!searching && searchResults.map((q) => {
-                    const isSelected = selectedTargetQ?.id === q.id;
+                
+                {/* 3 Clear Primary Types */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[
+                    { id: 'TRICK', label: 'My Trick', icon: Zap },
+                    { id: 'MNEMONIC', label: 'Formula', icon: Brain },
+                    { id: 'STORY', label: 'Short Story', icon: BookOpen },
+                  ].map((t) => {
+                    const isSelected = selectedType === t.id;
+                    const Icon = t.icon;
                     return (
                       <button
-                        key={q.id}
+                        key={t.id}
                         type="button"
-                        onClick={() => setSelectedTargetQ(q)}
-                        className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-start gap-2.5 ${
+                        onClick={() => setSelectedType(t.id as MemoryType)}
+                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                           isSelected
-                            ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold'
-                            : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-800'
+                            ? 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-1 ring-emerald-400'
+                            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
                         }`}
                       >
-                        <span className="text-[11px] font-bold text-stone-400 mt-0.5 shrink-0">
-                          {q.exam_paper?.year ? `${q.exam_paper.year} P${q.exam_paper.paper_number}` : `Q${q.original_question_number}`}
-                        </span>
-                        <div
-                          dir="rtl"
-                          lang="ar"
-                          className="flex-1 font-arabic text-xs sm:text-sm leading-relaxed text-right line-clamp-1"
-                        >
-                          {q.question_arabic}
-                        </div>
+                        <Icon size={14} className={isSelected ? 'text-emerald-700' : 'text-stone-400'} />
+                        <span>{t.label}</span>
                       </button>
                     );
                   })}
                 </div>
+
+                <textarea
+                  dir="auto"
+                  rows={3}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Write your mental shortcut, author formula, or story here... (e.g. Abu al-Faraj = Isfahan + 24 parts + Kitab al-Aghani)"
+                  className="w-full p-3.5 bg-white border border-stone-200 rounded-2xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none leading-relaxed transition-all placeholder:text-stone-400"
+                />
               </div>
 
-              {/* Selected Question Details & Relationship */}
-              {selectedTargetQ && (
-                <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200 space-y-3">
-                  <div className="text-xs font-bold text-stone-700">Connecting With:</div>
-                  <div
-                    dir="rtl"
-                    lang="ar"
-                    className="font-arabic font-bold text-stone-900 text-sm bg-white p-3 rounded-xl border border-stone-200 text-right leading-relaxed"
-                  >
-                    {selectedTargetQ.question_arabic}
+              {/* Smart Prompts Suggestions */}
+              {smartPrompts.length > 0 && !content && (
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    Suggested Framework:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {smartPrompts.slice(0, 2).map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setContent(p.template)}
+                        className="text-[11px] font-arabic font-bold text-stone-600 bg-stone-50 hover:bg-emerald-50 border border-stone-200 hover:border-emerald-300 px-2.5 py-1 rounded-lg transition-colors text-right"
+                      >
+                        {p.template}
+                      </button>
+                    ))}
                   </div>
+                </div>
+              )}
 
-                  <div>
-                    <label className="block text-xs font-bold text-stone-700 mb-1">
-                      Relationship Type:
-                    </label>
-                    <select
-                      value={relationType}
-                      onChange={(e) => setRelationType(e.target.value as RelationshipType)}
-                      className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs sm:text-sm text-stone-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              {/* Optional Advanced Accordion */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="text-xs font-bold text-stone-500 hover:text-stone-800 inline-flex items-center gap-1"
+                >
+                  <ChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  <span>{showAdvanced ? 'Hide tags' : '+ Add keywords / tags'}</span>
+                </button>
+
+                {showAdvanced && (
+                  <div className="mt-2 pt-2 border-t border-stone-100">
+                    <input
+                      type="text"
+                      value={keywords}
+                      onChange={(e) => setKeywords(e.target.value)}
+                      placeholder="Keywords separated by comma (e.g. Author, Jahiliyyah, Muallaqah)"
+                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div className="text-xs font-bold text-rose-700 bg-rose-50 p-2.5 rounded-xl border border-rose-200">
+                  {error}
+                </div>
+              )}
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={handleSaveMemory}
+                  className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {saveSuccess ? (
+                    <>
+                      <Check size={16} /> Saved to 5-Level Retention Queue!
+                    </>
+                  ) : saving ? (
+                    'Saving...'
+                  ) : (
+                    'Save Memory Anchor'
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── MODE 2: LINK ANOTHER QUESTION ── */}
+          {mode === 'link_question' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                  Search & select question to link:
+                </label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-3 text-stone-400" />
+                  <input
+                    type="text"
+                    value={targetSearch}
+                    onChange={(e) => setTargetSearch(e.target.value)}
+                    placeholder="Search by author, title, or Arabic keyword..."
+                    className="w-full pl-9 pr-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div className="max-h-36 overflow-y-auto divide-y divide-stone-100 border border-stone-200 rounded-xl bg-white">
+                  {searchResults.map((sq) => (
+                    <div
+                      key={sq.id}
+                      onClick={() => setSelectedTargetQuestion(sq)}
+                      className={`p-2.5 text-xs cursor-pointer transition-colors ${
+                        selectedTargetQuestion?.id === sq.id ? 'bg-emerald-50 text-emerald-900 font-bold' : 'hover:bg-stone-50'
+                      }`}
                     >
-                      {RELATIONSHIP_TYPES.map((rt) => (
-                        <option key={rt.id} value={rt.id}>
-                          {rt.label} ({rt.arabicLabel})
+                      <span className="font-bold text-[10px] text-stone-400">
+                        {sq.exam_paper?.year} P{sq.exam_paper?.paper_number} • Q{sq.original_question_number}
+                      </span>
+                      <p dir="rtl" lang="ar" className="font-arabic text-xs line-clamp-1 mt-0.5">
+                        {sq.question_arabic}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selectedTargetQuestion && (
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2">
+                  <div className="text-[11px] font-bold text-emerald-900">
+                    Selected: {selectedTargetQuestion.exam_paper?.year} Q{selectedTargetQuestion.original_question_number}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      value={relationshipType}
+                      onChange={(e) => setRelationshipType(e.target.value as RelationshipType)}
+                      className="p-2 bg-white border border-stone-200 rounded-lg text-xs font-bold"
+                    >
+                      {RELATIONSHIP_TYPES.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.label}
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-stone-600 mb-1">
-                      Connection Note (Optional):
-                    </label>
                     <input
                       type="text"
-                      dir="auto"
-                      value={relationNote}
-                      onChange={(e) => setRelationNote(e.target.value)}
-                      placeholder="e.g. Both written by the same author in 4th century AH"
-                      className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs sm:text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                      value={connectionNote}
+                      onChange={(e) => setConnectionNote(e.target.value)}
+                      placeholder="Optional link note..."
+                      className="p-2 bg-white border border-stone-200 rounded-lg text-xs"
                     />
                   </div>
+                </div>
+              )}
 
-                  <button
-                    type="button"
-                    onClick={handleLinkQuestions}
-                    disabled={linkingQuestion}
-                    className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm disabled:opacity-40"
-                  >
-                    {linkingQuestion ? 'Linking...' : 'Connect Questions in Knowledge Graph'}
-                  </button>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  disabled={saving || !selectedTargetQuestion}
+                  onClick={handleCreateConnection}
+                  className="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+                >
+                  <Link2 size={15} />
+                  <span>Connect Questions</span>
+                </button>
+              </div>
+
+              {/* Existing Connections */}
+              {savedConnections.length > 0 && (
+                <div className="pt-3 border-t border-stone-100 space-y-2">
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                    Existing Connections ({savedConnections.length}):
+                  </span>
+                  <div className="space-y-1.5">
+                    {savedConnections.map((c) => (
+                      <div key={c.id} className="p-2 rounded-lg bg-stone-50 border border-stone-200 text-xs flex items-center justify-between">
+                        <span className="font-bold text-stone-700">
+                          Q{c.target_question.original_question_number}: {c.relationship_type}
+                        </span>
+                        {c.note && <span className="text-stone-400 text-[11px]">{c.note}</span>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* ── 3. Saved Memories for this Question ── */}
-          {(savedMemories.length > 0 || savedConnections.length > 0) && (
-            <div className="pt-4 border-t border-stone-200 space-y-3">
-              <div className="text-xs font-extrabold text-stone-700 uppercase tracking-wider">
-                My Saved Connections for this Question ({savedMemories.length + savedConnections.length})
-              </div>
-
-              <div className="space-y-2">
-                {savedMemories.map((m) => {
-                  const typeMeta = MEMORY_TYPES.find((t) => t.id === m.type);
-                  return (
-                    <div
-                      key={m.id}
-                      className="bg-stone-50 border border-stone-200/90 rounded-2xl p-3.5 flex items-start justify-between gap-3 group"
-                    >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                            {typeMeta?.label || m.type}
-                          </span>
-                        </div>
-                        <div
-                          dir="auto"
-                          className="font-arabic font-bold text-stone-900 text-sm sm:text-base leading-relaxed whitespace-pre-wrap"
-                        >
-                          {m.content}
-                        </div>
-                        {Array.isArray(m.keywords) && m.keywords.length > 0 && (
-                          <div className="flex flex-wrap gap-1 pt-1">
-                            {m.keywords.map((kw, i) => (
-                              <span
-                                key={i}
-                                className="px-1.5 py-0.5 rounded bg-stone-200/70 text-stone-600 text-[10px] font-medium"
-                              >
-                                #{kw}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteMemory(m.id)}
-                        className="text-stone-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors shrink-0"
-                        title="Delete this memory"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {savedConnections.map((c) => {
-                  const relMeta = RELATIONSHIP_TYPES.find((r) => r.id === c.relationship_type);
-                  return (
-                    <div
-                      key={c.id}
-                      className="bg-emerald-50/50 border border-emerald-200/80 rounded-2xl p-3.5 flex items-start justify-between gap-3"
-                    >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-700 text-white text-[10px] font-bold flex items-center gap-1">
-                            <LinkConnectionIcon size={12} />
-                            {relMeta?.label || c.relationship_type}
-                          </span>
-                        </div>
-                        <div
-                          dir="rtl"
-                          lang="ar"
-                          className="font-arabic font-bold text-emerald-950 text-xs sm:text-sm leading-relaxed text-right line-clamp-2"
-                        >
-                          {c.target_question?.question_arabic}
-                        </div>
-                        {c.note && (
-                          <div className="text-xs text-emerald-800 font-medium italic">
-                            Note: {c.note}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteConnection(c.id)}
-                        className="text-stone-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors shrink-0"
-                        title="Delete question connection"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 sm:px-7 py-3 bg-stone-50 border-t border-stone-200 flex items-center justify-between text-xs text-stone-500 shrink-0">
-          <span>Personal & Private to your account</span>
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold rounded-xl transition-colors"
-          >
-            Done
-          </button>
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   Trophy,
   Layers,
-  Sparkles,
+  Play,
 } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
@@ -312,8 +312,8 @@ export default async function DashboardPage() {
       type: 'REVIEW_MISTAKES',
       badge: 'WEAK AREA FOCUS',
       badgeColor: 'bg-rose-50 text-rose-900 border border-rose-200',
-      title: `You have ${incorrectCount} incorrect ${incorrectCount === 1 ? 'question' : 'questions'} to master`,
-      subtitle: 'Targeted revision based on past test attempts',
+      title: `You have ${incorrectCount} questions to review`,
+      subtitle: 'Targeted revision based on past test mistakes',
       description: 'Revisit your mistakes to eliminate weak points and prevent repeated errors in the exam.',
       ctaText: 'Review Mistakes →',
       ctaHref: '/dashboard/incorrect',
@@ -323,8 +323,8 @@ export default async function DashboardPage() {
       type: 'START_FIRST_TEST',
       badge: 'GET STARTED',
       badgeColor: 'bg-stone-100 text-stone-800 border border-stone-300',
-      title: 'You haven’t started a test yet',
-      subtitle: 'Begin with recent 2024 PYQs or Syllabus Unit 1',
+      title: 'Start your first PYQ paper',
+      subtitle: 'You haven’t started a test yet',
       description: 'Solve real past exam questions to establish your baseline accuracy and unlock personal memory tracking.',
       ctaText: 'Choose a PYQ Paper →',
       ctaHref: '/pyq',
@@ -354,101 +354,112 @@ export default async function DashboardPage() {
     };
   }
 
+  // Determine accuracy label
+  let accuracyContext = 'Based on practice attempts';
+  if (questionsAttempted > 0) {
+    if (accuracyRate >= 75) accuracyContext = 'Strong performance';
+    else if (accuracyRate >= 50) accuracyContext = 'Developing accuracy';
+    else accuracyContext = 'Needs focused practice';
+  }
+
   return (
     <div className="flex-1 bg-stone-50/60 min-h-screen text-stone-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* ── 1. WELCOME + PREPARATION SUMMARY ── */}
+        {/* ── 1. WELCOME + ACTIONABLE STATUS ── */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <div className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-800 mb-1">
-              STUDENT DASHBOARD
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight">
-              {session?.user?.name ? `Welcome back, ${session.user.name}` : 'Welcome to Your Dashboard'}
+            <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+              Welcome back 👋
             </h1>
-            <p className="text-stone-500 text-sm font-medium mt-0.5">
-              Your personal command center for UGC NET Arabic preparation.
+            <p className="text-stone-500 text-xs sm:text-sm font-medium mt-0.5">
+              {dueReviewCount > 0
+                ? `You have ${dueReviewCount} memories due for review today.`
+                : incorrectCount > 0
+                ? `You have ${incorrectCount} mistakes logged to review.`
+                : `Your preparation queue is currently clear.`}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-bold">
+          <div className="flex items-center gap-2.5 text-xs font-bold">
             <Link
               href="/dashboard/bookmarks"
-              className="px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:border-stone-300 transition-colors inline-flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:border-stone-300 transition-colors inline-flex items-center gap-1.5"
             >
-              <Bookmark size={14} className="text-amber-600" />
+              <Bookmark size={13} className="text-amber-600" />
               <span>Bookmarks ({bookmarkedCount})</span>
             </Link>
             <Link
               href="/memories"
-              className="px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:border-stone-300 transition-colors inline-flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:border-stone-300 transition-colors inline-flex items-center gap-1.5"
             >
-              <Brain size={14} className="text-emerald-700" />
+              <Brain size={13} className="text-emerald-700" />
               <span>Knowledge Graph ({connectionsCount})</span>
             </Link>
           </div>
         </div>
 
-        {/* ── 2. PREPARATION STATS STRIP (Where am I?) ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-8">
-          <div className="bg-white rounded-2xl p-5 border border-stone-200/90 shadow-sm">
-            <div className="text-xs font-bold uppercase tracking-wider text-stone-400">Questions Solved</div>
-            <div className="text-3xl font-black text-stone-900 mt-1">{questionsAttempted}</div>
-            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Total attempts logged</div>
+        {/* ── 2. PREPARATION METRICS STRIP (Where am I?) ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-sm">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">Questions Solved</div>
+            <div className="text-2xl sm:text-3xl font-black text-stone-900 mt-1">{questionsAttempted}</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Attempts logged</div>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-stone-200/90 shadow-sm">
-            <div className="text-xs font-bold uppercase tracking-wider text-stone-400">Accuracy Rate</div>
-            <div className="text-3xl font-black text-emerald-800 mt-1">{accuracyRate}%</div>
-            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Across all mock tests</div>
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-sm">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">Accuracy Rate</div>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">{accuracyRate}%</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">{accuracyContext}</div>
           </div>
 
           <Link
             href="/dashboard/incorrect"
-            className="bg-white hover:bg-rose-50/40 rounded-2xl p-5 border border-stone-200/90 hover:border-rose-200 shadow-sm transition-all group"
+            className="bg-white hover:bg-rose-50/40 rounded-2xl p-4 sm:p-5 border border-stone-200/90 hover:border-rose-200 shadow-sm transition-all group"
           >
-            <div className="text-xs font-bold uppercase tracking-wider text-stone-400 group-hover:text-rose-700">
-              Mistakes Logged
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 group-hover:text-rose-700">
+              Mistakes to Master
             </div>
-            <div className="text-3xl font-black text-rose-700 mt-1">{incorrectCount}</div>
-            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Questions to review →</div>
+            <div className="text-2xl sm:text-3xl font-black text-rose-700 mt-1">{incorrectCount}</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Review mistakes →</div>
           </Link>
 
           <Link
             href="/memories"
-            className="bg-white hover:bg-emerald-50/40 rounded-2xl p-5 border border-stone-200/90 hover:border-emerald-200 shadow-sm transition-all group"
+            className="bg-white hover:bg-emerald-50/40 rounded-2xl p-4 sm:p-5 border border-stone-200/90 hover:border-emerald-200 shadow-sm transition-all group"
           >
-            <div className="text-xs font-bold uppercase tracking-wider text-stone-400 group-hover:text-emerald-800">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 group-hover:text-emerald-800">
               PYQs Mastered 🏆
             </div>
-            <div className="text-3xl font-black text-emerald-800 mt-1">{completedCount}</div>
-            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Passed all 5 levels →</div>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">{completedCount}</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">
+              {totalTrackedCount > 0 ? `${completedCount} of ${totalTrackedCount} in queue` : '5-Level retention'}
+            </div>
           </Link>
         </div>
 
-        {/* ── 3. DOMINANT NEXT BEST ACTION CARD (What should I do now?) ── */}
-        <div className="bg-white rounded-3xl border-2 border-stone-900 shadow-lg p-6 sm:p-8 mb-10 relative overflow-hidden">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
+        {/* ── 3. THE DOMINANT NEXT BEST ACTION CARD (What should I do now?) ── */}
+        <div className="bg-white rounded-3xl border-2 border-stone-900 shadow-md p-6 sm:p-7 mb-10 relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div className="space-y-1.5 max-w-2xl">
               <div className="flex items-center gap-2">
-                <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold uppercase tracking-wider ${nextAction.badgeColor}`}>
+                <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider ${nextAction.badgeColor}`}>
                   {nextAction.badge}
                 </span>
-                <span className="text-xs font-mono text-stone-400 uppercase tracking-widest">
+                <span className="text-[11px] font-mono text-stone-400 uppercase tracking-widest">
                   NEXT BEST ACTION
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">
                 {nextAction.title}
               </h2>
 
-              <div className="text-sm font-bold text-emerald-900 font-sans">
+              <div className="text-xs sm:text-sm font-bold text-emerald-900">
                 {nextAction.subtitle}
               </div>
 
-              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+              <p className="text-xs text-stone-600 font-medium leading-relaxed">
                 {nextAction.description}
               </p>
             </div>
@@ -456,7 +467,7 @@ export default async function DashboardPage() {
             <div className="shrink-0">
               <Link
                 href={nextAction.ctaHref}
-                className="px-7 py-4 bg-stone-900 hover:bg-stone-800 text-white font-black text-sm sm:text-base rounded-2xl transition-all shadow-md inline-flex items-center gap-2 active:scale-95"
+                className="px-6 py-3.5 bg-stone-900 hover:bg-stone-800 text-white font-black text-xs sm:text-sm rounded-xl transition-all shadow-sm inline-flex items-center gap-2 active:scale-95"
               >
                 <span>{nextAction.ctaText}</span>
               </Link>
@@ -464,14 +475,14 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* ── 4. WEAK AREAS & UNIT MASTERY (What am I weak at?) ── */}
+        {/* ── 4. FOCUS NEXT / WEAK AREAS (What am I weak at?) ── */}
         {weakestUnits.length > 0 && (
-          <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-8 shadow-sm mb-10">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-4 mb-6">
+          <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-7 shadow-sm mb-10">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-5">
               <div>
-                <h3 className="text-lg font-black text-stone-900">Your Weak Areas</h3>
+                <h3 className="text-base font-black text-stone-900">Focus Next: Weak Areas</h3>
                 <p className="text-xs text-stone-500 font-medium mt-0.5">
-                  Units with the highest concentration of mistakes based on your practice.
+                  Units with the highest frequency of errors in past tests.
                 </p>
               </div>
 
@@ -479,21 +490,21 @@ export default async function DashboardPage() {
                 href="/dashboard/incorrect"
                 className="text-xs font-bold text-rose-700 hover:text-rose-900 transition-colors flex items-center gap-1"
               >
-                <span>All Mistakes ({incorrectCount})</span>
-                <ChevronRight size={14} />
+                <span>Review All Mistakes ({incorrectCount})</span>
+                <ChevronRight size={13} />
               </Link>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-3.5">
-              {weakestUnits.slice(0, 3).map((w) => (
+            <div className="grid sm:grid-cols-3 gap-3">
+              {weakestUnits.slice(0, 3).map((w, idx) => (
                 <Link
                   key={w.unit_number}
                   href={`/syllabus/${w.unit_number}`}
-                  className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 hover:border-rose-300 transition-all group flex flex-col justify-between space-y-3"
+                  className="p-4 rounded-2xl bg-rose-50/40 border border-rose-100 hover:border-rose-300 transition-all group flex flex-col justify-between space-y-2.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="w-7 h-7 rounded-xl bg-white border border-rose-200 text-rose-900 font-bold text-xs flex items-center justify-center">
-                      U{w.unit_number}
+                    <span className="text-xs font-bold text-rose-900">
+                      {idx + 1}. Unit {w.unit_number}
                     </span>
                     <span className="text-xs font-bold text-rose-700">
                       {w.count} {w.count === 1 ? 'mistake' : 'mistakes'}
@@ -504,7 +515,7 @@ export default async function DashboardPage() {
                     <div
                       dir="rtl"
                       lang="ar"
-                      className="font-arabic font-bold text-stone-900 text-base line-clamp-1 text-right"
+                      className="font-arabic font-bold text-stone-900 text-sm line-clamp-1 text-right"
                     >
                       {w.name_arabic}
                     </div>
@@ -522,7 +533,7 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* ── 5. 5-LEVEL SPACED REPETITION & COMPLETION TRACKER (What should I remember?) ── */}
+        {/* ── 5. YOUR MEMORY RETENTION LOOP & 5-LEVEL TRACKER (What should I remember?) ── */}
         <SpacedPyqTracker
           completedItems={completedSpacedItems}
           activeItems={activeSpacedItems}
@@ -533,12 +544,12 @@ export default async function DashboardPage() {
         />
 
         {/* ── 6. RECENT TEST ACTIVITY (What did I do?) ── */}
-        <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-8 shadow-sm mb-12">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-4 mb-6">
+        <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-7 shadow-sm mb-12">
+          <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-5">
             <div>
-              <h3 className="text-lg font-black text-stone-900">Recent Test Activity</h3>
+              <h3 className="text-base font-black text-stone-900">Recent Test Activity</h3>
               <p className="text-xs text-stone-500 font-medium mt-0.5">
-                Past mock test attempts and scores.
+                History of completed and ongoing mock practice sessions.
               </p>
             </div>
 
@@ -547,15 +558,15 @@ export default async function DashboardPage() {
               className="text-xs font-bold text-emerald-800 hover:text-emerald-950 transition-colors flex items-center gap-1"
             >
               <span>Browse All Papers</span>
-              <ChevronRight size={14} />
+              <ChevronRight size={13} />
             </Link>
           </div>
 
           {recentSessions.length === 0 ? (
-            <div className="text-center py-8 px-4 space-y-2">
-              <Clock size={32} className="mx-auto text-stone-300" />
-              <p className="text-sm font-bold text-stone-700">No test attempts yet</p>
-              <p className="text-xs text-stone-400 max-w-sm mx-auto">
+            <div className="text-center py-6 px-4 space-y-1.5">
+              <Clock size={28} className="mx-auto text-stone-300" />
+              <p className="text-xs font-bold text-stone-700">No test attempts yet</p>
+              <p className="text-[11px] text-stone-400 max-w-sm mx-auto">
                 Start practicing PYQs or Syllabus units to see your score history logged here.
               </p>
             </div>
@@ -573,32 +584,32 @@ export default async function DashboardPage() {
                 return (
                   <div
                     key={rs.id}
-                    className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-stone-900 text-sm">{displayTitle}</span>
+                        <span className="font-bold text-stone-900 text-xs sm:text-sm">{displayTitle}</span>
                         {isOngoing && (
                           <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px]">
                             In Progress
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-stone-400 font-medium">
+                      <div className="text-[11px] text-stone-400 font-medium">
                         {rs.started_at ? formatRelativeDate(rs.started_at) : 'Recently'} • {rs.total_questions} questions
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       {!isOngoing ? (
                         <div className="text-right">
-                          <div className="text-sm font-black text-stone-900">{rs.score} pts</div>
-                          <div className="text-xs font-bold text-emerald-700">{accuracy}% accuracy</div>
+                          <div className="text-xs sm:text-sm font-black text-stone-900">{rs.score} pts</div>
+                          <div className="text-[11px] font-bold text-emerald-700">{accuracy}% accuracy</div>
                         </div>
                       ) : (
                         <Link
                           href={`/practice?sessionId=${rs.id}`}
-                          className="px-3.5 py-1.5 rounded-xl bg-stone-900 text-white font-bold text-xs hover:bg-stone-800 transition-colors"
+                          className="px-3 py-1 rounded-xl bg-stone-900 text-white font-bold text-xs hover:bg-stone-800 transition-colors"
                         >
                           Resume
                         </Link>
@@ -611,9 +622,9 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* ── 7. ACCOUNT SETTINGS (Subordinate Section) ── */}
-        <div id="account-settings" className="border-t border-stone-200 pt-8 pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 rounded-2xl p-6 border border-stone-200 text-xs">
+        {/* ── 7. ACCOUNT MANAGEMENT (Subordinate Section) ── */}
+        <div id="account-settings" className="border-t border-stone-200 pt-6 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/70 rounded-2xl p-5 border border-stone-200 text-xs">
             <div>
               <div className="font-bold text-stone-900">Account Management</div>
               <div className="text-stone-500 mt-0.5">Signed in as {session?.user?.email || 'Student'}</div>
