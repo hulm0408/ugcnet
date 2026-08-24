@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { List, X } from 'lucide-react';
+import { getOptionText } from '@/lib/arabicUtils';
 
 interface QuestionReviewViewProps {
   year?: string;
@@ -282,13 +283,13 @@ export default function QuestionReviewView({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center flex-wrap gap-1 sm:gap-2 mb-1">
                               <div dir="rtl" className="font-arabic text-lg sm:text-xl font-bold text-stone-900 leading-snug">
-                                {currentQ.options_arabic?.[opt] as string}
+                                {getOptionText(currentQ.options_arabic?.[opt], 'ar')}
                               </div>
                               {badge}
                             </div>
                             {currentQ.options_english && (
                               <div className="text-stone-600 text-xs sm:text-sm">
-                                {currentQ.options_english[opt] as string}
+                                {getOptionText(currentQ.options_english[opt], 'en')}
                               </div>
                             )}
                           </div>

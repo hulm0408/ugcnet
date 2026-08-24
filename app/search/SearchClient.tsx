@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Filter, BookOpen, Layers, Calendar, ChevronLeft, ChevronRight, Eye, EyeOff, PlayCircle } from 'lucide-react';
 import Link from 'next/link';
+import { getOptionText } from '@/lib/arabicUtils';
 
 interface QuestionItem {
   id: string;
@@ -269,7 +270,7 @@ export default function SearchClient({
                           lang="ar"
                           className="font-arabic font-bold text-base sm:text-lg leading-snug flex-1"
                         >
-                          {optTextAr || '—'}
+                          {getOptionText(optTextAr, 'ar') || '—'}
                         </div>
                       </div>
                     );

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import prisma from '@/lib/db';
 import Link from 'next/link';
 import { ChevronLeft, XCircle } from 'lucide-react';
+import { getOptionText } from '@/lib/arabicUtils';
 
 export const metadata: Metadata = {
   title: 'Mistakes & Review | Dashboard',
@@ -114,13 +115,13 @@ export default async function IncorrectQuestionsPage() {
                         <div className="flex items-start gap-3">
                           <span className="font-bold text-red-600 shrink-0">Your Answer:</span>
                           <span dir="rtl" className="font-arabic text-base text-stone-700">
-                            {attempt.selected_option ? options[attempt.selected_option] : 'No Answer'}
+                            {attempt.selected_option ? getOptionText(options?.[attempt.selected_option], 'ar') : 'No Answer'}
                           </span>
                         </div>
                         <div className="flex items-start gap-3">
                           <span className="font-bold text-emerald-600 shrink-0">Correct Answer:</span>
                           <span dir="rtl" className="font-arabic text-base text-stone-900 font-bold">
-                            {options[q.correct_answer] || q.correct_answer_text_arabic}
+                            {getOptionText(options?.[q.correct_answer] || q.correct_answer_text_arabic, 'ar')}
                           </span>
                         </div>
                       </div>

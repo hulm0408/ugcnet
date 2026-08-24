@@ -215,8 +215,41 @@ export async function GET(request: Request) {
       prisma.question.count({ where }),
     ]);
 
+    const normalizedQuestions = questions.map((q) => {
+      const optAr = (q.options_arabic as any) || {};
+      const optEn = (q.options_english as any) || {};
+
+      const cleanOptAr: Record<string, string> = {};
+      const cleanOptEn: Record<string, string> = {};
+
+      for (const k of ['A', 'B', 'C', 'D']) {
+        const valAr = optAr[k];
+        if (typeof valAr === 'object' && valAr !== null) {
+          cleanOptAr[k] = valAr.arabic || valAr.text || '';
+          if (!optEn[k] && valAr.english) {
+            cleanOptEn[k] = valAr.english;
+          }
+        } else {
+          cleanOptAr[k] = typeof valAr === 'string' ? valAr : '';
+        }
+
+        const valEn = optEn[k] ?? cleanOptEn[k];
+        if (typeof valEn === 'object' && valEn !== null) {
+          cleanOptEn[k] = valEn.english || valEn.text || '';
+        } else if (typeof valEn === 'string' && valEn) {
+          cleanOptEn[k] = valEn;
+        }
+      }
+
+      return {
+        ...q,
+        options_arabic: cleanOptAr,
+        options_english: Object.keys(cleanOptEn).length > 0 ? cleanOptEn : null,
+      };
+    });
+
     return NextResponse.json({
-      data: questions,
+      data: normalizedQuestions,
       meta: {
         total,
         page,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import NtaPaletteIcon from '@/components/ui/NtaPaletteIcon';
 import { Menu, X, AlertCircle, Bookmark, Check, RefreshCw } from 'lucide-react';
+import { getOptionText } from '@/lib/arabicUtils';
 
 interface MockTestViewProps {
   year?: string;
@@ -215,11 +216,11 @@ export default function MockTestView({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div dir="rtl" className="font-arabic text-base sm:text-lg font-bold text-stone-900 mb-1 leading-snug">
-                        {currentQ.options_arabic?.[opt] as string}
+                        {getOptionText(currentQ.options_arabic?.[opt], 'ar')}
                       </div>
                       {currentQ.options_english && (
                         <div className="text-stone-600 text-xs sm:text-sm">
-                          {currentQ.options_english[opt] as string}
+                          {getOptionText(currentQ.options_english[opt], 'en')}
                         </div>
                       )}
                     </div>
