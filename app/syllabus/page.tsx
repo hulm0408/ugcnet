@@ -3,17 +3,24 @@ import Link from 'next/link';
 import { ChevronRight, Layers, BookOpen, GraduationCap, Target } from 'lucide-react';
 import prisma from '@/lib/db';
 import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
+import { getActiveSubjectServer } from '@/lib/subjectContext';
 
-export const metadata: Metadata = {
-  title: 'Official Syllabus — UGC NET Arabic',
-  description: 'Browse the 10 official UGC NET Arabic syllabus units with hierarchical drill-down navigation.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const activeSubject = await getActiveSubjectServer();
+  return {
+    title: `Official Syllabus — UGC NET ${activeSubject.name}`,
+    description: `Browse the official UGC NET ${activeSubject.name} syllabus units with hierarchical drill-down navigation.`,
+  };
+}
 
 export const dynamic = 'force-dynamic';
 
 export default async function SyllabusLandingPage() {
-  // Fetch all 10 official units with their broad topics and questions count
+  const activeSubject = await getActiveSubjectServer();
+
+  // Fetch all official units for this active subject
   const units = await prisma.syllabusUnit.findMany({
+    where: { subject_id: activeSubject.id },
     orderBy: { unit_number: 'asc' },
     select: {
       id: true,
@@ -36,18 +43,17 @@ export default async function SyllabusLandingPage() {
   return (
     <div className="flex-1 min-h-screen pt-8 pb-20 bg-[#FAF9F6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header Title Section: Calm Academic Style */}
         <div className="mb-8 text-left border-b border-stone-200/80 pb-6">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-stone-100 text-stone-600 text-[11px] font-semibold tracking-wider uppercase mb-2.5">
             <GraduationCap size={13} className="text-emerald-800" />
-            <span>Official NTA Curriculum</span>
+            <span>Official NTA Curriculum • {activeSubject.name} (Code {activeSubject.code})</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-1.5">
-            Syllabus Units
+            {activeSubject.name} Syllabus Units
           </h1>
           <p className="text-stone-500 text-xs sm:text-sm font-medium max-w-2xl">
-            Browse the 10 official UGC NET Arabic units. Select a unit to explore its topics, authors, and learning nodes.
+            Browse the official UGC NET {activeSubject.name} units. Select a unit to explore its topics and practice questions.
           </p>
         </div>
 

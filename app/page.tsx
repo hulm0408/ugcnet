@@ -15,35 +15,54 @@ import {
 } from 'lucide-react';
 import prisma from '@/lib/db';
 import PreparationJourneySvg from '@/components/home/PreparationJourneySvg';
+import { getActiveSubjectServer } from '@/lib/subjectContext';
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
+  const activeSubject = await getActiveSubjectServer();
+  const totalQuestions = await prisma.question.count({
+    where: { content_status: 'PUBLISHED', subject_id: activeSubject.id },
+  });
 
   return {
-    title: 'Master UGC NET Arabic — Official Syllabus, Real PYQs & Memory Retention',
-    description: `Master UGC NET Arabic the smart way. Solve ${totalQuestions.toLocaleString()}+ real past exam questions (2004–2024), track your weak areas, and lock your recall with 5-level spaced repetition.`,
+    title: `Master UGC NET ${activeSubject.name} — Official Syllabus, Real PYQs & Mock Tests`,
+    description: `Master UGC NET ${activeSubject.name} the smart way. Solve real past exam questions (${totalQuestions.toLocaleString()}+ Qs), track your weak areas, and practice authentic NTA CBT tests.`,
     alternates: { canonical: '/' },
   };
 }
 
 export default async function HomePage() {
-  const [totalQuestions, totalPapers, totalUnits, papers, unitsList] = await Promise.all([
-    prisma.question.count({ where: { content_status: 'PUBLISHED' } }),
-    prisma.examPaper.count({ where: { content_status: 'PUBLISHED' } }),
-    prisma.syllabusUnit.count(),
+  const activeSubject = await getActiveSubjectServer();
+
+  const [totalQuestions, totalPapers, totalUnits, papers, unitsList, freeBenchmarkPaper] = await Promise.all([
+    prisma.question.count({
+      where: { content_status: 'PUBLISHED', subject_id: activeSubject.id },
+    }),
+    prisma.examPaper.count({
+      where: { content_status: 'PUBLISHED', subject_id: activeSubject.id },
+    }),
+    prisma.syllabusUnit.count({
+      where: { subject_id: activeSubject.id },
+    }),
     prisma.examPaper.findMany({
-      where: { content_status: 'PUBLISHED' },
-      select: { year: true, paper_number: true, display_name: true },
+      where: { content_status: 'PUBLISHED', subject_id: activeSubject.id },
+      select: { year: true, paper_number: true, display_name: true, is_free_benchmark: true, id: true },
       orderBy: { year: 'desc' },
     }),
     prisma.syllabusUnit.findMany({
+      where: { subject_id: activeSubject.id },
       orderBy: { unit_number: 'asc' },
       include: {
         _count: {
           select: { broad_topics: true, questions: true },
         },
+      },
+    }),
+    prisma.examPaper.findFirst({
+      where: {
+        subject_id: activeSubject.id,
+        is_free_benchmark: true,
       },
     }),
   ]);
@@ -52,7 +71,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex-1 overflow-hidden bg-white text-stone-900">
-      {/* ── 1. HERO SECTION: Sharpened Single Promise ── */}
+      {/* ── 1. HERO SECTION: Dynamic Subject Context ── */}
       <section className="relative bg-stone-950 text-white pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-stone-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-8 items-center">
@@ -61,34 +80,37 @@ export default async function HomePage() {
             <div className="lg:col-span-7 space-y-6 text-left">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold tracking-wider uppercase">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                UGC NET / JRF ARABIC • PREPARATION PLATFORM
+                UGC NET / JRF {activeSubject.name.toUpperCase()} (CODE {activeSubject.code}) • PREP PLATFORM
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.12]">
-                Master UGC NET Arabic — <br />
+                Master UGC NET {activeSubject.name} — <br />
                 <span className="text-emerald-400">the smart way.</span>
               </h1>
 
-              <div
-                dir="rtl"
-                lang="ar"
-                className="font-arabic text-lg sm:text-xl text-emerald-200/90 leading-relaxed font-bold"
-              >
-                ادرس المنهج الرسمي • تدرب على أسئلة الامتحانات السابقة • ثبّت حفظك بالروابط الذهنية
-              </div>
+              {activeSubject.name_native && (
+                <div
+                  dir={activeSubject.direction}
+                  className={`text-lg sm:text-xl text-emerald-200/90 leading-relaxed font-bold ${
+                    activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
+                  }`}
+                >
+                  {activeSubject.name_native}
+                </div>
+              )}
 
               <p className="text-stone-300 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
-                Practice real PYQs. Track your weak areas. Build personal memory connections to remember difficult authors, works, and dates for good.
+                Practice authentic {activeSubject.name} PYQs under official NTA exam conditions. Track your weak syllabus units and reinforce key concepts.
               </p>
 
-              {/* Two Primary CTAs */}
+              {/* Primary CTAs */}
               <div className="flex flex-col sm:flex-row gap-3.5 pt-2">
                 <Link
-                  href="/practice"
+                  href={freeBenchmarkPaper ? `/practice?paperId=${freeBenchmarkPaper.id}` : '/pyq'}
                   className="px-7 py-3.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-lg hover:shadow-emerald-900/40 text-center inline-flex items-center justify-center gap-2 active:scale-95"
                 >
                   <Play size={17} fill="currentColor" />
-                  <span>Start Practicing</span>
+                  <span>{freeBenchmarkPaper ? 'Take Free Benchmark Mock Test' : 'Browse Exam Papers'}</span>
                 </Link>
                 <Link
                   href="/syllabus"

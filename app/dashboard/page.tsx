@@ -22,16 +22,21 @@ import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
 import SpacedPyqTracker, { SpacedItem } from '@/components/dashboard/SpacedPyqTracker';
 import prisma from '@/lib/db';
 import { formatRelativeDate } from '@/lib/dateUtils';
+import { getActiveSubjectServer } from '@/lib/subjectContext';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Dashboard — Your Preparation Progress',
-  description: 'Track your UGC NET Arabic progress, accuracy, weak units, and next recommended action.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const activeSubject = await getActiveSubjectServer();
+  return {
+    title: `Dashboard — ${activeSubject.name} Preparation Progress`,
+    description: `Track your UGC NET ${activeSubject.name} progress, accuracy, weak units, and next recommended action.`,
+  };
+}
 
 export default async function DashboardPage() {
   const session = await auth();
+  const activeSubject = await getActiveSubjectServer();
 
   let questionsAttempted = 0;
   let accuracyRate = 0;
@@ -81,16 +86,31 @@ export default async function DashboardPage() {
       recentSessionsDb,
     ] = await Promise.all([
       prisma.practiceAttempt.count({
-        where: { user_id: session.user.id },
+        where: {
+          user_id: session.user.id,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.practiceAttempt.count({
-        where: { user_id: session.user.id, is_correct: true },
+        where: {
+          user_id: session.user.id,
+          is_correct: true,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.practiceAttempt.count({
-        where: { user_id: session.user.id, is_correct: false, is_skipped: false },
+        where: {
+          user_id: session.user.id,
+          is_correct: false,
+          is_skipped: false,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.bookmark.count({
-        where: { user_id: session.user.id },
+        where: {
+          user_id: session.user.id,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.memoryConnection.count({
         where: { user_id: session.user.id },
@@ -369,15 +389,18 @@ export default async function DashboardPage() {
         {/* ── 1. WELCOME + ACTIONABLE STATUS ── */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80 border border-emerald-300 text-emerald-800 text-[11px] font-bold uppercase tracking-wider mb-2">
+              <span>{activeSubject.name} (Code {activeSubject.code})</span>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
-              Welcome back 👋
+              {activeSubject.name} NET/JRF Dashboard
             </h1>
             <p className="text-stone-500 text-xs sm:text-sm font-medium mt-0.5">
               {dueReviewCount > 0
                 ? `You have ${dueReviewCount} memories due for review today.`
                 : incorrectCount > 0
-                ? `You have ${incorrectCount} mistakes logged to review.`
-                : `Your preparation queue is currently clear.`}
+                ? `You have ${incorrectCount} mistakes logged to review in ${activeSubject.name}.`
+                : `Your preparation queue for ${activeSubject.name} is currently clear.`}
             </p>
           </div>
 

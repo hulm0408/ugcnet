@@ -111,6 +111,9 @@ export default function SubjectSwitcher() {
     setActiveSlug(slug);
     setIsOpen(false);
 
+    // Set cookie immediately on client
+    document.cookie = `ugc_active_subject=${slug}; path=/; max-age=31536000; SameSite=Lax`;
+
     try {
       await fetch('/api/subjects', {
         method: 'POST',
@@ -121,7 +124,8 @@ export default function SubjectSwitcher() {
       console.warn('Failed to persist active subject:', err);
     }
 
-    router.refresh();
+    // Full page refresh to ensure all server components re-render with new subject context
+    window.location.reload();
   };
 
   return (
