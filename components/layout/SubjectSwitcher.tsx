@@ -14,10 +14,49 @@ interface SubjectItem {
   direction: 'ltr' | 'rtl';
 }
 
+const DEFAULT_SUBJECTS: SubjectItem[] = [
+  {
+    id: 'subj_paper1_code00',
+    code: '00',
+    slug: 'paper-1',
+    name: 'General Paper 1',
+    name_native: 'General Paper on Teaching & Research Aptitude',
+    is_paper_1: true,
+    direction: 'ltr',
+  },
+  {
+    id: 'subj_arabic_code29',
+    code: '29',
+    slug: 'arabic',
+    name: 'Arabic',
+    name_native: 'اللغة العربية وآدابها',
+    is_paper_1: false,
+    direction: 'rtl',
+  },
+  {
+    id: 'subj_english_code30',
+    code: '30',
+    slug: 'english',
+    name: 'English',
+    name_native: 'English Literature',
+    is_paper_1: false,
+    direction: 'ltr',
+  },
+  {
+    id: 'subj_commerce_code08',
+    code: '08',
+    slug: 'commerce',
+    name: 'Commerce',
+    name_native: 'Commerce & Management',
+    is_paper_1: false,
+    direction: 'ltr',
+  },
+];
+
 export default function SubjectSwitcher() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [subjects, setSubjects] = useState<SubjectItem[]>([]);
+  const [subjects, setSubjects] = useState<SubjectItem[]>(DEFAULT_SUBJECTS);
   const [activeSlug, setActiveSlug] = useState<string>('arabic');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
