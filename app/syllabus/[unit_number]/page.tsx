@@ -15,7 +15,7 @@ export async function generateMetadata({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return { title: 'Unit Not Found' };
 
-  const unit = await prisma.syllabusUnit.findUnique({
+  const unit = await prisma.syllabusUnit.findFirst({
     where: { unit_number: unitNum },
     select: { name_english: true, name_arabic: true, unit_number: true },
   });
@@ -38,7 +38,7 @@ export default async function UnitPage({
   if (isNaN(unitNum)) return notFound();
 
   // Fetch the Unit and its Broad Topics with question counts
-  const unit = await prisma.syllabusUnit.findUnique({
+  const unit = await prisma.syllabusUnit.findFirst({
     where: { unit_number: unitNum },
     include: {
       broad_topics: {

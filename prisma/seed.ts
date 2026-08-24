@@ -126,13 +126,32 @@ const syllabusUnits = [
 async function main() {
   console.log('Starting database seed...');
 
+  const arabicSubject = await prisma.subject.upsert({
+    where: { code: '29' },
+    update: {},
+    create: {
+      code: '29',
+      slug: 'arabic',
+      name: 'Arabic',
+      name_native: 'اللغة العربية وآدابها',
+      direction: 'rtl',
+      primary_language: 'ar',
+      secondary_language: 'en',
+    },
+  });
+
   for (const unit of syllabusUnits) {
     const { broad_topics, ...unitData } = unit;
 
     const createdUnit = await prisma.syllabusUnit.upsert({
-      where: { unit_number: unit.unit_number },
-      update: unitData,
-      create: unitData,
+      where: {
+        subject_id_unit_number: {
+          subject_id: arabicSubject.id,
+          unit_number: unit.unit_number,
+        },
+      },
+      update: { ...unitData, subject_id: arabicSubject.id },
+      create: { ...unitData, subject_id: arabicSubject.id },
     });
 
     console.log(`Upserted Unit: ${createdUnit.name_english}`);
