@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search, LogOut } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import ProfileSidePanel from '@/components/layout/ProfileSidePanel';
+import SubjectSwitcher from '@/components/layout/SubjectSwitcher';
 
 const navLinks = [
   { href: '/', label: 'Home', icon: Home },
@@ -31,20 +32,25 @@ export default function Header({ user }: { user: { name?: string | null, email?:
   
   return (
     <>
-    <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-stone-200/50 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-stone-200/60 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] transition-all duration-300">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 gap-3">
 
-          {/* Brand */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-9 h-9 bg-gradient-to-tr from-primary-dark to-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-105 group-hover:shadow-primary/30 transition-all duration-300">
-              <span className="text-white font-bold text-lg font-arabic">ع</span>
-            </div>
-            <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-stone-900 font-extrabold text-[15px] tracking-tight transition-colors">Arabic NET/JRF</span>
-              <span className="text-stone-500 text-[10px] font-bold tracking-[0.15em] uppercase mt-1">PYQ Platform</span>
-            </div>
-          </Link>
+          {/* Brand & Active Subject Switcher */}
+          <div className="flex items-center gap-3 min-w-0">
+            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+              <div className="w-9 h-9 bg-gradient-to-tr from-primary-dark to-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-105 group-hover:shadow-primary/30 transition-all duration-300">
+                <GraduationCap size={20} className="text-white" />
+              </div>
+              <div className="hidden lg:flex flex-col leading-none">
+                <span className="text-stone-900 font-black text-[15px] tracking-tight">UGC NET/JRF</span>
+                <span className="text-stone-400 text-[9px] font-bold tracking-widest uppercase mt-0.5">Platform</span>
+              </div>
+            </Link>
+
+            {/* 1-Click Subject Switcher */}
+            <SubjectSwitcher />
+          </div>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">

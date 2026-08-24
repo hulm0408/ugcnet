@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const entity = searchParams.get('entity');
     const year = searchParams.get('year');
     const questionId = searchParams.get('questionId');
+    const subjectParam = searchParams.get('subject') || searchParams.get('subjectId') || searchParams.get('subject_id');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 250);
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
 
@@ -24,6 +25,14 @@ export async function GET(request: Request) {
     const where: any = {
       content_status: 'PUBLISHED',
     };
+
+    if (subjectParam) {
+      where.OR = [
+        { subject_id: subjectParam },
+        { subject: { slug: subjectParam } },
+        { subject: { code: subjectParam } },
+      ];
+    }
 
     // 1. Single Question
     if (questionId) {

@@ -7,24 +7,59 @@ datasource db {
 }
 
 // ═══════════════════════════════════════════════════
-// OFFICIAL SYLLABUS
+// CORE SUBJECT ENGINE (MULTI-SUBJECT FOUNDATION)
+// ═══════════════════════════════════════════════════
+
+model Subject {
+  id                 String    @id @default(cuid())
+  code               String    @unique // "00" (Paper 1), "29" (Arabic), "30" (English), "08" (Commerce)
+  slug               String    @unique // "paper-1", "arabic", "english", "commerce"
+  name               String            // "Arabic", "General Paper 1", "English Literature"
+  name_native        String?           // "اللغة العربية وآدابها", "General Paper on Teaching & Research Aptitude"
+  is_paper_1         Boolean   @default(false)
+  direction          String    @default("ltr") // "ltr" | "rtl"
+  primary_language   String    @default("en")  // "ar", "en", "hi", "ur"
+  secondary_language String?                  // "hi", "en"
+  is_active          Boolean   @default(true)
+  order_index        Int       @default(0)
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  units              SyllabusUnit[]
+  exam_papers        ExamPaper[]
+  questions          Question[]
+  subscriptions      UserSubscription[]
+  practice_sessions  PracticeSession[]
+  users_as_active    User[]            @relation("ActiveSubject")
+
+  @@index([is_active, order_index])
+  @@index([is_paper_1])
+}
+
+// ═══════════════════════════════════════════════════
+// OFFICIAL SYLLABUS (SCOPED BY SUBJECT)
 // ═══════════════════════════════════════════════════
 
 model SyllabusUnit {
-  id              String   @id @default(cuid())
-  unit_number     Int      @unique
-  name_arabic     String
-  name_english    String
-  slug            String   @unique
+  id                  String   @id @default(cuid())
+  subject_id          String?
+  subject             Subject? @relation(fields: [subject_id], references: [id])
+  unit_number         Int      // 1 to 10
+  name_arabic         String
+  name_english        String
+  slug                String
   description_arabic  String?
   description_english String?
-  is_active       Boolean  @default(true)
-  order_index     Int
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  is_active           Boolean  @default(true)
+  order_index         Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
 
-  broad_topics    BroadTopic[]
-  questions       Question[]
+  broad_topics        BroadTopic[]
+  questions           Question[]
+
+  @@unique([subject_id, unit_number])
+  @@unique([subject_id, slug])
 }
 
 model BroadTopic {
@@ -70,10 +105,12 @@ model Subtopic {
 
 model ExamPaper {
   id                  String   @id @default(cuid())
+  subject_id          String?
+  subject_ref         Subject? @relation(fields: [subject_id], references: [id])
   source_file_name    String
   exam_name           String
   subject             String   @default("Arabic (Code No. 029)")
-  paper_number        String   // "II" | "III"
+  paper_number        String   // "I" | "II" | "III"
   year                Int
   session             String?  // "June" | "Dec" | "Jan" | "Nov"
   part                String?  // "Part 1" | "Part 2" | null
@@ -89,12 +126,15 @@ model ExamPaper {
   questions           Question[]
   import_jobs         ImportJob[]
 
+  @@index([subject_id, year, content_status])
   @@index([year, content_status])
   @@index([content_status])
 }
 
 model Question {
   id                          String   @id @default(cuid())
+  subject_id                  String?
+  subject                     Subject? @relation(fields: [subject_id], references: [id])
   source_question_id          String   @unique  // Original ID or generated NET_YYYY_Px_Qnnn
   source_file_name            String
   exam_paper_id               String
@@ -155,6 +195,7 @@ model Question {
   spaced_memory_queue         SpacedMemoryQueue[]
   memory_review_logs          MemoryReviewLog[]
 
+  @@index([subject_id, content_status])
   @@index([exam_paper_id, content_status])
   @@index([unit_id, content_status])
   @@index([broad_topic_id])
@@ -167,24 +208,27 @@ model Question {
 // ═══════════════════════════════════════════════════
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  passwordHash  String?   @map("password_hash")
-  role          String    @default("USER")  // USER | ADMIN | SUPER_ADMIN
-  isActive      Boolean   @default(true) @map("is_active")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  lastActiveAt  DateTime? @map("last_active_at")
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime? @map("email_verified")
+  image              String?
+  passwordHash       String?   @map("password_hash")
+  role               String    @default("USER")  // USER | ADMIN | SUPER_ADMIN
+  isActive           Boolean   @default(true) @map("is_active")
+  active_subject_id  String?   @map("active_subject_id")
+  active_subject     Subject?  @relation("ActiveSubject", fields: [active_subject_id], references: [id])
+  createdAt          DateTime  @default(now()) @map("created_at")
+  lastActiveAt       DateTime? @map("last_active_at")
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts           Account[]
+  sessions           Session[]
+  subscriptions      UserSubscription[]
   
-  practice_sessions PracticeSession[]
-  bookmarks       Bookmark[]
-  reports         QuestionReport[]
-  audit_logs      AuditLog[]
+  practice_sessions  PracticeSession[]
+  bookmarks          Bookmark[]
+  reports            QuestionReport[]
+  audit_logs         AuditLog[]
   classification_history ClassificationHistory[]
   memory_connections     MemoryConnection[]
   question_connections   QuestionConnection[]
@@ -233,6 +277,42 @@ model VerificationToken {
 }
 
 // ═══════════════════════════════════════════════════
+// SUBSCRIPTIONS & ENTITLEMENTS
+// ═══════════════════════════════════════════════════
+
+model SubscriptionPlan {
+  id                String      @id @default(cuid())
+  name              String      // "Subject Pro Pass - 6 Months", "All-Access 1 Year"
+  plan_type         String      // "SINGLE_SUBJECT" | "ALL_ACCESS" | "PAPER_1_ONLY"
+  duration_days     Int         // 30, 90, 180, 365
+  price_inr         Int         // Price in INR
+  features          Json?       // Feature list array
+  is_active         Boolean     @default(true)
+  created_at        DateTime    @default(now())
+  updated_at        DateTime    @updatedAt
+  
+  subscriptions     UserSubscription[]
+}
+
+model UserSubscription {
+  id                String           @id @default(cuid())
+  user_id           String
+  user              User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan_id           String
+  plan              SubscriptionPlan @relation(fields: [plan_id], references: [id])
+  subject_id        String?          // Null if ALL_ACCESS
+  subject           Subject?         @relation(fields: [subject_id], references: [id])
+  status            String           @default("ACTIVE") // "ACTIVE" | "EXPIRED" | "CANCELLED"
+  starts_at         DateTime         @default(now())
+  expires_at        DateTime
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+
+  @@index([user_id, status, expires_at])
+  @@index([subject_id, status])
+}
+
+// ═══════════════════════════════════════════════════
 // PRACTICE ENGINE
 // ═══════════════════════════════════════════════════
 
@@ -240,6 +320,8 @@ model PracticeSession {
   id              String    @id @default(cuid())
   user_id         String
   user            User      @relation(fields: [user_id], references: [id])
+  subject_id      String?
+  subject         Subject?  @relation(fields: [subject_id], references: [id])
   
   mode            String    // year_wise|unit_wise|topic_wise|mixed|incorrect|bookmarked|unattempted|custom
   filters         Json?     // {year, unit_id, topic_id, paper_id, question_type, ...}
@@ -261,6 +343,7 @@ model PracticeSession {
 
   @@index([user_id, status])
   @@index([user_id, started_at])
+  @@index([subject_id])
 }
 
 model PracticeAttempt {
@@ -490,4 +573,3 @@ model MemoryReviewLog {
   @@index([user_id, question_id])
   @@index([user_id, reviewed_at])
 }
-
