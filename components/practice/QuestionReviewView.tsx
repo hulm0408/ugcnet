@@ -15,8 +15,8 @@ interface QuestionReviewViewProps {
 }
 
 export default function QuestionReviewView({
-  year = '2009',
-  paper = 'Paper II',
+  year,
+  paper,
   questions,
   answers,
   evaluations,
@@ -28,6 +28,8 @@ export default function QuestionReviewView({
   const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect' | 'unattempted'>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isListOpen, setIsListOpen] = useState(false);
+
+  const headerTitle = paper || (year ? `UGC NET Arabic – ${year}` : 'UGC NET Arabic Practice');
 
   const filteredQuestions = questions.map((q, idx) => ({ q, idx })).filter(({ q }) => {
     const isAns = !!answers[q.id];
@@ -64,7 +66,7 @@ export default function QuestionReviewView({
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
             <div className="font-bold text-stone-900 text-sm sm:text-base">
-              UGC NET Arabic – {year} {paper}
+              {headerTitle}
             </div>
             <div className="hidden sm:block h-4 w-px bg-stone-300" />
             <div className="text-[10px] sm:text-xs font-bold text-stone-500 uppercase tracking-wider">

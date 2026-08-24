@@ -2,19 +2,20 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-
-import { Target, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
+import { Target, CheckCircle2, ArrowLeft, RefreshCw, BookOpen } from 'lucide-react';
 
 import InstructionsView from '@/components/practice/InstructionsView';
 import MockTestView from '@/components/practice/MockTestView';
 import ResultSummaryView from '@/components/practice/ResultSummaryView';
 import QuestionReviewView from '@/components/practice/QuestionReviewView';
+import { resolvePracticeContext, buildQuestionsApiUrl, PracticeContext } from '@/lib/practiceContext';
 
 const evaluateAnswer = async (questionId: string, selectedOption: string) => {
   const res = await fetch('/api/questions/evaluate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ questionId, selectedOption })
+    body: JSON.stringify({ questionId, selectedOption }),
   });
   if (!res.ok) throw new Error('Evaluation failed');
   return res.json();
@@ -22,20 +23,17 @@ const evaluateAnswer = async (questionId: string, selectedOption: string) => {
 
 function PracticeContent() {
   const searchParams = useSearchParams();
-  const unit = searchParams.get('unit');
-  const topic = searchParams.get('topic');
-  const subtopic = searchParams.get('subtopic');
-  const entity = searchParams.get('entity');
-  const year = searchParams.get('year') || (unit ? null : '2009');
-  const paperId = searchParams.get('paperId');
-  const paperTitle = searchParams.get('paperTitle');
-  const paper = searchParams.get('paper') || paperTitle || (unit ? null : 'Paper II');
+  const context: PracticeContext = resolvePracticeContext(searchParams);
+  const typeParam = searchParams.get('type'); // 'mock' | 'practice'
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [sessionMode, setSessionMode] = useState<'practice' | 'mock' | 'instructions' | null>(null);
+  // If paper mode and type=mock, default to mock test. Otherwise allow toggle or practice mode.
+  const [sessionMode, setSessionMode] = useState<'practice' | 'mock' | 'instructions' | null>(
+    typeParam === 'mock' ? 'instructions' : 'practice'
+  );
   const [testStatus, setTestStatus] = useState<'in-progress' | 'submitted' | 'summary' | 'review'>('in-progress');
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,83 +42,101 @@ function PracticeContent() {
   const [bookmarked, setBookmarked] = useState<Set<string>>(new Set());
   const [visited, setVisited] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
+  const [startTime] = useState<number>(Date.now());
 
   useEffect(() => {
     async function loadQuestions() {
       try {
         setLoading(true);
-        let baseUrl = '/api/questions?published=true&limit=250';
-        if (year) baseUrl += `&year=${year}`;
-        if (unit) baseUrl += `&unit=${unit}`;
-        if (topic) baseUrl += `&topic=${topic}`;
-        if (subtopic) baseUrl += `&subtopic=${subtopic}`;
-        if (entity) baseUrl += `&entity=${encodeURIComponent(entity)}`;
-        if (paperId) baseUrl += `&paperId=${paperId}`;
+        setError(null);
 
+        const apiUrl = buildQuestionsApiUrl(context);
         let allQuestions: any[] = [];
         let page = 1;
         let totalPages = 1;
 
         do {
-          const res = await fetch(`${baseUrl}&page=${page}`);
-          if (!res.ok) throw new Error('Failed to load questions');
-          
-          const data = await res.json();
-          allQuestions = [...allQuestions, ...(data.data || [])];
-          totalPages = data.meta?.totalPages || 1;
+          const res = await fetch(`${apiUrl}&page=${page}`);
+          if (!res.ok) throw new Error(`Failed to load questions (Status ${res.status})`);
+
+          const json = await res.json();
+          allQuestions = [...allQuestions, ...(json.data || [])];
+          totalPages = json.meta?.totalPages || 1;
           page++;
         } while (page <= totalPages);
 
         setQuestions(allQuestions);
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || 'Unable to load questions');
       } finally {
         setLoading(false);
       }
     }
     loadQuestions();
-  }, [year, unit, topic, subtopic, entity, paperId]);
+  }, [
+    context.mode,
+    context.paperId,
+    context.year,
+    context.unitNumber,
+    context.topicSlug,
+    context.subtopicSlug,
+    context.nodeSlug,
+    context.questionId,
+  ]);
 
   useEffect(() => {
-    if (questions.length > 0 && testStatus === 'in-progress') {
+    if (questions.length > 0 && testStatus === 'in-progress' && questions[currentIndex]) {
       const q = questions[currentIndex];
-      setVisited(prev => new Set(prev).add(q.id));
+      setVisited((prev) => new Set(prev).add(q.id));
     }
   }, [currentIndex, questions, testStatus]);
 
   const handleSelectOption = async (qId: string, option: string) => {
-    setAnswers(prev => ({ ...prev, [qId]: option }));
+    setAnswers((prev) => ({ ...prev, [qId]: option }));
 
     if (sessionMode === 'practice') {
       try {
         const evalRes = await evaluateAnswer(qId, option);
-        setEvaluations(prev => ({ ...prev, [qId]: evalRes }));
+        setEvaluations((prev) => ({ ...prev, [qId]: evalRes }));
       } catch (err) {
-        console.error('Failed to evaluate:', err);
+        console.error('Failed to evaluate answer:', err);
       }
+    }
+  };
+
+  const handleClearResponse = (qId: string) => {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[qId];
+      return next;
+    });
+    if (sessionMode === 'practice') {
+      setEvaluations((prev) => {
+        const next = { ...prev };
+        delete next[qId];
+        return next;
+      });
     }
   };
 
   const handleToggleBookmark = async (qId: string) => {
     const isNowBookmarked = !bookmarked.has(qId);
-    
-    // Update local state immediately for snappy UI
-    setBookmarked(prev => {
+
+    setBookmarked((prev) => {
       const next = new Set(prev);
       if (next.has(qId)) next.delete(qId);
       else next.add(qId);
       return next;
     });
 
-    // Fire API call in background
     try {
       await fetch('/api/bookmarks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId: qId, bookmarked: isNowBookmarked })
+        body: JSON.stringify({ questionId: qId, bookmarked: isNowBookmarked }),
       });
     } catch (err) {
-      console.warn('Failed to save bookmark. User may be guest:', err);
+      console.warn('Failed to save bookmark:', err);
     }
   };
 
@@ -138,143 +154,149 @@ function PracticeContent() {
         setEvaluations(newEvals);
       }
 
-      // Save session to database (fails silently if unauthenticated)
-      const qIds = questions.map(q => q.id);
+      // Persist session
+      const qIds = questions.map((q) => q.id);
       try {
         await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mode: sessionMode,
-            filters: { year, unit, topic, subtopic, paperId },
+            filters: context,
             questionIds: qIds,
             answers: answers,
-            evaluations: finalEvaluations
-          })
+            evaluations: finalEvaluations,
+          }),
         });
       } catch (err) {
-        console.warn('Failed to save session, user might be guest:', err);
+        console.warn('Guest practice session not saved to database:', err);
       }
 
-      setTestStatus('summary'); // go to summary directly after submit
+      setTestStatus('summary');
     } catch (err) {
-      console.error(err);
-      alert('Failed to submit test. Please check connection.');
+      console.error('Submit error:', err);
+      alert('Failed to submit test. Please verify connection.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Loading Skeleton
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#FCFAF8]">
-        <div className="w-10 h-10 border-4 border-stone-200 border-t-[#107A53] rounded-full animate-spin" />
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] bg-[#FCFAF8] p-6">
+        <div className="bg-white border border-stone-200/90 rounded-3xl p-8 sm:p-10 max-w-md w-full text-center shadow-sm space-y-4">
+          <div className="w-12 h-12 border-4 border-stone-200 border-t-primary rounded-full animate-spin mx-auto" />
+          <h3 className="font-bold text-stone-900 text-base sm:text-lg">
+            Loading Questions...
+          </h3>
+          <p className="text-stone-500 text-xs sm:text-sm font-medium">
+            Fetching {context.titleEnglish}
+          </p>
+        </div>
       </div>
     );
   }
 
+  // Error State
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#FCFAF8] p-6">
-        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-10 max-w-md w-full text-center">
-          <h2 className="text-stone-900 font-bold text-lg mb-2">Could Not Load Questions</h2>
-          <p className="text-stone-500 text-sm mb-6">{error}</p>
-          <button onClick={() => window.location.reload()} className="px-5 py-2 bg-stone-900 text-white text-sm font-bold rounded-xl hover:bg-stone-800 transition-colors">
-            Try Again
-          </button>
+      <div className="flex-1 flex items-center justify-center min-h-[70vh] bg-[#FCFAF8] p-6">
+        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 sm:p-10 max-w-md w-full text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <RefreshCw size={24} />
+          </div>
+          <h2 className="text-stone-900 font-bold text-lg">Unable to Load Questions</h2>
+          <p className="text-stone-500 text-xs sm:text-sm font-medium leading-relaxed">{error}</p>
+          <div className="flex justify-center gap-3 pt-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2.5 bg-primary text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors shadow-sm"
+            >
+              Retry
+            </button>
+            <Link
+              href="/syllabus"
+              className="px-5 py-2.5 bg-stone-100 text-stone-700 text-xs sm:text-sm font-bold rounded-xl hover:bg-stone-200 transition-colors"
+            >
+              Back to Syllabus
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Empty State (Context Specific)
   if (questions.length === 0) {
+    let emptyMessage = 'No questions available for this selection.';
+    let emptySubtitle = 'Try choosing another unit, topic, or exam paper.';
+
+    if (context.mode === 'incorrect') {
+      emptyMessage = 'No Mistakes Yet!';
+      emptySubtitle = 'You have not answered any questions incorrectly yet, or you are not signed in.';
+    } else if (context.mode === 'bookmarked') {
+      emptyMessage = 'No Bookmarked Questions';
+      emptySubtitle = 'Click the bookmark icon on any question during practice to review it here.';
+    } else if (context.mode === 'unattempted') {
+      emptyMessage = 'All Questions Attempted!';
+      emptySubtitle = 'Great job! You have practiced all questions in the bank.';
+    }
+
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#FCFAF8] p-6">
-        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-10 max-w-md w-full text-center">
-          <p className="text-stone-500 font-bold">No published questions available yet.</p>
+      <div className="flex-1 flex items-center justify-center min-h-[70vh] bg-[#FCFAF8] p-6">
+        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 sm:p-12 max-w-md w-full text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mx-auto border border-emerald-100">
+            <BookOpen size={28} />
+          </div>
+          <h2 className="text-stone-900 font-extrabold text-xl">{emptyMessage}</h2>
+          <p className="text-stone-500 text-xs sm:text-sm font-medium leading-relaxed">
+            {emptySubtitle}
+          </p>
+          <div className="pt-3">
+            <Link
+              href="/syllabus"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold text-xs sm:text-sm rounded-xl hover:bg-primary-dark transition-colors shadow-sm"
+            >
+              <ArrowLeft size={16} /> Browse Full Syllabus
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
-  // "? Mode Selection Screen
-  const displayYear = year || (unit ? `Unit ${unit}` : '2009');
-  const displayPaper = paper || (unit ? 'Mixed' : 'Paper II');
-
-  if (!sessionMode) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-primary-surface to-white p-6" style={{ height: 'calc(100vh - 64px)' }}>
-        <div className="text-center mb-10 animate-fade-in">
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 mb-4 tracking-tight">Choose Your Mode</h1>
-          <p className="text-stone-500 text-lg font-medium max-w-lg mx-auto">Select how you want to attempt these {questions.length} questions. Practice at your own pace or simulate the real exam.</p>
-        </div>
-        
-        <div className="grid sm:grid-cols-2 gap-6 w-full max-w-3xl animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <button
-            onClick={() => setSessionMode('practice')}
-            className="text-left group bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-stone-200/60 hover:border-primary/40 p-8 transition-all duration-300 shadow-sm hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-primary/20"
-          >
-            <div className="w-16 h-16 rounded-2xl bg-primary-surface text-primary-dark group-hover:bg-primary group-hover:text-white flex items-center justify-center mb-6 transition-all duration-300">
-              <Target size={32} />
-            </div>
-            <h2 className="text-2xl font-bold text-stone-900 mb-3 group-hover:text-primary transition-colors">Practice Mode</h2>
-            <p className="text-stone-500 leading-relaxed text-sm font-medium">Get immediate feedback and detailed explanations after answering each question. Best for deep learning and revision.</p>
-          </button>
-          
-          <button
-            onClick={() => setSessionMode('instructions')}
-            className="text-left group bg-white/80 backdrop-blur-xl rounded-3xl border-2 border-stone-200/60 hover:border-accent/40 p-8 transition-all duration-300 shadow-sm hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-accent/20"
-          >
-            <div className="w-16 h-16 rounded-2xl bg-accent/10 text-accent-dark group-hover:bg-accent group-hover:text-white flex items-center justify-center mb-6 transition-all duration-300">
-              <CheckCircle2 size={32} />
-            </div>
-            <h2 className="text-2xl font-bold text-stone-900 mb-3 group-hover:text-accent transition-colors">Mock Test</h2>
-            <p className="text-stone-500 leading-relaxed text-sm font-medium">CBT-style environment with a timer. Answers are saved, and results are shown only after you submit the full test.</p>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // "? Mock Test Instructions
+  // Instructions View for Mock Test
   if (sessionMode === 'instructions') {
     return (
-      <InstructionsView 
-        year={displayYear}
-        paper={displayPaper}
+      <InstructionsView
+        year={context.year ? context.year.toString() : 'UGC NET'}
+        paper={context.paperTitle || context.titleEnglish}
         totalQuestions={questions.length}
         onStart={() => {
           setSessionMode('mock');
           setTestStatus('in-progress');
         }}
-        onBack={() => setSessionMode(null)}
+        onBack={() => setSessionMode('practice')}
       />
     );
   }
 
-  // Stats calculation
-  const answeredCount = Object.keys(answers).length;
-  const correctCount = Object.values(evaluations).filter(e => e?.isCorrect).length;
-  const incorrectCount = answeredCount - correctCount;
-  const unattemptedCount = questions.length - answeredCount;
-
-  // "? In-Progress Test
+  // Active CBT Mock Test / Practice Test
   if (testStatus === 'in-progress') {
-    // For practice mode, we might want to just show the MockTestView but immediately show correct/incorrect answers.
-    // For now, MockTestView is designed for Mock, but we can reuse it or use a simplified one.
-    // Given the 9 screens, MockTestView is what we built.
     return (
-      <MockTestView 
-        year={displayYear}
-        paper={displayPaper}
+      <MockTestView
+        year={context.year ? context.year.toString() : 'UGC NET'}
+        paper={context.paperTitle || context.titleEnglish}
         questions={questions}
         currentIndex={currentIndex}
         answers={answers}
         bookmarked={bookmarked}
         visited={visited}
         onSelectOption={handleSelectOption}
-        onNavigate={setCurrentIndex}
+        onNavigate={(idx) => setCurrentIndex(idx)}
         onToggleBookmark={handleToggleBookmark}
+        onClearResponse={handleClearResponse}
         onSubmit={submitTest}
         submitting={submitting}
         evaluations={evaluations}
@@ -282,16 +304,27 @@ function PracticeContent() {
     );
   }
 
-  // "? Result Summary
+  // Result Summary View
   if (testStatus === 'summary') {
+    const attemptedCount = Object.keys(answers).length;
+    const correctCount = Object.values(evaluations).filter((e: any) => e?.isCorrect).length;
+    const incorrectCount = attemptedCount - correctCount;
+    const unattemptedCount = questions.length - attemptedCount;
+
+    const secondsElapsed = Math.max(1, Math.round((Date.now() - startTime) / 1000));
+    const mins = Math.floor(secondsElapsed / 60);
+    const secs = secondsElapsed % 60;
+    const timeTakenFormatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
     return (
-      <ResultSummaryView 
-        year={displayYear}
-        paper={displayPaper}
+      <ResultSummaryView
+        year={context.year ? context.year.toString() : 'UGC NET'}
+        paper={context.paperTitle || context.titleEnglish}
         correctCount={correctCount}
         incorrectCount={incorrectCount}
         unattemptedCount={unattemptedCount}
         totalQuestions={questions.length}
+        timeTaken={timeTakenFormatted}
         questions={questions}
         answers={answers}
         evaluations={evaluations}
@@ -300,12 +333,17 @@ function PracticeContent() {
     );
   }
 
-  // "? Question Review
+  // Question Review View
   if (testStatus === 'review') {
+    const attemptedCount = Object.keys(answers).length;
+    const correctCount = Object.values(evaluations).filter((e: any) => e?.isCorrect).length;
+    const incorrectCount = attemptedCount - correctCount;
+    const unattemptedCount = questions.length - attemptedCount;
+
     return (
-      <QuestionReviewView 
-        year={displayYear}
-        paper={displayPaper}
+      <QuestionReviewView
+        year={context.year ? context.year.toString() : 'UGC NET'}
+        paper={context.paperTitle || context.titleEnglish}
         questions={questions}
         answers={answers}
         evaluations={evaluations}
@@ -322,11 +360,13 @@ function PracticeContent() {
 
 export default function PracticePage() {
   return (
-    <Suspense fallback={
-      <div className="flex-1 flex items-center justify-center bg-[#FCFAF8]">
-        <div className="w-10 h-10 border-4 border-stone-200 border-t-[#107A53] rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center min-h-[70vh] bg-[#FCFAF8]">
+          <div className="w-10 h-10 border-4 border-stone-200 border-t-primary rounded-full animate-spin" />
+        </div>
+      }
+    >
       <PracticeContent />
     </Suspense>
   );

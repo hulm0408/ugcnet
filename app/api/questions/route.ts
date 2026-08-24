@@ -1,54 +1,145 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
+import { auth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const mode = searchParams.get('mode');
     const paperId = searchParams.get('paperId');
     const unitId = searchParams.get('unitId');
     const unit = searchParams.get('unit');
     const topic = searchParams.get('topic');
     const subtopic = searchParams.get('subtopic');
+    const node = searchParams.get('node');
+    const entity = searchParams.get('entity');
     const year = searchParams.get('year');
+    const questionId = searchParams.get('questionId');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 250);
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
 
     // Filter construction — always scope to PUBLISHED
-    const where: Record<string, unknown> = {
+    const where: any = {
       content_status: 'PUBLISHED',
     };
 
-    if (paperId) {
+    // 1. Single Question
+    if (questionId) {
+      where.id = questionId;
+    }
+
+    // 2. Exact Paper
+    else if (paperId) {
       where.exam_paper_id = paperId;
     }
 
-    if (unitId) {
+    // 3. User-Specific Modes (Requires Auth)
+    else if (mode === 'incorrect') {
+      const session = await auth();
+      if (!session?.user?.id) {
+        return NextResponse.json({
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 0, requiresAuth: true },
+        });
+      }
+      const attempts = await prisma.practiceAttempt.findMany({
+        where: { user_id: session.user.id, is_correct: false, is_skipped: false },
+        select: { question_id: true },
+      });
+      const qIds = Array.from(new Set(attempts.map((a) => a.question_id)));
+      if (qIds.length === 0) {
+        return NextResponse.json({
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 0 },
+        });
+      }
+      where.id = { in: qIds };
+    } else if (mode === 'bookmarked') {
+      const session = await auth();
+      if (!session?.user?.id) {
+        return NextResponse.json({
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 0, requiresAuth: true },
+        });
+      }
+      const bookmarks = await prisma.bookmark.findMany({
+        where: { user_id: session.user.id },
+        select: { question_id: true },
+      });
+      const qIds = bookmarks.map((b) => b.question_id);
+      if (qIds.length === 0) {
+        return NextResponse.json({
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 0 },
+        });
+      }
+      where.id = { in: qIds };
+    } else if (mode === 'unattempted') {
+      const session = await auth();
+      if (session?.user?.id) {
+        const attempts = await prisma.practiceAttempt.findMany({
+          where: { user_id: session.user.id },
+          select: { question_id: true },
+        });
+        const attemptedIds = Array.from(new Set(attempts.map((a) => a.question_id)));
+        if (attemptedIds.length > 0) {
+          where.id = { notIn: attemptedIds };
+        }
+      }
+    }
+
+    // 4. Node / Theme Mode
+    else if (node) {
+      where.OR = [
+        { question_micro_focus_english: { contains: node, mode: 'insensitive' } },
+        { question_micro_focus_arabic: { contains: node } },
+      ];
+      if (subtopic) {
+        where.subtopic = { slug: subtopic };
+      }
+      if (topic) {
+        where.broad_topic = { slug: topic };
+      }
+      if (unit) {
+        where.unit = { unit_number: parseInt(unit, 10) };
+      }
+    }
+
+    // 5. Subtopic / Entity Mode
+    else if (subtopic || entity) {
+      const targetSub = subtopic || entity;
+      where.OR = [
+        { subtopic: { slug: targetSub } },
+        { specific_entity_name_arabic: targetSub },
+        { specific_entity_name_english: { contains: targetSub, mode: 'insensitive' } },
+      ];
+      if (topic) {
+        where.broad_topic = { slug: topic };
+      }
+      if (unit) {
+        where.unit = { unit_number: parseInt(unit, 10) };
+      }
+    }
+
+    // 6. Topic Mode
+    else if (topic) {
+      where.broad_topic = { slug: topic };
+      if (unit) {
+        where.unit = { unit_number: parseInt(unit, 10) };
+      }
+    }
+
+    // 7. Unit Mode
+    else if (unit) {
+      where.unit = { unit_number: parseInt(unit, 10) };
+    } else if (unitId) {
       where.unit_id = unitId;
     }
 
-    if (unit) {
-      where.unit = { unit_number: parseInt(unit, 10) };
-    }
-    
-    if (topic) {
-      where.broad_topic = { slug: topic };
-    }
-    
-    if (subtopic) {
-      where.subtopic = { slug: subtopic };
-    }
-
-    const entity = searchParams.get('entity');
-    if (entity) {
-      where.OR = [
-        { specific_entity_name_arabic: entity },
-        { specific_entity_name_english: entity },
-      ];
-    }
-
-    if (year && !paperId) {
+    // 8. Year Mode
+    else if (year) {
       where.exam_paper = {
         year: parseInt(year, 10),
       };
@@ -76,6 +167,11 @@ export async function GET(request: Request) {
           options_arabic: true,
           options_english: true,
           options_generated: true,
+          correct_answer: true,
+          correct_answer_text_arabic: true,
+          correct_answer_text_english: true,
+          explanation_arabic: true,
+          explanation_english: true,
           unit_id: true,
           broad_topic_id: true,
           content_status: true,
@@ -83,20 +179,22 @@ export async function GET(request: Request) {
             select: {
               name_arabic: true,
               name_english: true,
-              unit_number: true
-            }
+              unit_number: true,
+            },
           },
           broad_topic: {
             select: {
               name_arabic: true,
-              name_english: true
-            }
+              name_english: true,
+              slug: true,
+            },
           },
           subtopic: {
             select: {
               name_arabic: true,
-              name_english: true
-            }
+              name_english: true,
+              slug: true,
+            },
           },
           specific_entity_name_arabic: true,
           specific_entity_name_english: true,
@@ -104,10 +202,12 @@ export async function GET(request: Request) {
           question_micro_focus_english: true,
           exam_paper: {
             select: {
+              id: true,
               exam_name: true,
               year: true,
               session: true,
               paper_number: true,
+              display_name: true,
             },
           },
         },

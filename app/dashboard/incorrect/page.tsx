@@ -59,14 +59,25 @@ export default async function IncorrectQuestionsPage() {
           <ChevronLeft size={16} /> Back to Dashboard
         </Link>
         
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
-            <XCircle size={20} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
+              <XCircle size={20} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-stone-900">Mistakes & Review</h1>
+              <p className="text-sm text-stone-500">Review {questionsToReview.length} questions you answered incorrectly</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-stone-900">Mistakes & Review</h1>
-            <p className="text-sm text-stone-500">Review {questionsToReview.length} questions you answered incorrectly</p>
-          </div>
+
+          {questionsToReview.length > 0 && (
+            <Link
+              href="/practice?mode=incorrect"
+              className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl transition-colors shadow-sm text-center"
+            >
+              Practice All Mistakes
+            </Link>
+          )}
         </div>
 
         {questionsToReview.length === 0 ? (

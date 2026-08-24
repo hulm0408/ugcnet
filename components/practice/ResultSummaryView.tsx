@@ -18,19 +18,20 @@ interface ResultSummaryViewProps {
 }
 
 export default function ResultSummaryView({
-  year = '2009',
-  paper = 'Paper II',
+  year,
+  paper,
   correctCount,
   incorrectCount,
   unattemptedCount,
   totalQuestions,
-  timeTaken = '01:35:12', // Mocked time taken
+  timeTaken = '00:00',
   questions = [],
   answers = {},
   evaluations = {},
   onViewReview
 }: ResultSummaryViewProps) {
   const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+  const headerTitle = paper || (year ? `UGC NET Arabic – ${year}` : 'UGC NET Arabic Practice');
   
   // Compute Sectional Analysis
   const sectionsMap = new Map<string, { name_arabic: string, name_english: string, total: number, correct: number, incorrect: number, unit_number: number }>();
@@ -61,7 +62,7 @@ export default function ResultSummaryView({
   });
 
   const sections = Array.from(sectionsMap.values()).sort((a, b) => a.unit_number - b.unit_number);
-  
+
   // Find weakest section
   const weakestSection = sections.reduce((weakest, current) => {
     if (!weakest) return current;
@@ -76,7 +77,7 @@ export default function ResultSummaryView({
         
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 tracking-tight">UGC NET Arabic – {year} {paper}</h1>
+          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 tracking-tight">{headerTitle}</h1>
           <p className="text-sm text-stone-500 font-medium mt-2">Test Completed on {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} – {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
         </div>
 

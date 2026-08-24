@@ -38,14 +38,25 @@ export default async function BookmarksPage() {
           <ChevronLeft size={16} /> Back to Dashboard
         </Link>
         
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
-            <BookMarked size={20} />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
+              <BookMarked size={20} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-stone-900">Bookmarked Questions</h1>
+              <p className="text-sm text-stone-500">Review {bookmarks.length} questions you saved for later</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-stone-900">Bookmarked Questions</h1>
-            <p className="text-sm text-stone-500">Review {bookmarks.length} questions you saved for later</p>
-          </div>
+
+          {bookmarks.length > 0 && (
+            <Link
+              href="/practice?mode=bookmarked"
+              className="px-5 py-2.5 bg-accent hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition-colors shadow-sm text-center"
+            >
+              Practice All Bookmarks
+            </Link>
+          )}
         </div>
 
         {bookmarks.length === 0 ? (
