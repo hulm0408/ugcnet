@@ -3,6 +3,8 @@ import prisma from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { normalizeArabicText } from '@/lib/arabicUtils';
 
+import { getActiveSubjectServer } from '@/lib/subjectContext';
+
 export const dynamic = 'force-dynamic';
 
 // GET: Fetch memories for authenticated user with search & filters
@@ -13,6 +15,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const activeSubject = await getActiveSubjectServer();
+
     const { searchParams } = new URL(request.url);
     const questionId = searchParams.get('questionId');
     const type = searchParams.get('type');
@@ -21,9 +25,10 @@ export async function GET(request: Request) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
     const skip = (page - 1) * limit;
 
-    // Build user-scoped where clause
+    // Build user-scoped and subject-scoped where clause
     const where: any = {
       user_id: session.user.id,
+      question: { subject_id: activeSubject.id },
     };
 
     if (questionId) {

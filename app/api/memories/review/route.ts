@@ -3,6 +3,8 @@ import prisma from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { calculate5LevelReview, SPACING_LEVELS } from '@/lib/memoryEngine';
 
+import { getActiveSubjectServer } from '@/lib/subjectContext';
+
 export const dynamic = 'force-dynamic';
 
 // GET: Fetch questions due for 5-Level Spaced Review or get completion stats
@@ -12,6 +14,8 @@ export async function GET(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const activeSubject = await getActiveSubjectServer();
 
     const { searchParams } = new URL(request.url);
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
@@ -23,6 +27,7 @@ export async function GET(request: Request) {
 
     const where: any = {
       user_id: session.user.id,
+      question: { subject_id: activeSubject.id },
     };
 
     if (completedOnly) {

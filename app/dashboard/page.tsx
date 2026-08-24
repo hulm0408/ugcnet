@@ -113,47 +113,96 @@ export default async function DashboardPage() {
         },
       }),
       prisma.memoryConnection.count({
-        where: { user_id: session.user.id },
+        where: {
+          user_id: session.user.id,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
         where: {
           user_id: session.user.id,
           status: 'ACTIVE',
           next_review_at: { lte: now },
+          question: { subject_id: activeSubject.id },
         },
       }),
       prisma.spacedMemoryQueue.count({
         where: {
           user_id: session.user.id,
           updated_at: { gte: todayStart },
+          question: { subject_id: activeSubject.id },
         },
       }),
       prisma.questionConnection.count({
-        where: { user_id: session.user.id },
+        where: {
+          user_id: session.user.id,
+          source_question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id, is_completed: true },
+        where: {
+          user_id: session.user.id,
+          is_completed: true,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id },
+        where: {
+          user_id: session.user.id,
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id, level: 1, is_completed: false, status: 'ACTIVE' },
+        where: {
+          user_id: session.user.id,
+          level: 1,
+          is_completed: false,
+          status: 'ACTIVE',
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id, level: 2, is_completed: false, status: 'ACTIVE' },
+        where: {
+          user_id: session.user.id,
+          level: 2,
+          is_completed: false,
+          status: 'ACTIVE',
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id, level: 3, is_completed: false, status: 'ACTIVE' },
+        where: {
+          user_id: session.user.id,
+          level: 3,
+          is_completed: false,
+          status: 'ACTIVE',
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id, level: 4, is_completed: false, status: 'ACTIVE' },
+        where: {
+          user_id: session.user.id,
+          level: 4,
+          is_completed: false,
+          status: 'ACTIVE',
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.count({
-        where: { user_id: session.user.id, level: 5, is_completed: false, status: 'ACTIVE' },
+        where: {
+          user_id: session.user.id,
+          level: 5,
+          is_completed: false,
+          status: 'ACTIVE',
+          question: { subject_id: activeSubject.id },
+        },
       }),
       prisma.spacedMemoryQueue.findMany({
-        where: { user_id: session.user.id, is_completed: true },
+        where: {
+          user_id: session.user.id,
+          is_completed: true,
+          question: { subject_id: activeSubject.id },
+        },
         include: {
           question: {
             include: {
@@ -171,7 +220,12 @@ export default async function DashboardPage() {
         take: 15,
       }),
       prisma.spacedMemoryQueue.findMany({
-        where: { user_id: session.user.id, is_completed: false, status: 'ACTIVE' },
+        where: {
+          user_id: session.user.id,
+          is_completed: false,
+          status: 'ACTIVE',
+          question: { subject_id: activeSubject.id },
+        },
         include: {
           question: {
             include: {
@@ -191,6 +245,7 @@ export default async function DashboardPage() {
       prisma.practiceSession.findFirst({
         where: {
           user_id: session.user.id,
+          subject_id: activeSubject.id,
           status: 'in_progress',
         },
         orderBy: { last_active_at: 'desc' },
@@ -200,6 +255,7 @@ export default async function DashboardPage() {
           user_id: session.user.id,
           is_correct: false,
           is_skipped: false,
+          question: { subject_id: activeSubject.id },
         },
         include: {
           question: {
@@ -217,7 +273,10 @@ export default async function DashboardPage() {
         take: 80,
       }),
       prisma.practiceSession.findMany({
-        where: { user_id: session.user.id },
+        where: {
+          user_id: session.user.id,
+          subject_id: activeSubject.id,
+        },
         orderBy: { started_at: 'desc' },
         take: 4,
       }),

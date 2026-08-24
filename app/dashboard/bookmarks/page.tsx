@@ -5,6 +5,8 @@ import prisma from '@/lib/db';
 import Link from 'next/link';
 import { ChevronLeft, BookMarked } from 'lucide-react';
 
+import { getActiveSubjectServer } from '@/lib/subjectContext';
+
 export const metadata: Metadata = {
   title: 'Bookmarks | Dashboard',
 };
@@ -15,8 +17,13 @@ export default async function BookmarksPage() {
     redirect('/login');
   }
 
+  const activeSubject = await getActiveSubjectServer();
+
   const bookmarks = await prisma.bookmark.findMany({
-    where: { user_id: session.user.id },
+    where: {
+      user_id: session.user.id,
+      question: { subject_id: activeSubject.id },
+    },
     include: {
       question: {
         select: {

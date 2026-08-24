@@ -11,6 +11,8 @@ import MistakesTrackerClient, {
 } from '@/components/dashboard/MistakesTrackerClient';
 import { formatRelativeDate, formatFullDateTime } from '@/lib/dateUtils';
 
+import { getActiveSubjectServer } from '@/lib/subjectContext';
+
 export const metadata: Metadata = {
   title: 'Mistake Tracker & Test History | Dashboard',
   description: 'Review your past test attempts, track mistakes by date and paper, and practice weak topics.',
@@ -23,11 +25,15 @@ export default async function IncorrectQuestionsPage() {
   }
 
   const userId = session.user.id;
+  const activeSubject = await getActiveSubjectServer();
 
-  // 1. Fetch all test sessions for the user with attempts and questions
+  // 1. Fetch test sessions for the user scoped strictly to the active subject
   const [sessionsDb, allAttemptsDb, unitsDb] = await Promise.all([
     prisma.practiceSession.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+        subject_id: activeSubject.id,
+      },
       orderBy: { completed_at: 'desc' },
       include: {
         attempts: {
@@ -44,7 +50,10 @@ export default async function IncorrectQuestionsPage() {
       },
     }),
     prisma.practiceAttempt.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+        question: { subject_id: activeSubject.id },
+      },
       select: {
         id: true,
         question_id: true,
@@ -57,6 +66,7 @@ export default async function IncorrectQuestionsPage() {
       orderBy: { attempted_at: 'asc' },
     }),
     prisma.syllabusUnit.findMany({
+      where: { subject_id: activeSubject.id },
       orderBy: { unit_number: 'asc' },
     }),
   ]);
