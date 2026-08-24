@@ -47,7 +47,7 @@ async function normalizeDatabaseOptionTypes() {
         where: { id: q.id },
         data: {
           options_arabic: cleanOptAr,
-          options_english: Object.keys(cleanOptEn).length > 0 ? cleanOptEn : null,
+          options_english: Object.keys(cleanOptEn).length > 0 ? cleanOptEn : undefined,
         },
       });
       fixedCount++;
