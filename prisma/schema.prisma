@@ -453,13 +453,17 @@ model SpacedMemoryQueue {
   question_id     String
   question        Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
   
+  level           Int       @default(1) // 1: 24h | 2: 3d | 3: 7d | 4: 16d | 5: 45d | 6: COMPLETED
   last_reviewed_at DateTime?
   review_count    Int       @default(0)
   difficulty      String    @default("MEDIUM") // EASY | MEDIUM | HARD
   interval_days   Int       @default(1)
   next_review_at  DateTime  @default(now())
+  due_deadline    DateTime?
   memory_strength Float     @default(1.0) // 0.0 to 5.0
-  status          String    @default("ACTIVE") // ACTIVE | MASTERED | ARCHIVED
+  status          String    @default("ACTIVE") // ACTIVE | COMPLETED | EXPIRED | ARCHIVED
+  is_completed    Boolean   @default(false)
+  completed_at    DateTime?
   
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
@@ -467,6 +471,8 @@ model SpacedMemoryQueue {
   @@unique([user_id, question_id])
   @@index([user_id, next_review_at])
   @@index([user_id, status])
+  @@index([user_id, level])
+  @@index([user_id, is_completed])
 }
 
 model MemoryReviewLog {

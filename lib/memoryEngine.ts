@@ -1,10 +1,10 @@
 /**
  * Personal Memory + Connection Engine Core Logic
- * Spaced repetition algorithm, connection types, and smart memory prompts.
+ * Strict 5-Level Spaced Repetition Schedule, Connection Types, and Smart Prompts.
  */
 
 export const MEMORY_TYPES = [
-  { id: 'TRICK', label: 'My Trick', arabicLabel: 'حيلتي الذهنية', icon: 'Sparkles', desc: 'Short mental shortcut or acronym' },
+  { id: 'TRICK', label: 'My Trick', arabicLabel: 'حيلتي الذهنية', icon: 'Zap', desc: 'Short mental shortcut or acronym' },
   { id: 'MNEMONIC', label: 'My Mnemonic', arabicLabel: 'رمز الحفظ', icon: 'Key', desc: 'Formula or memory anchor' },
   { id: 'STORY', label: 'My Story', arabicLabel: 'قصة الربط', icon: 'BookOpen', desc: 'Brief vivid narrative connecting elements' },
   { id: 'CONCEPT', label: 'My Concept', arabicLabel: 'مفهومي الخاص', icon: 'Lightbulb', desc: 'Core concept in your own words' },
@@ -27,58 +27,199 @@ export const RELATIONSHIP_TYPES = [
 
 export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number]['id'];
 
-// Deterministic review intervals schedule (in days)
-export const SPACED_INTERVALS = [1, 3, 7, 14, 30, 60, 120] as const;
-
 /**
- * Calculates next review interval and memory strength based on recall feedback.
+ * Strict 5-Level Spaced Repetition Schedule:
+ * 1st Review: Within 24 hours of first learning (1 day)
+ * 2nd Review: 2 to 3 days later (3 days)
+ * 3rd Review: About 1 week later (7 days)
+ * 4th Review: 2 to 3 weeks later (16 days)
+ * 5th Review: 1 to 2 months later (45 days -> Completed Achievement)
  */
-export function calculateNextReview(
-  currentIntervalDays: number = 1,
-  currentStrength: number = 1.0,
-  wasHelpful: boolean
-): {
+export const SPACING_LEVELS = [
+  {
+    level: 1,
+    title: '1st Review',
+    arabicTitle: 'المراجعة الأولى',
+    timeframe: 'Within 24 hours',
+    arabicTimeframe: 'خلال 24 ساعة',
+    intervalHours: 24,
+    intervalDays: 1,
+    graceHours: 36,
+    description: 'Initial consolidation within 24 hours',
+  },
+  {
+    level: 2,
+    title: '2nd Review',
+    arabicTitle: 'المراجعة الثانية',
+    timeframe: '2 to 3 days later',
+    arabicTimeframe: 'بعد 2 إلى 3 أيام',
+    intervalHours: 72,
+    intervalDays: 3,
+    graceHours: 96,
+    description: 'Reinforcing short-term retention',
+  },
+  {
+    level: 3,
+    title: '3rd Review',
+    arabicTitle: 'المراجعة الثالثة',
+    timeframe: 'About 1 week later',
+    arabicTimeframe: 'بعد أسبوع تقريباً',
+    intervalHours: 168,
+    intervalDays: 7,
+    graceHours: 216,
+    description: 'Transitioning to medium-term memory',
+  },
+  {
+    level: 4,
+    title: '4th Review',
+    arabicTitle: 'المراجعة الرابعة',
+    timeframe: '2 to 3 weeks later',
+    arabicTimeframe: 'بعد أسبوعين إلى 3 أسابيع',
+    intervalHours: 384,
+    intervalDays: 16,
+    graceHours: 504,
+    description: 'Long-term structural memory lock',
+  },
+  {
+    level: 5,
+    title: '5th Review (Mastery)',
+    arabicTitle: 'المراجعة الخامسة (الإتقان)',
+    timeframe: '1 to 2 months later',
+    arabicTimeframe: 'بعد شهر إلى شهرين',
+    intervalHours: 1080,
+    intervalDays: 45,
+    graceHours: 1440,
+    description: 'Permanent mastery — Marks PYQ as Completed',
+  },
+] as const;
+
+export interface NextReviewResult {
+  level: number;
   intervalDays: number;
   memoryStrength: number;
   nextReviewAt: Date;
-  status: 'ACTIVE' | 'MASTERED' | 'ARCHIVED';
-} {
+  dueDeadline: Date;
+  status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED';
+  isCompleted: boolean;
+  completedAt: Date | null;
+  onTime: boolean;
+}
+
+/**
+ * Calculates next review progression in the strict 5-Level Spaced Repetition System.
+ * If not completed on time (past the deadline), it drops back to Level 1 and does not count as achievement.
+ */
+export function calculate5LevelReview({
+  currentLevel = 1,
+  currentStrength = 1.0,
+  dueDeadline,
+  wasHelpful,
+}: {
+  currentLevel?: number;
+  currentStrength?: number;
+  dueDeadline?: Date | null;
+  wasHelpful: boolean;
+}): NextReviewResult {
   const now = new Date();
 
-  if (wasHelpful) {
-    // Find next step in intervals schedule
-    let nextIdx = SPACED_INTERVALS.findIndex((val) => val > currentIntervalDays);
-    let intervalDays: number;
-    if (nextIdx === -1) {
-      // Exceeded highest configured interval, multiply by 1.5
-      intervalDays = Math.min(180, Math.round(currentIntervalDays * 1.5));
-    } else {
-      intervalDays = SPACED_INTERVALS[nextIdx];
-    }
+  // Check if review was completed on time (before deadline with grace period)
+  const isOverdueMissed = dueDeadline ? now.getTime() > new Date(dueDeadline).getTime() : false;
 
-    const memoryStrength = Math.min(5.0, Number((currentStrength + 0.5).toFixed(1)));
-    const status = memoryStrength >= 4.5 && intervalDays >= 60 ? 'MASTERED' : 'ACTIVE';
-    const nextReviewAt = new Date(now.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+  if (isOverdueMissed) {
+    // Overdue / missed review window: Reset back to Level 1
+    const level1Config = SPACING_LEVELS[0];
+    const nextReviewAt = new Date(now.getTime() + level1Config.intervalHours * 60 * 60 * 1000);
+    const deadline = new Date(now.getTime() + level1Config.graceHours * 60 * 60 * 1000);
 
     return {
-      intervalDays,
-      memoryStrength,
+      level: 1,
+      intervalDays: 1,
+      memoryStrength: Math.max(1.0, Number((currentStrength - 0.5).toFixed(1))),
       nextReviewAt,
-      status,
-    };
-  } else {
-    // User struggled: Reset interval to 1 day for reinforcement
-    const intervalDays = 1;
-    const memoryStrength = Math.max(0.5, Number((currentStrength - 0.5).toFixed(1)));
-    const nextReviewAt = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
-
-    return {
-      intervalDays,
-      memoryStrength,
-      nextReviewAt,
+      dueDeadline: deadline,
       status: 'ACTIVE',
+      isCompleted: false,
+      completedAt: null,
+      onTime: false,
     };
   }
+
+  if (wasHelpful) {
+    if (currentLevel >= 5) {
+      // Completed all 5 levels on time -> COMPLETED ACHIEVEMENT!
+      return {
+        level: 5,
+        intervalDays: 60,
+        memoryStrength: 5.0,
+        nextReviewAt: new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),
+        dueDeadline: new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000),
+        status: 'COMPLETED',
+        isCompleted: true,
+        completedAt: now,
+        onTime: true,
+      };
+    }
+
+    // Advance to next level (e.g. Level 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 5)
+    const nextLevel = currentLevel + 1;
+    const levelConfig = SPACING_LEVELS[nextLevel - 1];
+    const nextReviewAt = new Date(now.getTime() + levelConfig.intervalHours * 60 * 60 * 1000);
+    const deadline = new Date(now.getTime() + levelConfig.graceHours * 60 * 60 * 1000);
+    const memoryStrength = Math.min(5.0, Number((currentStrength + 0.8).toFixed(1)));
+
+    return {
+      level: nextLevel,
+      intervalDays: levelConfig.intervalDays,
+      memoryStrength,
+      nextReviewAt,
+      dueDeadline: deadline,
+      status: 'ACTIVE',
+      isCompleted: false,
+      completedAt: null,
+      onTime: true,
+    };
+  } else {
+    // User struggled to recall: reset to Level 1 for reinforcement
+    const level1Config = SPACING_LEVELS[0];
+    const nextReviewAt = new Date(now.getTime() + level1Config.intervalHours * 60 * 60 * 1000);
+    const deadline = new Date(now.getTime() + level1Config.graceHours * 60 * 60 * 1000);
+
+    return {
+      level: 1,
+      intervalDays: 1,
+      memoryStrength: Math.max(1.0, Number((currentStrength - 0.5).toFixed(1))),
+      nextReviewAt,
+      dueDeadline: deadline,
+      status: 'ACTIVE',
+      isCompleted: false,
+      completedAt: null,
+      onTime: true,
+    };
+  }
+}
+
+/**
+ * Initial enrollment into the 5-level spaced queue.
+ */
+export function getInitialEnrollment(): {
+  level: number;
+  intervalDays: number;
+  nextReviewAt: Date;
+  dueDeadline: Date;
+  status: 'ACTIVE';
+} {
+  const now = new Date();
+  const level1 = SPACING_LEVELS[0];
+  const nextReviewAt = new Date(now.getTime() + level1.intervalHours * 60 * 60 * 1000);
+  const dueDeadline = new Date(now.getTime() + level1.graceHours * 60 * 60 * 1000);
+
+  return {
+    level: 1,
+    intervalDays: 1,
+    nextReviewAt,
+    dueDeadline,
+    status: 'ACTIVE',
+  };
 }
 
 export interface SmartPrompt {

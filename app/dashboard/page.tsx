@@ -4,6 +4,7 @@ import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRi
 import { BrainSparkIcon, SpacedRepetitionIcon, KnowledgeGraphIcon } from '@/components/memory/MemoryIcons';
 import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
+import SpacedPyqTracker, { SpacedItem } from '@/components/dashboard/SpacedPyqTracker';
 import prisma from '@/lib/db';
 import { formatRelativeDate } from '@/lib/dateUtils';
 
@@ -26,11 +27,16 @@ export default async function DashboardPage() {
   let bookmarkedCount = 0;
   let incorrectCount = 0;
 
-  // Memory engine metrics
+  // Memory & 5-Level Spaced metrics
   let memoriesCount = 0;
   let dueReviewCount = 0;
   let rememberedTodayCount = 0;
   let connectionsCount = 0;
+  let completedCount = 0;
+  let totalTrackedCount = 0;
+  let levelCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  let completedSpacedItems: SpacedItem[] = [];
+  let activeSpacedItems: SpacedItem[] = [];
 
   if (session?.user?.id) {
     const now = new Date();
@@ -45,6 +51,15 @@ export default async function DashboardPage() {
       dueCountDb,
       remTodayDb,
       connCountDb,
+      compCountDb,
+      totTrackDb,
+      lvl1Db,
+      lvl2Db,
+      lvl3Db,
+      lvl4Db,
+      lvl5Db,
+      compItemsDb,
+      activeItemsDb,
     ] = await Promise.all([
       prisma.practiceAttempt.count({
         where: { user_id: session.user.id },
@@ -64,7 +79,7 @@ export default async function DashboardPage() {
       prisma.spacedMemoryQueue.count({
         where: {
           user_id: session.user.id,
-          status: { in: ['ACTIVE', 'MASTERED'] },
+          status: 'ACTIVE',
           next_review_at: { lte: now },
         },
       }),
@@ -77,6 +92,63 @@ export default async function DashboardPage() {
       prisma.questionConnection.count({
         where: { user_id: session.user.id },
       }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, is_completed: true },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 1, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 2, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 3, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 4, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 5, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.findMany({
+        where: { user_id: session.user.id, is_completed: true },
+        include: {
+          question: {
+            include: {
+              exam_paper: {
+                select: {
+                  year: true,
+                  paper_number: true,
+                  session: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { completed_at: 'desc' },
+        take: 15,
+      }),
+      prisma.spacedMemoryQueue.findMany({
+        where: { user_id: session.user.id, is_completed: false, status: 'ACTIVE' },
+        include: {
+          question: {
+            include: {
+              exam_paper: {
+                select: {
+                  year: true,
+                  paper_number: true,
+                  session: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { next_review_at: 'asc' },
+        take: 15,
+      }),
     ]);
 
     questionsAttempted = totalAttempted;
@@ -88,6 +160,39 @@ export default async function DashboardPage() {
     dueReviewCount = dueCountDb;
     rememberedTodayCount = remTodayDb;
     connectionsCount = connCountDb;
+    completedCount = compCountDb;
+    totalTrackedCount = totTrackDb;
+    levelCounts = {
+      1: lvl1Db,
+      2: lvl2Db,
+      3: lvl3Db,
+      4: lvl4Db,
+      5: lvl5Db,
+    };
+    completedSpacedItems = compItemsDb.map((item) => ({
+      id: item.id,
+      question_id: item.question_id,
+      level: item.level,
+      interval_days: item.interval_days,
+      next_review_at: item.next_review_at.toISOString(),
+      due_deadline: item.due_deadline ? item.due_deadline.toISOString() : null,
+      is_completed: item.is_completed,
+      completed_at: item.completed_at ? item.completed_at.toISOString() : null,
+      memory_strength: item.memory_strength,
+      question: item.question,
+    }));
+    activeSpacedItems = activeItemsDb.map((item) => ({
+      id: item.id,
+      question_id: item.question_id,
+      level: item.level,
+      interval_days: item.interval_days,
+      next_review_at: item.next_review_at.toISOString(),
+      due_deadline: item.due_deadline ? item.due_deadline.toISOString() : null,
+      is_completed: item.is_completed,
+      completed_at: item.completed_at ? item.completed_at.toISOString() : null,
+      memory_strength: item.memory_strength,
+      question: item.question,
+    }));
   }
 
   // Fetch recent sessions
@@ -221,6 +326,18 @@ export default async function DashboardPage() {
               </Link>
             </div>
           </div>
+        )}
+
+        {/* ── 5-Level Spaced PYQ Mastery & Completion Tracker ── */}
+        {session && (
+          <SpacedPyqTracker
+            completedItems={completedSpacedItems}
+            activeItems={activeSpacedItems}
+            levelCounts={levelCounts}
+            totalCompletedCount={completedCount}
+            totalTrackedCount={totalTrackedCount}
+            dueTodayCount={dueReviewCount}
+          />
         )}
 
         {/* Recent Activity & Test History */}

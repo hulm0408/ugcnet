@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { calculateNextReview } from '@/lib/memoryEngine';
+import { calculate5LevelReview, SPACING_LEVELS } from '@/lib/memoryEngine';
 
 export const dynamic = 'force-dynamic';
 
-// GET: Fetch questions due for spaced review
+// GET: Fetch questions due for 5-Level Spaced Review or get completion stats
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -15,23 +15,33 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
-    const all = searchParams.get('all') === 'true'; // if true, fetch all active in queue even if not yet due
+    const all = searchParams.get('all') === 'true'; // if true, fetch all active in queue
+    const levelParam = searchParams.get('level'); // filter by specific level
+    const completedOnly = searchParams.get('completed') === 'true'; // fetch mastered completed questions
 
     const now = new Date();
 
     const where: any = {
       user_id: session.user.id,
-      status: { in: ['ACTIVE', 'MASTERED'] },
     };
 
-    if (!all) {
-      where.next_review_at = { lte: now };
+    if (completedOnly) {
+      where.is_completed = true;
+    } else {
+      where.status = 'ACTIVE';
+      if (!all) {
+        where.next_review_at = { lte: now };
+      }
+    }
+
+    if (levelParam) {
+      where.level = parseInt(levelParam, 10);
     }
 
     // Find queued items
     const queueItems = await prisma.spacedMemoryQueue.findMany({
       where,
-      orderBy: { next_review_at: 'asc' },
+      orderBy: completedOnly ? { completed_at: 'desc' } : { next_review_at: 'asc' },
       take: limit,
       include: {
         question: {
@@ -114,31 +124,70 @@ export async function GET(request: Request) {
     }
 
     // Assemble review payload
-    const reviewItems = queueItems.map((item) => ({
-      queueId: item.id,
-      intervalDays: item.interval_days,
-      reviewCount: item.review_count,
-      memoryStrength: item.memory_strength,
-      nextReviewAt: item.next_review_at,
-      question: item.question,
-      userMemories: memoriesByQ[item.question_id] || [],
-      userConnections: connectionsByQ[item.question_id] || [],
-    }));
+    const reviewItems = queueItems.map((item) => {
+      const levelInfo = SPACING_LEVELS[Math.min(5, Math.max(1, item.level)) - 1];
+      const isOverdue = item.due_deadline ? now.getTime() > new Date(item.due_deadline).getTime() : false;
 
-    // Stats
-    const [dueCount, totalQueueCount] = await Promise.all([
+      return {
+        queueId: item.id,
+        level: item.level,
+        levelInfo,
+        intervalDays: item.interval_days,
+        reviewCount: item.review_count,
+        memoryStrength: item.memory_strength,
+        nextReviewAt: item.next_review_at,
+        dueDeadline: item.due_deadline,
+        isOverdue,
+        isCompleted: item.is_completed,
+        completedAt: item.completed_at,
+        status: item.status,
+        question: item.question,
+        userMemories: memoriesByQ[item.question_id] || [],
+        userConnections: connectionsByQ[item.question_id] || [],
+      };
+    });
+
+    // Compute comprehensive Level breakdown stats
+    const [
+      dueCount,
+      totalQueueCount,
+      completedCount,
+      level1Count,
+      level2Count,
+      level3Count,
+      level4Count,
+      level5Count,
+    ] = await Promise.all([
       prisma.spacedMemoryQueue.count({
         where: {
           user_id: session.user.id,
-          status: { in: ['ACTIVE', 'MASTERED'] },
+          status: 'ACTIVE',
           next_review_at: { lte: now },
         },
       }),
       prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id },
+      }),
+      prisma.spacedMemoryQueue.count({
         where: {
           user_id: session.user.id,
-          status: { in: ['ACTIVE', 'MASTERED'] },
+          is_completed: true,
         },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 1, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 2, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 3, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 4, is_completed: false, status: 'ACTIVE' },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: { user_id: session.user.id, level: 5, is_completed: false, status: 'ACTIVE' },
       }),
     ]);
 
@@ -147,6 +196,14 @@ export async function GET(request: Request) {
       meta: {
         dueCount,
         totalQueueCount,
+        completedCount,
+        levelCounts: {
+          1: level1Count,
+          2: level2Count,
+          3: level3Count,
+          4: level4Count,
+          5: level5Count,
+        },
       },
     });
   } catch (error) {
@@ -155,7 +212,7 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Submit review feedback for a question
+// POST: Submit review feedback for a question and progress through 5 Levels
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -180,11 +237,18 @@ export async function POST(request: Request) {
       },
     });
 
-    const currentInterval = queueItem?.interval_days || 1;
+    const currentLevel = queueItem?.level || 1;
     const currentStrength = queueItem?.memory_strength || 1.0;
     const currentReviewCount = queueItem?.review_count || 0;
+    const dueDeadline = queueItem?.due_deadline;
 
-    const nextSchedule = calculateNextReview(currentInterval, currentStrength, wasHelpful);
+    // Calculate progression based on strict timing and recall feedback
+    const nextSchedule = calculate5LevelReview({
+      currentLevel,
+      currentStrength,
+      dueDeadline,
+      wasHelpful,
+    });
 
     // Update queue record
     const updatedQueue = await prisma.spacedMemoryQueue.upsert({
@@ -197,20 +261,28 @@ export async function POST(request: Request) {
       create: {
         user_id: session.user.id,
         question_id: questionId,
+        level: nextSchedule.level,
         review_count: 1,
         last_reviewed_at: new Date(),
         interval_days: nextSchedule.intervalDays,
         memory_strength: nextSchedule.memoryStrength,
         next_review_at: nextSchedule.nextReviewAt,
+        due_deadline: nextSchedule.dueDeadline,
         status: nextSchedule.status,
+        is_completed: nextSchedule.isCompleted,
+        completed_at: nextSchedule.completedAt,
       },
       update: {
+        level: nextSchedule.level,
         review_count: currentReviewCount + 1,
         last_reviewed_at: new Date(),
         interval_days: nextSchedule.intervalDays,
         memory_strength: nextSchedule.memoryStrength,
         next_review_at: nextSchedule.nextReviewAt,
+        due_deadline: nextSchedule.dueDeadline,
         status: nextSchedule.status,
+        is_completed: nextSchedule.isCompleted,
+        completed_at: nextSchedule.completedAt,
         updated_at: new Date(),
       },
     });
@@ -230,6 +302,8 @@ export async function POST(request: Request) {
       success: true,
       queueItem: updatedQueue,
       nextSchedule,
+      onTime: nextSchedule.onTime,
+      isCompleted: nextSchedule.isCompleted,
     });
   } catch (error) {
     console.error('[API /memories/review] POST Error:', error);

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { getInitialEnrollment } from '@/lib/memoryEngine';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
       });
 
       return NextResponse.json({
-        isRemembered: item?.status === 'ACTIVE' || item?.status === 'MASTERED',
+        isRemembered: item?.status === 'ACTIVE' || item?.status === 'COMPLETED',
         queueItem: item || null,
       });
     }
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
         where: {
           user_id: session.user.id,
           question_id: { in: ids },
-          status: { in: ['ACTIVE', 'MASTERED'] },
+          status: { in: ['ACTIVE', 'COMPLETED'] },
         },
         select: { question_id: true },
       });
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
     const totalCount = await prisma.spacedMemoryQueue.count({
       where: {
         user_id: session.user.id,
-        status: { in: ['ACTIVE', 'MASTERED'] },
+        status: { in: ['ACTIVE', 'COMPLETED'] },
       },
     });
 
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Toggle "Remember This" lightweight action
+// POST: Toggle "Remember This" lightweight action (Enrolls into 5-Level Spaced Repetition)
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
     }
 
     if (remember === false) {
-      // Remove or archive
+      // Remove from queue
       await prisma.spacedMemoryQueue.deleteMany({
         where: {
           user_id: session.user.id,
@@ -92,7 +93,9 @@ export async function POST(request: Request) {
         isRemembered: false,
       });
     } else {
-      // Add or reactivate
+      const enrollment = getInitialEnrollment();
+
+      // Enroll into 5-Level Spaced Repetition (Level 1: 24h review)
       const queueItem = await prisma.spacedMemoryQueue.upsert({
         where: {
           user_id_question_id: {
@@ -103,13 +106,20 @@ export async function POST(request: Request) {
         create: {
           user_id: session.user.id,
           question_id: questionId,
-          status: 'ACTIVE',
-          interval_days: 1,
-          next_review_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+          level: enrollment.level,
+          status: enrollment.status,
+          interval_days: enrollment.intervalDays,
+          next_review_at: enrollment.nextReviewAt,
+          due_deadline: enrollment.dueDeadline,
           memory_strength: 1.0,
+          is_completed: false,
         },
         update: {
-          status: 'ACTIVE',
+          level: enrollment.level,
+          status: enrollment.status,
+          interval_days: enrollment.intervalDays,
+          next_review_at: enrollment.nextReviewAt,
+          due_deadline: enrollment.dueDeadline,
           updated_at: new Date(),
         },
       });

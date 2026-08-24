@@ -1,12 +1,12 @@
 /**
  * Automated Verification Script for Personal Memory + Connection Engine
- * Tests strict user isolation, multiple connection types, spaced repetition, and Arabic normalization.
+ * Tests strict user isolation, 5-Level Spaced Repetition Schedule, time limits, and completion achievements.
  */
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import { calculateNextReview, generateSmartMemoryPrompts } from '../lib/memoryEngine';
+import { calculate5LevelReview, getInitialEnrollment, SPACING_LEVELS, generateSmartMemoryPrompts } from '../lib/memoryEngine';
 import { normalizeArabicText } from '../lib/arabicUtils';
 
 const connectionString = process.env.DATABASE_URL;
@@ -19,7 +19,7 @@ const prisma = new PrismaClient({ adapter });
 
 async function runTests() {
   console.log('════════════════════════════════════════════════════════════');
-  console.log('🧪 RUNNING MEMORY ENGINE AUTOMATED TEST MATRIX');
+  console.log('🧪 RUNNING 5-LEVEL SPACED REPETITION AUTOMATED TEST MATRIX');
   console.log('════════════════════════════════════════════════════════════\n');
 
   let passed = 0;
@@ -148,25 +148,78 @@ async function runTests() {
     });
     assert(connListB.length === 0, 'User B knowledge graph does NOT contain User A connection');
 
-    // ── 4. Test Spaced Repetition Deterministic Algorithm ──
-    console.log('\n4. Testing Spaced Repetition Scheduling Algorithm...');
+    // ── 4. Test 5-Level Spaced Repetition Progression & Time Limits ──
+    console.log('\n4. Testing 5-Level Spaced Repetition Schedule...');
     
-    // Initial state: interval 1 day, strength 1.0
-    const step1 = calculateNextReview(1, 1.0, true);
-    assert(step1.intervalDays === 3, 'Recall success from 1d advances to 3d interval');
-    assert(step1.memoryStrength === 1.5, 'Recall success increases strength to 1.5');
-    assert(step1.status === 'ACTIVE', 'Status remains ACTIVE');
+    // Enrollment: Level 1 (24h)
+    const enrollment = getInitialEnrollment();
+    assert(enrollment.level === 1, 'Initial enrollment starts at Level 1');
+    assert(enrollment.intervalDays === 1, 'Level 1 interval is 24 hours (1 day)');
 
-    const step2 = calculateNextReview(3, 1.5, true);
-    assert(step2.intervalDays === 7, 'Recall success from 3d advances to 7d interval');
+    // Step 1: Complete Level 1 on time -> advances to Level 2 (3 days)
+    const step1 = calculate5LevelReview({
+      currentLevel: 1,
+      currentStrength: 1.0,
+      dueDeadline: enrollment.dueDeadline,
+      wasHelpful: true,
+    });
+    assert(step1.level === 2, 'Passing Level 1 advances to Level 2');
+    assert(step1.intervalDays === 3, 'Level 2 interval is 3 days (2-3 days later)');
+    assert(!step1.isCompleted, 'Level 2 is not yet marked as completed achievement');
 
-    const step3 = calculateNextReview(7, 2.0, true);
-    assert(step3.intervalDays === 14, 'Recall success from 7d advances to 14d interval');
+    // Step 2: Complete Level 2 on time -> advances to Level 3 (7 days)
+    const step2 = calculate5LevelReview({
+      currentLevel: 2,
+      currentStrength: step1.memoryStrength,
+      dueDeadline: step1.dueDeadline,
+      wasHelpful: true,
+    });
+    assert(step2.level === 3, 'Passing Level 2 advances to Level 3');
+    assert(step2.intervalDays === 7, 'Level 3 interval is 7 days (~1 week later)');
 
-    // Failure / struggle reset
-    const stepFail = calculateNextReview(14, 2.5, false);
-    assert(stepFail.intervalDays === 1, 'Recall struggle resets interval back to 1d');
-    assert(stepFail.memoryStrength === 2.0, 'Recall struggle decreases strength by 0.5');
+    // Step 3: Complete Level 3 on time -> advances to Level 4 (16 days)
+    const step3 = calculate5LevelReview({
+      currentLevel: 3,
+      currentStrength: step2.memoryStrength,
+      dueDeadline: step2.dueDeadline,
+      wasHelpful: true,
+    });
+    assert(step3.level === 4, 'Passing Level 3 advances to Level 4');
+    assert(step3.intervalDays === 16, 'Level 4 interval is 16 days (2-3 weeks later)');
+
+    // Step 4: Complete Level 4 on time -> advances to Level 5 (45 days)
+    const step4 = calculate5LevelReview({
+      currentLevel: 4,
+      currentStrength: step3.memoryStrength,
+      dueDeadline: step3.dueDeadline,
+      wasHelpful: true,
+    });
+    assert(step4.level === 5, 'Passing Level 4 advances to Level 5');
+    assert(step4.intervalDays === 45, 'Level 5 interval is 45 days (1-2 months later)');
+    assert(!step4.isCompleted, 'Level 5 is not yet completed until final review passes');
+
+    // Step 5: Complete Level 5 on time -> FULL MASTERY & COMPLETION ACHIEVEMENT!
+    const step5 = calculate5LevelReview({
+      currentLevel: 5,
+      currentStrength: step4.memoryStrength,
+      dueDeadline: step4.dueDeadline,
+      wasHelpful: true,
+    });
+    assert(step5.isCompleted === true, 'Passing Level 5 marks PYQ as COMPLETED Achievement!');
+    assert(step5.status === 'COMPLETED', 'Status changed to COMPLETED');
+    assert(step5.completedAt !== null, 'completedAt timestamp set');
+
+    // Test Rule: If NOT completed on given time (missed/overdue) -> Resets to Level 1 and NOT created as achievement
+    const missedDeadlineInPast = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000); // 5 days ago
+    const lateReview = calculate5LevelReview({
+      currentLevel: 4,
+      currentStrength: 3.5,
+      dueDeadline: missedDeadlineInPast,
+      wasHelpful: true,
+    });
+    assert(lateReview.level === 1, 'Missed deadline resets question back to Level 1');
+    assert(lateReview.isCompleted === false, 'Late review does NOT grant completion achievement');
+    assert(lateReview.onTime === false, 'onTime flag is false');
 
     // ── 5. Test Arabic Tashkeel & Diacritics Normalization ──
     console.log('\n5. Testing Arabic Normalization Utilities...');
@@ -192,6 +245,7 @@ async function runTests() {
 
     // ── Clean up test data ──
     await prisma.questionConnection.deleteMany({ where: { user_id: { in: [userA.id, userB.id] } } });
+    await prisma.spacedMemoryQueue.deleteMany({ where: { user_id: { in: [userA.id, userB.id] } } });
     await prisma.memoryConnection.deleteMany({ where: { user_id: { in: [userA.id, userB.id] } } });
     await prisma.user.deleteMany({ where: { id: { in: [userA.id, userB.id] } } });
 
