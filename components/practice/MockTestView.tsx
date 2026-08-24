@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import NtaPaletteIcon from '@/components/ui/NtaPaletteIcon';
-import { Menu, X, AlertCircle, Bookmark, Check, RefreshCw } from 'lucide-react';
+import { Menu, X, AlertCircle, Bookmark, Check, RefreshCw, ArrowLeft } from 'lucide-react';
 import { getOptionText } from '@/lib/arabicUtils';
+import MemoryButton from '@/components/memory/MemoryButton';
+import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
+import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 
 interface MockTestViewProps {
   year?: string;
@@ -42,6 +46,8 @@ export default function MockTestView({
   const [timeLeft, setTimeLeft] = useState(120 * 60);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [memoryModalOpen, setMemoryModalOpen] = useState(false);
+  const [memoryRefresh, setMemoryRefresh] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -90,6 +96,16 @@ export default function MockTestView({
           >
             {isNavOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
+
+          <Link
+            href="/dashboard"
+            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors hidden sm:inline-flex items-center gap-1 text-xs font-bold"
+            title="Exit to Dashboard"
+          >
+            <ArrowLeft size={16} />
+            <span>Exit</span>
+          </Link>
+
           <div className="font-bold text-stone-900 text-sm sm:text-base">
             {headerTitle}
           </div>
@@ -247,11 +263,18 @@ export default function MockTestView({
                 </div>
               </div>
             )}
+
+            {/* Personal Memory Preview */}
+            <QuestionMemoryStrip
+              questionId={currentQ.id}
+              onOpenModal={() => setMemoryModalOpen(true)}
+              refreshTrigger={memoryRefresh}
+            />
           </div>
 
           {/* Bottom Actions Bar */}
           <div className="shrink-0 p-4 bg-white border-t border-stone-200 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
               <button
                 onClick={() => onToggleBookmark(currentQ.id)}
                 className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 transition-colors font-bold text-xs sm:text-sm ${
@@ -264,6 +287,11 @@ export default function MockTestView({
                 {isCurrentBookmarked ? 'Marked' : 'Mark for Review'}
               </button>
 
+              <MemoryButton
+                questionId={currentQ.id}
+                onOpenMemoryModal={() => setMemoryModalOpen(true)}
+              />
+
               {isCurrentAnswered && onClearResponse && (
                 <button
                   onClick={() => onClearResponse(currentQ.id)}
@@ -273,6 +301,16 @@ export default function MockTestView({
                 </button>
               )}
             </div>
+
+            {/* Memory Modal */}
+            {memoryModalOpen && (
+              <MemoryConnectionModal
+                isOpen={memoryModalOpen}
+                onClose={() => setMemoryModalOpen(false)}
+                question={currentQ}
+                onMemorySaved={() => setMemoryRefresh((prev) => prev + 1)}
+              />
+            )}
 
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto ml-auto">
               <button

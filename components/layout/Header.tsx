@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/pyq', label: 'PYQs', icon: BookMarked },
   { href: '/syllabus', label: 'Syllabus', icon: GraduationCap },
+  { href: '/memories', label: 'Memories', icon: LayoutDashboard },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
@@ -20,9 +21,13 @@ export default function Header({ user }: { user: { name?: string | null, email?:
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // Do not show header on Home page if we want a different one, but usually it's global.
-  // Actually, the mockup shows the header on the home page too with the same style but transparent maybe? No, the home page in the mockup has a white rounded pill navbar. Wait, the user said "HOME PAGE CHOR KAR ISKI STYLES KO COPY KARO".
-  // Let's check if we are on home page to use a different style, or just keep it global white. The home page currently uses this header and it looks fine.
+  // Do not show global header on full-screen test/practice/instructions pages
+  if (
+    pathname.startsWith('/practice') ||
+    pathname.startsWith('/instructions')
+  ) {
+    return null;
+  }
   
   return (
     <>

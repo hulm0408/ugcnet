@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, Sparkles } from 'lucide-react';
+import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, Sparkles, Brain } from 'lucide-react';
+import { BrainSparkIcon, SpacedRepetitionIcon, KnowledgeGraphIcon } from '@/components/memory/MemoryIcons';
 import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
 import prisma from '@/lib/db';
@@ -25,9 +26,26 @@ export default async function DashboardPage() {
   let bookmarkedCount = 0;
   let incorrectCount = 0;
 
+  // Memory engine metrics
+  let memoriesCount = 0;
+  let dueReviewCount = 0;
+  let rememberedTodayCount = 0;
+  let connectionsCount = 0;
+
   if (session?.user?.id) {
-    // Count actual answered attempts (not session.total_questions which = session size)
-    const [totalAttempted, correctCount, incorrectCountDb, bookmarkedCountDb] = await Promise.all([
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const [
+      totalAttempted,
+      correctCount,
+      incorrectCountDb,
+      bookmarkedCountDb,
+      memCountDb,
+      dueCountDb,
+      remTodayDb,
+      connCountDb,
+    ] = await Promise.all([
       prisma.practiceAttempt.count({
         where: { user_id: session.user.id },
       }),
@@ -40,12 +58,36 @@ export default async function DashboardPage() {
       prisma.bookmark.count({
         where: { user_id: session.user.id },
       }),
+      prisma.memoryConnection.count({
+        where: { user_id: session.user.id },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: {
+          user_id: session.user.id,
+          status: { in: ['ACTIVE', 'MASTERED'] },
+          next_review_at: { lte: now },
+        },
+      }),
+      prisma.spacedMemoryQueue.count({
+        where: {
+          user_id: session.user.id,
+          updated_at: { gte: todayStart },
+        },
+      }),
+      prisma.questionConnection.count({
+        where: { user_id: session.user.id },
+      }),
     ]);
 
     questionsAttempted = totalAttempted;
     accuracyRate = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
     incorrectCount = incorrectCountDb;
     bookmarkedCount = bookmarkedCountDb;
+
+    memoriesCount = memCountDb;
+    dueReviewCount = dueCountDb;
+    rememberedTodayCount = remTodayDb;
+    connectionsCount = connCountDb;
   }
 
   // Fetch recent sessions
@@ -119,6 +161,67 @@ export default async function DashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* ── My Memory Section ── */}
+        {session && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+                <BrainSparkIcon size={20} className="text-emerald-700" />
+                My Memory & Knowledge Graph
+              </h2>
+              <Link
+                href="/memories"
+                className="text-xs font-bold text-emerald-700 hover:text-emerald-900 transition-colors flex items-center gap-1"
+              >
+                Open Memory Hub <ChevronRight size={14} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Link
+                href="/memories"
+                className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <BrainSparkIcon size={20} />
+                </div>
+                <div className="text-3xl font-black text-stone-900 tracking-tight">{memoriesCount}</div>
+                <div className="text-xs font-bold text-stone-500 mt-0.5">Memories Created</div>
+              </Link>
+
+              <Link
+                href="/memories/review"
+                className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <SpacedRepetitionIcon size={20} />
+                </div>
+                <div className="text-3xl font-black text-stone-900 tracking-tight">{dueReviewCount}</div>
+                <div className="text-xs font-bold text-stone-500 mt-0.5">Due for Review</div>
+              </Link>
+
+              <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center mb-3">
+                  <Clock size={20} />
+                </div>
+                <div className="text-3xl font-black text-stone-900 tracking-tight">{rememberedTodayCount}</div>
+                <div className="text-xs font-bold text-stone-500 mt-0.5">Remembered Today</div>
+              </div>
+
+              <Link
+                href="/memories"
+                className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <KnowledgeGraphIcon size={20} />
+                </div>
+                <div className="text-3xl font-black text-stone-900 tracking-tight">{connectionsCount}</div>
+                <div className="text-xs font-bold text-stone-500 mt-0.5">Questions Connected</div>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Recent Activity & Test History */}
         {session && (

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { List, X } from 'lucide-react';
 import { getOptionText } from '@/lib/arabicUtils';
+import MemoryButton from '@/components/memory/MemoryButton';
+import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
+import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 
 interface QuestionReviewViewProps {
   year?: string;
@@ -29,6 +32,8 @@ export default function QuestionReviewView({
   const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect' | 'unattempted'>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isListOpen, setIsListOpen] = useState(false);
+  const [memoryModalOpen, setMemoryModalOpen] = useState(false);
+  const [memoryRefresh, setMemoryRefresh] = useState(0);
 
   const headerTitle = paper || (year ? `UGC NET Arabic – ${year}` : 'UGC NET Arabic Practice');
 
@@ -299,9 +304,27 @@ export default function QuestionReviewView({
                     })}
                   </div>
 
+                  {/* Memory Actions Row */}
+                  <div className="bg-white rounded-2xl border border-stone-200 p-4 mb-6 flex items-center justify-between gap-3 flex-wrap shadow-sm">
+                    <div className="text-xs font-bold text-stone-500">
+                      Personal Mental Connection
+                    </div>
+                    <MemoryButton
+                      questionId={currentQ.id}
+                      onOpenMemoryModal={() => setMemoryModalOpen(true)}
+                    />
+                  </div>
+
+                  {/* Personal Memory Preview Strip */}
+                  <QuestionMemoryStrip
+                    questionId={currentQ.id}
+                    onOpenModal={() => setMemoryModalOpen(true)}
+                    refreshTrigger={memoryRefresh}
+                  />
+
                   {/* Explanation Section */}
                   {evalRes?.explanation && (
-                    <div className="bg-primary-surface border border-primary/20 rounded-2xl p-5 sm:p-8 mb-8">
+                    <div className="bg-primary-surface border border-primary/20 rounded-2xl p-5 sm:p-8 mb-8 mt-6">
                       <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold text-stone-900 mb-3 sm:mb-4">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-primary sm:w-6 sm:h-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10"></circle>
@@ -318,6 +341,16 @@ export default function QuestionReviewView({
                         ))}
                       </div>
                     </div>
+                  )}
+
+                  {/* Memory Modal */}
+                  {memoryModalOpen && (
+                    <MemoryConnectionModal
+                      isOpen={memoryModalOpen}
+                      onClose={() => setMemoryModalOpen(false)}
+                      question={currentQ}
+                      onMemorySaved={() => setMemoryRefresh((prev) => prev + 1)}
+                    />
                   )}
 
                 </div>

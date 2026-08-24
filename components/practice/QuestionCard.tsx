@@ -1,7 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import MemoryButton from '@/components/memory/MemoryButton';
+import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
+import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 
 type EvalResult = {
   isCorrect: boolean;
@@ -51,6 +54,8 @@ function parseOptionText(data: unknown): { arabic: string; english: string } {
 const OPTIONS = ['A', 'B', 'C', 'D'] as const;
 
 export default function QuestionCard({ question, mode, selectedOption, evaluation, onSelectOption }: QuestionProps) {
+  const [memoryModalOpen, setMemoryModalOpen] = useState(false);
+  const [memoryRefresh, setMemoryRefresh] = useState(0);
   const isEval = evaluation !== null;
   
   const handleSelect = (opt: string) => {
@@ -232,6 +237,34 @@ export default function QuestionCard({ question, mode, selectedOption, evaluatio
             );
           })}
         </div>
+
+        {/* ── Question Action Bar (Remember + Memory Connections) ── */}
+        <div className="mt-4 pt-3.5 border-t border-stone-100 flex items-center justify-between gap-3 flex-wrap">
+          <div className="text-xs font-bold text-stone-400">
+            Personal Memory
+          </div>
+          <MemoryButton
+            questionId={question.id}
+            onOpenMemoryModal={() => setMemoryModalOpen(true)}
+          />
+        </div>
+
+        {/* ── Personal Memory Preview Strip ── */}
+        <QuestionMemoryStrip
+          questionId={question.id}
+          onOpenModal={() => setMemoryModalOpen(true)}
+          refreshTrigger={memoryRefresh}
+        />
+
+        {/* ── Memory Connection Modal ── */}
+        {memoryModalOpen && (
+          <MemoryConnectionModal
+            isOpen={memoryModalOpen}
+            onClose={() => setMemoryModalOpen(false)}
+            question={question}
+            onMemorySaved={() => setMemoryRefresh((prev) => prev + 1)}
+          />
+        )}
 
         {/* ── Answer Explanation ─────────────────────────── */}
         {isEval && (

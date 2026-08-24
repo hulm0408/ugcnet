@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import styles from './QuestionCard.module.css';
+import MemoryButton from '@/components/memory/MemoryButton';
+import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
+import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 
 interface Option {
   key: string;
@@ -31,6 +34,8 @@ export default function QuestionCard({
   contextEnglish,
 }: QuestionProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [memoryModalOpen, setMemoryModalOpen] = useState(false);
+  const [memoryRefresh, setMemoryRefresh] = useState(0);
 
   const options: Option[] = ['A', 'B', 'C', 'D'].map(key => ({
     key,
@@ -83,6 +88,37 @@ export default function QuestionCard({
           </button>
         ))}
       </div>
+
+      {/* Memory Actions Row */}
+      <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-xs font-bold text-stone-400">Personal Connection</span>
+        <MemoryButton
+          questionId={id}
+          onOpenMemoryModal={() => setMemoryModalOpen(true)}
+        />
+      </div>
+
+      {/* Inline Memory Preview */}
+      <QuestionMemoryStrip
+        questionId={id}
+        onOpenModal={() => setMemoryModalOpen(true)}
+        refreshTrigger={memoryRefresh}
+      />
+
+      {/* Memory Connection Modal */}
+      {memoryModalOpen && (
+        <MemoryConnectionModal
+          isOpen={memoryModalOpen}
+          onClose={() => setMemoryModalOpen(false)}
+          question={{
+            id,
+            original_question_number: originalNumber,
+            question_arabic: questionArabic,
+            question_english: questionEnglish,
+          }}
+          onMemorySaved={() => setMemoryRefresh((prev) => prev + 1)}
+        />
+      )}
     </div>
   );
 }

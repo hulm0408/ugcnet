@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, CheckCircle2, Bookmark, Share2 } from 'lucide-react';
+import MemoryButton from '@/components/memory/MemoryButton';
+import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
+import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 
 export interface QuestionData {
   id: string;
@@ -29,6 +32,8 @@ interface QuestionBrowserCardProps {
 
 export default function QuestionBrowserCard({ question, index }: QuestionBrowserCardProps) {
   const [isRevealed, setIsRevealed] = useState(false);
+  const [memoryModalOpen, setMemoryModalOpen] = useState(false);
+  const [memoryRefresh, setMemoryRefresh] = useState(0);
 
   let optionsObj: Record<string, string> = {};
   try {
@@ -116,37 +121,61 @@ export default function QuestionBrowserCard({ question, index }: QuestionBrowser
       )}
 
       {/* Action Footer */}
-      <div className="flex items-center justify-between pt-3.5 border-t border-stone-100 text-xs mt-4">
-        <button
-          type="button"
-          onClick={() => setIsRevealed(!isRevealed)}
-          className="inline-flex items-center gap-1.5 text-stone-700 hover:text-stone-900 font-bold py-1.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 transition-colors"
-        >
-          {isRevealed ? (
-            <>
-              <EyeOff size={14} />
-              Hide Answer
-            </>
-          ) : (
-            <>
-              <Eye size={14} />
-              Reveal Answer
-            </>
-          )}
-        </button>
-
-        {isRevealed && (
-          <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs">
-            <CheckCircle2 size={16} />
-            <span>Correct: Option ({question.correct_answer})</span>
-            {question.correct_answer_text_arabic && (
-              <span dir="rtl" lang="ar" className="font-arabic font-medium text-emerald-900">
-                — {question.correct_answer_text_arabic}
-              </span>
+      <div className="flex items-center justify-between pt-3.5 border-t border-stone-100 text-xs mt-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsRevealed(!isRevealed)}
+            className="inline-flex items-center gap-1.5 text-stone-700 hover:text-stone-900 font-bold py-1.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 transition-colors"
+          >
+            {isRevealed ? (
+              <>
+                <EyeOff size={14} />
+                Hide Answer
+              </>
+            ) : (
+              <>
+                <Eye size={14} />
+                Reveal Answer
+              </>
             )}
-          </div>
-        )}
+          </button>
+        </div>
+
+        <MemoryButton
+          questionId={question.id}
+          onOpenMemoryModal={() => setMemoryModalOpen(true)}
+        />
       </div>
+
+      {isRevealed && (
+        <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs mt-3 pt-2 border-t border-dashed border-stone-200">
+          <CheckCircle2 size={16} />
+          <span>Correct: Option ({question.correct_answer})</span>
+          {question.correct_answer_text_arabic && (
+            <span dir="rtl" lang="ar" className="font-arabic font-medium text-emerald-900">
+              — {question.correct_answer_text_arabic}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Inline Memory Preview */}
+      <QuestionMemoryStrip
+        questionId={question.id}
+        onOpenModal={() => setMemoryModalOpen(true)}
+        refreshTrigger={memoryRefresh}
+      />
+
+      {/* Memory Connection Modal */}
+      {memoryModalOpen && (
+        <MemoryConnectionModal
+          isOpen={memoryModalOpen}
+          onClose={() => setMemoryModalOpen(false)}
+          question={question}
+          onMemorySaved={() => setMemoryRefresh((prev) => prev + 1)}
+        />
+      )}
     </div>
   );
 }

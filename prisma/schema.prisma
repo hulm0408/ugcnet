@@ -149,6 +149,11 @@ model Question {
   bookmarks                   Bookmark[]
   reports                     QuestionReport[]
   classification_history      ClassificationHistory[]
+  memory_connections          MemoryConnection[]
+  source_connections          QuestionConnection[]   @relation("SourceConnections")
+  target_connections          QuestionConnection[]   @relation("TargetConnections")
+  spaced_memory_queue         SpacedMemoryQueue[]
+  memory_review_logs          MemoryReviewLog[]
 
   @@index([exam_paper_id, content_status])
   @@index([unit_id, content_status])
@@ -181,6 +186,10 @@ model User {
   reports         QuestionReport[]
   audit_logs      AuditLog[]
   classification_history ClassificationHistory[]
+  memory_connections     MemoryConnection[]
+  question_connections   QuestionConnection[]
+  spaced_memory_queue    SpacedMemoryQueue[]
+  memory_review_logs     MemoryReviewLog[]
 
   @@map("User")
 }
@@ -391,3 +400,88 @@ model SiteSetting {
   updated_by  String?
   updated_at  DateTime @updatedAt
 }
+
+// ═══════════════════════════════════════════════════
+// PERSONAL MEMORY + CONNECTION ENGINE
+// ═══════════════════════════════════════════════════
+
+model MemoryConnection {
+  id          String   @id @default(cuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question_id String
+  question    Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  
+  type        String   // TRICK | MNEMONIC | STORY | CONCEPT | KEYWORD | PERSONAL_EXPLANATION | VISUAL_CONNECTION
+  content     String   // The personal trick, mnemonic or explanation text
+  keywords    Json?    // Optional keywords/tags as array of strings
+  is_public   Boolean  @default(false)
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@unique([user_id, question_id, type])
+  @@index([user_id, question_id])
+  @@index([user_id, type])
+  @@index([user_id, created_at])
+}
+
+model QuestionConnection {
+  id                  String   @id @default(cuid())
+  user_id             String
+  user                User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  source_question_id  String
+  source_question     Question @relation("SourceConnections", fields: [source_question_id], references: [id], onDelete: Cascade)
+  target_question_id  String
+  target_question     Question @relation("TargetConnections", fields: [target_question_id], references: [id], onDelete: Cascade)
+  
+  relationship_type   String   @default("RELATED_CONCEPT") // SAME_AUTHOR | SAME_WORK | SAME_ERA | CONTRAST | PREREQUISITE | THEMATIC | RELATED_CONCEPT
+  note                String?
+  
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  @@unique([user_id, source_question_id, target_question_id])
+  @@index([user_id, source_question_id])
+  @@index([user_id, target_question_id])
+}
+
+model SpacedMemoryQueue {
+  id              String    @id @default(cuid())
+  user_id         String
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question_id     String
+  question        Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  
+  last_reviewed_at DateTime?
+  review_count    Int       @default(0)
+  difficulty      String    @default("MEDIUM") // EASY | MEDIUM | HARD
+  interval_days   Int       @default(1)
+  next_review_at  DateTime  @default(now())
+  memory_strength Float     @default(1.0) // 0.0 to 5.0
+  status          String    @default("ACTIVE") // ACTIVE | MASTERED | ARCHIVED
+  
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@unique([user_id, question_id])
+  @@index([user_id, next_review_at])
+  @@index([user_id, status])
+}
+
+model MemoryReviewLog {
+  id          String   @id @default(cuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question_id String
+  question    Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  
+  memory_id   String?
+  was_helpful Boolean  @default(true)
+  feedback    String?
+  reviewed_at DateTime @default(now())
+
+  @@index([user_id, question_id])
+  @@index([user_id, reviewed_at])
+}
+

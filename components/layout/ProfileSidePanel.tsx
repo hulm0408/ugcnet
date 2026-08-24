@@ -18,6 +18,8 @@ interface ProfileSidePanelProps {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, desc: 'Your progress overview' },
+  { href: '/memories', label: 'My Memories', icon: Trophy, desc: 'Tricks, mnemonics & graph' },
+  { href: '/memories/review', label: 'Review Due', icon: BookMarked, desc: 'Spaced repetition recall' },
   { href: '/practice', label: 'Practice Now', icon: BookOpen, desc: 'Continue studying' },
   { href: '/dashboard/bookmarks', label: 'Bookmarks', icon: BookMarked, desc: 'Saved questions' },
   { href: '/dashboard/incorrect', label: 'Incorrect', icon: XCircle, desc: 'Review mistakes' },
