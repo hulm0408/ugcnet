@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { verifyPaperAccess } from '@/lib/accessControl';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,8 +40,21 @@ export async function GET(request: Request) {
       where.id = questionId;
     }
 
-    // 2. Exact Paper
+    // 2. Exact Paper Access Check
     else if (paperId) {
+      const session = await auth();
+      const access = await verifyPaperAccess(session?.user?.id, paperId);
+      if (!access.hasAccess) {
+        return NextResponse.json(
+          {
+            error: 'LOCKED_CONTENT',
+            message: 'Subscription required to access this premium paper.',
+            paper: access.paper,
+            subject: access.subject,
+          },
+          { status: 403 }
+        );
+      }
       where.exam_paper_id = paperId;
     }
 

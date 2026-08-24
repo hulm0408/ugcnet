@@ -119,6 +119,8 @@ model ExamPaper {
   content_status      String   @default("PUBLISHED") // PUBLISHED|DRAFT|PRIVATE|UNVERIFIED|RESTRICTED|ARCHIVED
   status_reason       String?  // Why it's restricted/unverified
   is_paper_iii        Boolean  @default(false)
+  is_free_benchmark   Boolean  @default(false) // TRUE for exactly 1 free benchmark paper per subject
+  access_tier         String   @default("PREMIUM") // FREE | PREMIUM
   display_name        String   // Human-readable name for UI
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
@@ -126,6 +128,8 @@ model ExamPaper {
   questions           Question[]
   import_jobs         ImportJob[]
 
+  @@index([subject_id, is_free_benchmark])
+  @@index([subject_id, access_tier])
   @@index([subject_id, year, content_status])
   @@index([year, content_status])
   @@index([content_status])

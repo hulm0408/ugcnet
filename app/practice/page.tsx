@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Target, CheckCircle2, ArrowLeft, RefreshCw, BookOpen } from 'lucide-react';
+import { Target, CheckCircle2, ArrowLeft, RefreshCw, BookOpen, Lock, Sparkles } from 'lucide-react';
 
 import InstructionsView from '@/components/practice/InstructionsView';
 import MockTestView from '@/components/practice/MockTestView';
@@ -29,6 +29,10 @@ function PracticeContent() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lockedPayload, setLockedPayload] = useState<{
+    paper?: any;
+    subject?: any;
+  } | null>(null);
 
   // If paper mode and type=mock, default to mock test. Otherwise allow toggle or practice mode.
   const [sessionMode, setSessionMode] = useState<'practice' | 'mock' | 'instructions' | null>(
@@ -49,6 +53,7 @@ function PracticeContent() {
       try {
         setLoading(true);
         setError(null);
+        setLockedPayload(null);
 
         const apiUrl = buildQuestionsApiUrl(context);
         let allQuestions: any[] = [];
@@ -57,6 +62,16 @@ function PracticeContent() {
 
         do {
           const res = await fetch(`${apiUrl}&page=${page}`);
+
+          if (res.status === 403) {
+            const json = await res.json();
+            if (json.error === 'LOCKED_CONTENT') {
+              setLockedPayload(json);
+              setLoading(false);
+              return;
+            }
+          }
+
           if (!res.ok) throw new Error(`Failed to load questions (Status ${res.status})`);
 
           const json = await res.json();
@@ -198,10 +213,73 @@ function PracticeContent() {
     );
   }
 
-  // Error State
+  // Locked Content State (Value-Driven Paywall)
+  if (lockedPayload) {
+    const subjectName = lockedPayload.subject?.name || 'Arabic';
+    const subjectSlug = lockedPayload.subject?.slug || 'arabic';
+    const paperName = lockedPayload.paper?.display_name || context.paperTitle || 'This Exam Paper';
+
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[85vh] bg-stone-50 p-4 sm:p-6">
+        <div className="bg-white rounded-3xl border border-stone-200/90 shadow-2xl p-6 sm:p-10 max-w-lg w-full text-center space-y-6 animate-in zoom-in-95">
+          <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200/80 shadow-sm">
+            <Lock size={32} />
+          </div>
+
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary-dark text-xs font-extrabold mb-2">
+              <Sparkles size={13} /> Pro Access Required
+            </div>
+            <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+              Unlock {subjectName} Preparation
+            </h2>
+            <p className="text-stone-500 text-xs sm:text-sm font-medium mt-1">
+              <strong className="text-stone-800">{paperName}</strong> is part of full {subjectName} Pro preparation.
+            </p>
+          </div>
+
+          <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200/60 text-left space-y-2.5">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+              Your {subjectName} Pro Pass includes:
+            </div>
+            {[
+              `All 45+ ${subjectName} PYQ Papers (2004–2024 with answers)`,
+              'Full UGC NET General Paper 1 (10 Units included)',
+              'Personal Mistake Tracker & Weak Topic Analytics',
+              'Unlimited CBT Timed Mock Test Simulations',
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-stone-700">
+                <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Link
+              href={`/checkout?subject=${subjectSlug}&plan=plan_sub_6m`}
+              className="w-full py-3.5 px-6 bg-stone-900 hover:bg-stone-800 text-white font-extrabold text-sm rounded-2xl shadow-lg hover:shadow-xl flex items-center justify-center gap-2 transition-all active:scale-98"
+            >
+              <span>Unlock {subjectName} Pro (₹1,499)</span>
+              <ArrowLeft size={16} className="rotate-180" />
+            </Link>
+
+            <Link
+              href="/pyq"
+              className="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl flex items-center justify-center transition-colors"
+            >
+              Take Free Benchmark Exam / Browse Papers
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Generic Error State
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-[70vh] bg-[#FCFAF8] p-6">
+      <div className="flex-1 flex items-center justify-center min-h-[60vh] bg-stone-50 p-6">
         <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 sm:p-10 max-w-md w-full text-center space-y-4">
           <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
             <RefreshCw size={24} />
