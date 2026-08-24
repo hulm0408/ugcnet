@@ -20,6 +20,7 @@ export type PracticeMode =
 export interface PracticeContext {
   mode: PracticeMode;
   paperId?: string;
+  sessionId?: string;
   year?: number;
   unitNumber?: number;
   topicSlug?: string;
@@ -38,6 +39,7 @@ export function resolvePracticeContext(searchParams: {
 }): PracticeContext {
   const modeParam = searchParams.get('mode')?.toLowerCase();
   const paperId = searchParams.get('paperId') || searchParams.get('paper_id');
+  const sessionId = searchParams.get('sessionId') || searchParams.get('session_id');
   const yearParam = searchParams.get('year');
   const unitParam = searchParams.get('unit');
   const topicParam = searchParams.get('topic');
@@ -63,9 +65,27 @@ export function resolvePracticeContext(searchParams: {
 
   // 2. User-specific Modes
   if (modeParam === 'incorrect') {
+    if (sessionId) {
+      return {
+        mode: 'incorrect',
+        sessionId,
+        titleEnglish: 'Test Mistakes Practice',
+        titleArabic: 'تدريب على أخطاء الاختبار',
+        subtitle: 'Targeted practice for mistakes made in this specific session',
+      };
+    }
+    if (unitNumber) {
+      return {
+        mode: 'incorrect',
+        unitNumber,
+        titleEnglish: `Unit ${unitNumber} Mistakes Practice`,
+        titleArabic: `تدريب على أخطاء الوحدة ${unitNumber}`,
+        subtitle: `Targeted practice for mistakes in Unit ${unitNumber}`,
+      };
+    }
     return {
       mode: 'incorrect',
-      titleEnglish: 'Incorrect Questions Review',
+      titleEnglish: 'Mistakes & Review Practice',
       titleArabic: 'مراجعة الأسئلة الخاطئة',
       subtitle: 'Practice all questions you answered incorrectly',
     };
@@ -206,6 +226,8 @@ export function buildQuestionsApiUrl(context: PracticeContext): string {
       break;
     case 'incorrect':
       params.set('mode', 'incorrect');
+      if (context.sessionId) params.set('sessionId', context.sessionId);
+      if (context.unitNumber) params.set('unit', context.unitNumber.toString());
       break;
     case 'bookmarked':
       params.set('mode', 'bookmarked');

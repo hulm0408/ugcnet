@@ -4,6 +4,7 @@ import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRi
 import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
 import prisma from '@/lib/db';
+import { formatRelativeDate } from '@/lib/dateUtils';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -119,30 +120,85 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        {session && recentSessions.length > 0 && (
+        {/* Recent Activity & Test History */}
+        {session && (
           <div className="mb-10">
-            <h2 className="text-lg font-bold text-stone-900 mb-4">Recent Activity</h2>
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
-              <div className="divide-y divide-stone-100">
-                {recentSessions.map((rs) => (
-                  <div key={rs.id} className="p-5 flex items-center justify-between hover:bg-stone-50 transition-colors">
-                    <div>
-                      <div className="font-semibold text-stone-900 capitalize text-sm mb-1">{rs.mode.replace('_', ' ')} Practice</div>
-                      <div className="text-xs text-stone-500">
-                        {rs.total_questions} Questions • {(rs.completed_at ?? rs.started_at)?.toLocaleDateString() ?? 'In progress'}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-primary">
-                        {Math.round((rs.correct_count / rs.total_questions) * 100)}%
-                      </div>
-                      <div className="text-xs text-stone-400 font-medium uppercase tracking-wider mt-0.5">Accuracy</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-stone-900">Recent Test Activity</h2>
+              <Link
+                href="/dashboard/incorrect"
+                className="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
+              >
+                Open Mistake Tracker <ChevronRight size={14} />
+              </Link>
             </div>
+
+            {recentSessions.length === 0 ? (
+              <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 p-8 text-center shadow-sm">
+                <Clock size={36} className="mx-auto text-stone-300 mb-2" />
+                <p className="text-sm font-bold text-stone-700">No test attempts yet</p>
+                <p className="text-xs text-stone-400 mt-1">Start practicing PYQs or Syllabus units to see your score history and mistakes logged here.</p>
+              </div>
+            ) : (
+              <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden divide-y divide-stone-100">
+                {recentSessions.map((rs) => {
+                  const filters = (rs.filters as any) || {};
+                  const dateObj = rs.completed_at ?? rs.started_at;
+                  const displayTitle =
+                    filters.paperTitle ||
+                    filters.titleEnglish ||
+                    (filters.year ? `Year ${filters.year} Paper` : `${rs.mode.replace('_', ' ').toUpperCase()} Practice`);
+                  const accuracy = rs.total_questions > 0 ? Math.round((rs.correct_count / rs.total_questions) * 100) : 0;
+
+                  return (
+                    <div key={rs.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-stone-50/80 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                            accuracy >= 70
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : accuracy >= 40
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {accuracy}%
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-stone-900 text-sm">{displayTitle}</div>
+                          <div className="text-xs text-stone-500 font-medium flex items-center gap-2 mt-0.5">
+                            <span>{rs.total_questions} Questions</span>
+                            <span>•</span>
+                            <span>{formatRelativeDate(dateObj)}</span>
+                            {rs.incorrect_count > 0 && (
+                              <>
+                                <span>•</span>
+                                <span className="text-rose-600 font-bold">{rs.incorrect_count} Mistakes</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        {rs.incorrect_count > 0 && (
+                          <Link
+                            href="/dashboard/incorrect"
+                            className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors"
+                          >
+                            Review {rs.incorrect_count} Mistakes
+                          </Link>
+                        )}
+                        <div className="text-right pl-2 hidden sm:block">
+                          <div className="font-black text-stone-900 text-sm">{rs.score} pts</div>
+                          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">Score</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

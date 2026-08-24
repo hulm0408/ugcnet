@@ -44,8 +44,17 @@ export async function GET(request: Request) {
           meta: { total: 0, page: 1, limit, totalPages: 0, requiresAuth: true },
         });
       }
+      const sessionId = searchParams.get('sessionId') || searchParams.get('session_id');
+      const attemptsWhere: any = {
+        user_id: session.user.id,
+        is_correct: false,
+        is_skipped: false,
+      };
+      if (sessionId) {
+        attemptsWhere.session_id = sessionId;
+      }
       const attempts = await prisma.practiceAttempt.findMany({
-        where: { user_id: session.user.id, is_correct: false, is_skipped: false },
+        where: attemptsWhere,
         select: { question_id: true },
       });
       const qIds = Array.from(new Set(attempts.map((a) => a.question_id)));
@@ -56,6 +65,9 @@ export async function GET(request: Request) {
         });
       }
       where.id = { in: qIds };
+      if (unit) {
+        where.unit = { unit_number: parseInt(unit, 10) };
+      }
     } else if (mode === 'bookmarked') {
       const session = await auth();
       if (!session?.user?.id) {
