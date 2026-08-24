@@ -1,27 +1,38 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, Zap, Brain } from 'lucide-react';
-import { BrainSparkIcon, SpacedRepetitionIcon, KnowledgeGraphIcon } from '@/components/memory/MemoryIcons';
+import {
+  BookOpen,
+  Target,
+  Clock,
+  TrendingUp,
+  Bookmark,
+  AlertCircle,
+  ChevronRight,
+  Zap,
+  Brain,
+  ArrowRight,
+  RotateCcw,
+  CheckCircle2,
+  Trophy,
+  Layers,
+  Sparkles,
+} from 'lucide-react';
 import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
 import SpacedPyqTracker, { SpacedItem } from '@/components/dashboard/SpacedPyqTracker';
 import prisma from '@/lib/db';
 import { formatRelativeDate } from '@/lib/dateUtils';
 
-export const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Your Arabic NET/JRF practice dashboard — track progress, accuracy, and weak topics.',
-};
+export const dynamic = 'force-dynamic';
 
-const quickActions = [
-  { label: 'Continue Practice', href: '/practice', icon: BookOpen, color: 'bg-stone-900 text-white hover:bg-stone-800', desc: 'Pick up where you left off' },
-  { label: 'PYQ Year-wise', href: '/pyq', icon: BookMarked, color: 'bg-primary text-white hover:bg-primary-dark', desc: 'Browse past exam papers' },
-  { label: 'Syllabus Units', href: '/syllabus', icon: Target, color: 'bg-accent text-white hover:bg-amber-600', desc: 'Practice unit by unit' },
-];
+export const metadata: Metadata = {
+  title: 'Dashboard — Your Preparation Progress',
+  description: 'Track your UGC NET Arabic progress, accuracy, weak units, and next recommended action.',
+};
 
 export default async function DashboardPage() {
   const session = await auth();
-  
+
   let questionsAttempted = 0;
   let accuracyRate = 0;
   let bookmarkedCount = 0;
@@ -37,6 +48,11 @@ export default async function DashboardPage() {
   let levelCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   let completedSpacedItems: SpacedItem[] = [];
   let activeSpacedItems: SpacedItem[] = [];
+
+  // Next best action & weak units
+  let unfinishedSession: any = null;
+  let weakestUnits: Array<{ unit_number: number; name_arabic: string; name_english: string; count: number }> = [];
+  let recentSessions: any[] = [];
 
   if (session?.user?.id) {
     const now = new Date();
@@ -60,6 +76,9 @@ export default async function DashboardPage() {
       lvl5Db,
       compItemsDb,
       activeItemsDb,
+      unfinishedDb,
+      incorrectAttemptsDb,
+      recentSessionsDb,
     ] = await Promise.all([
       prisma.practiceAttempt.count({
         where: { user_id: session.user.id },
@@ -149,6 +168,39 @@ export default async function DashboardPage() {
         orderBy: { next_review_at: 'asc' },
         take: 15,
       }),
+      prisma.practiceSession.findFirst({
+        where: {
+          user_id: session.user.id,
+          status: 'in_progress',
+        },
+        orderBy: { last_active_at: 'desc' },
+      }),
+      prisma.practiceAttempt.findMany({
+        where: {
+          user_id: session.user.id,
+          is_correct: false,
+          is_skipped: false,
+        },
+        include: {
+          question: {
+            select: {
+              unit: {
+                select: {
+                  unit_number: true,
+                  name_arabic: true,
+                  name_english: true,
+                },
+              },
+            },
+          },
+        },
+        take: 80,
+      }),
+      prisma.practiceSession.findMany({
+        where: { user_id: session.user.id },
+        orderBy: { started_at: 'desc' },
+        take: 4,
+      }),
     ]);
 
     questionsAttempted = totalAttempted;
@@ -193,274 +245,384 @@ export default async function DashboardPage() {
       memory_strength: item.memory_strength,
       question: item.question,
     }));
+
+    unfinishedSession = unfinishedDb;
+    recentSessions = recentSessionsDb;
+
+    // Aggregate weakest units
+    const unitMap: Record<number, { unit_number: number; name_arabic: string; name_english: string; count: number }> = {};
+    for (const att of incorrectAttemptsDb) {
+      const u = att.question?.unit;
+      if (u) {
+        if (!unitMap[u.unit_number]) {
+          unitMap[u.unit_number] = {
+            unit_number: u.unit_number,
+            name_arabic: u.name_arabic || '',
+            name_english: u.name_english || '',
+            count: 0,
+          };
+        }
+        unitMap[u.unit_number].count++;
+      }
+    }
+    weakestUnits = Object.values(unitMap).sort((a, b) => b.count - a.count);
   }
 
-  // Fetch recent sessions
-  let recentSessions: any[] = [];
-  if (session?.user?.id) {
-    recentSessions = await prisma.practiceSession.findMany({
-      where: { user_id: session.user.id },
-      orderBy: { completed_at: 'desc' },
-      take: 3,
-    });
+  // ── Calculate ONE Dominant "NEXT BEST ACTION" ──
+  let nextAction: {
+    type: string;
+    badge: string;
+    badgeColor: string;
+    title: string;
+    subtitle: string;
+    description: string;
+    ctaText: string;
+    ctaHref: string;
+  };
+
+  if (unfinishedSession) {
+    const filters = (unfinishedSession.filters as any) || {};
+    const title = filters.paperTitle || filters.titleEnglish || 'Mock Test';
+    const currentQ = (unfinishedSession.current_index || 0) + 1;
+    const totalQ = unfinishedSession.total_questions || 50;
+
+    nextAction = {
+      type: 'RESUME_PRACTICE',
+      badge: 'CONTINUE SESSION',
+      badgeColor: 'bg-amber-50 text-amber-900 border border-amber-200',
+      title: 'Continue where you left off',
+      subtitle: `${title} • Question ${currentQ} of ${totalQ}`,
+      description: 'You have an active practice session waiting. Resume now to maintain your test momentum.',
+      ctaText: 'Continue Practice →',
+      ctaHref: `/practice?sessionId=${unfinishedSession.id}`,
+    };
+  } else if (dueReviewCount > 0) {
+    nextAction = {
+      type: 'REVIEW_MEMORIES',
+      badge: 'SCHEDULED REVIEW',
+      badgeColor: 'bg-emerald-50 text-emerald-900 border border-emerald-200',
+      title: `${dueReviewCount} ${dueReviewCount === 1 ? 'memory is' : 'memories are'} due for review`,
+      subtitle: 'Solidify your retention before the interval expires',
+      description: 'Review your scheduled memory connections on time to progress them to the next retention level.',
+      ctaText: 'Review Memories Now →',
+      ctaHref: '/memories/review',
+    };
+  } else if (incorrectCount > 0) {
+    nextAction = {
+      type: 'REVIEW_MISTAKES',
+      badge: 'WEAK AREA FOCUS',
+      badgeColor: 'bg-rose-50 text-rose-900 border border-rose-200',
+      title: `You have ${incorrectCount} incorrect ${incorrectCount === 1 ? 'question' : 'questions'} to master`,
+      subtitle: 'Targeted revision based on past test attempts',
+      description: 'Revisit your mistakes to eliminate weak points and prevent repeated errors in the exam.',
+      ctaText: 'Review Mistakes →',
+      ctaHref: '/dashboard/incorrect',
+    };
+  } else if (questionsAttempted === 0) {
+    nextAction = {
+      type: 'START_FIRST_TEST',
+      badge: 'GET STARTED',
+      badgeColor: 'bg-stone-100 text-stone-800 border border-stone-300',
+      title: 'You haven’t started a test yet',
+      subtitle: 'Begin with recent 2024 PYQs or Syllabus Unit 1',
+      description: 'Solve real past exam questions to establish your baseline accuracy and unlock personal memory tracking.',
+      ctaText: 'Choose a PYQ Paper →',
+      ctaHref: '/pyq',
+    };
+  } else if (weakestUnits.length > 0) {
+    const topWeak = weakestUnits[0];
+    nextAction = {
+      type: 'PRACTICE_WEAK_UNIT',
+      badge: 'RECOMMENDED PRACTICE',
+      badgeColor: 'bg-blue-50 text-blue-900 border border-blue-200',
+      title: `Practice Unit ${topWeak.unit_number}: ${topWeak.name_english}`,
+      subtitle: `${topWeak.count} mistakes logged in this unit`,
+      description: 'Reinforce this specific syllabus unit to improve your overall test accuracy.',
+      ctaText: `Practice Unit ${topWeak.unit_number} →`,
+      ctaHref: `/syllabus/${topWeak.unit_number}`,
+    };
+  } else {
+    nextAction = {
+      type: 'ALL_CLEAR',
+      badge: 'PREPARATION ON TRACK',
+      badgeColor: 'bg-emerald-50 text-emerald-900 border border-emerald-200',
+      title: 'You are all caught up!',
+      subtitle: 'All reviews and mistakes cleared',
+      description: 'Challenge yourself with a full 100-question mock exam or explore a new syllabus unit.',
+      ctaText: 'Browse All PYQ Papers →',
+      ctaHref: '/pyq',
+    };
   }
 
   return (
-    <div className="flex-1 bg-gradient-to-b from-primary-surface to-white min-h-screen">
+    <div className="flex-1 bg-stone-50/60 min-h-screen text-stone-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        {/* ── 1. WELCOME + PREPARATION SUMMARY ── */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600 tracking-tight">
-              {session?.user?.name ? `Welcome back, ${session.user.name}` : 'My Dashboard'}
+            <div className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-800 mb-1">
+              STUDENT DASHBOARD
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight">
+              {session?.user?.name ? `Welcome back, ${session.user.name}` : 'Welcome to Your Dashboard'}
             </h1>
-            <p className="text-stone-500 text-base mt-2">Track your NET/JRF Arabic preparation progress</p>
+            <p className="text-stone-500 text-sm font-medium mt-0.5">
+              Your personal command center for UGC NET Arabic preparation.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs font-bold">
+            <Link
+              href="/dashboard/bookmarks"
+              className="px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:border-stone-300 transition-colors inline-flex items-center gap-1.5"
+            >
+              <Bookmark size={14} className="text-amber-600" />
+              <span>Bookmarks ({bookmarkedCount})</span>
+            </Link>
+            <Link
+              href="/memories"
+              className="px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-stone-700 hover:border-stone-300 transition-colors inline-flex items-center gap-1.5"
+            >
+              <Brain size={14} className="text-emerald-700" />
+              <span>Knowledge Graph ({connectionsCount})</span>
+            </Link>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-10">
-          {[
-            { label: 'Questions Attempted', value: questionsAttempted.toString(), icon: Target, color: 'text-blue-600 bg-blue-50 border-blue-100', href: null },
-            { label: 'Accuracy Rate', value: `${accuracyRate}%`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', href: null },
-            { label: 'Mistakes', value: incorrectCount.toString(), icon: AlertCircle, color: 'text-red-600 bg-red-50 border-red-100', href: '/dashboard/incorrect' },
-            { label: 'Time Spent', value: '—', icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100', href: null },
-            { label: 'Bookmarked', value: bookmarkedCount.toString(), icon: BookMarked, color: 'text-purple-600 bg-purple-50 border-purple-100', href: '/dashboard/bookmarks' },
-          ].map(({ label, value, icon: Icon, color, href }) => {
-            const CardWrapper = href ? Link : 'div';
-            return (
-              // @ts-ignore (dynamic component typing)
-              <CardWrapper key={label} href={href || undefined} className={`bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] p-6 transition-all duration-300 relative overflow-hidden group hover:-translate-y-1 hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] hover:border-primary/20 cursor-pointer`}>
-                <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-gradient-to-br from-primary-surface to-white opacity-50 group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 ${color}`}>
-                  <Icon size={20} strokeWidth={2.5} />
-                </div>
-                <div className="text-3xl font-black text-stone-900 tracking-tight">{value}</div>
-                <div className="text-sm text-stone-500 font-semibold mt-1">{label}</div>
-              </CardWrapper>
-            );
-          })}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-12">
-          <h2 className="text-lg font-bold text-stone-900 mb-4 flex items-center gap-2">
-            <Zap size={18} className="text-accent" /> Quick Actions
-          </h2>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {quickActions.map(({ label, href, icon: Icon, color, desc }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-4 p-5 rounded-3xl ${color} shadow-sm hover:shadow-lg transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden`}
-              >
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Icon size={24} className="shrink-0 relative z-10" />
-                <div className="flex-1 min-w-0 relative z-10">
-                  <div className="font-bold text-base">{label}</div>
-                  <div className="text-sm opacity-80 mt-0.5">{desc}</div>
-                </div>
-                <ChevronRight size={18} className="shrink-0 opacity-60 group-hover:translate-x-1 transition-transform relative z-10" />
-              </Link>
-            ))}
+        {/* ── 2. PREPARATION STATS STRIP (Where am I?) ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-8">
+          <div className="bg-white rounded-2xl p-5 border border-stone-200/90 shadow-sm">
+            <div className="text-xs font-bold uppercase tracking-wider text-stone-400">Questions Solved</div>
+            <div className="text-3xl font-black text-stone-900 mt-1">{questionsAttempted}</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Total attempts logged</div>
           </div>
+
+          <div className="bg-white rounded-2xl p-5 border border-stone-200/90 shadow-sm">
+            <div className="text-xs font-bold uppercase tracking-wider text-stone-400">Accuracy Rate</div>
+            <div className="text-3xl font-black text-emerald-800 mt-1">{accuracyRate}%</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Across all mock tests</div>
+          </div>
+
+          <Link
+            href="/dashboard/incorrect"
+            className="bg-white hover:bg-rose-50/40 rounded-2xl p-5 border border-stone-200/90 hover:border-rose-200 shadow-sm transition-all group"
+          >
+            <div className="text-xs font-bold uppercase tracking-wider text-stone-400 group-hover:text-rose-700">
+              Mistakes Logged
+            </div>
+            <div className="text-3xl font-black text-rose-700 mt-1">{incorrectCount}</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Questions to review →</div>
+          </Link>
+
+          <Link
+            href="/memories"
+            className="bg-white hover:bg-emerald-50/40 rounded-2xl p-5 border border-stone-200/90 hover:border-emerald-200 shadow-sm transition-all group"
+          >
+            <div className="text-xs font-bold uppercase tracking-wider text-stone-400 group-hover:text-emerald-800">
+              PYQs Mastered 🏆
+            </div>
+            <div className="text-3xl font-black text-emerald-800 mt-1">{completedCount}</div>
+            <div className="text-[11px] font-bold text-stone-500 mt-0.5">Passed all 5 levels →</div>
+          </Link>
         </div>
 
-        {/* ── My Memory Section ── */}
-        {session && (
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-                <BrainSparkIcon size={20} className="text-emerald-700" />
-                My Memory & Knowledge Graph
+        {/* ── 3. DOMINANT NEXT BEST ACTION CARD (What should I do now?) ── */}
+        <div className="bg-white rounded-3xl border-2 border-stone-900 shadow-lg p-6 sm:p-8 mb-10 relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold uppercase tracking-wider ${nextAction.badgeColor}`}>
+                  {nextAction.badge}
+                </span>
+                <span className="text-xs font-mono text-stone-400 uppercase tracking-widest">
+                  NEXT BEST ACTION
+                </span>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+                {nextAction.title}
               </h2>
-              <Link
-                href="/memories"
-                className="text-xs font-bold text-emerald-700 hover:text-emerald-900 transition-colors flex items-center gap-1"
-              >
-                Open Memory Hub <ChevronRight size={14} />
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Link
-                href="/memories"
-                className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <BrainSparkIcon size={20} />
-                </div>
-                <div className="text-3xl font-black text-stone-900 tracking-tight">{memoriesCount}</div>
-                <div className="text-xs font-bold text-stone-500 mt-0.5">Memories Created</div>
-              </Link>
-
-              <Link
-                href="/memories/review"
-                className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <SpacedRepetitionIcon size={20} />
-                </div>
-                <div className="text-3xl font-black text-stone-900 tracking-tight">{dueReviewCount}</div>
-                <div className="text-xs font-bold text-stone-500 mt-0.5">Due for Review</div>
-              </Link>
-
-              <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center mb-3">
-                  <Clock size={20} />
-                </div>
-                <div className="text-3xl font-black text-stone-900 tracking-tight">{rememberedTodayCount}</div>
-                <div className="text-xs font-bold text-stone-500 mt-0.5">Remembered Today</div>
+              <div className="text-sm font-bold text-emerald-900 font-sans">
+                {nextAction.subtitle}
               </div>
 
-              <Link
-                href="/memories"
-                className="bg-white/90 backdrop-blur-md rounded-3xl border border-stone-200/80 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <KnowledgeGraphIcon size={20} />
-                </div>
-                <div className="text-3xl font-black text-stone-900 tracking-tight">{connectionsCount}</div>
-                <div className="text-xs font-bold text-stone-500 mt-0.5">Questions Connected</div>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* ── 5-Level Spaced PYQ Mastery & Completion Tracker ── */}
-        {session && (
-          <SpacedPyqTracker
-            completedItems={completedSpacedItems}
-            activeItems={activeSpacedItems}
-            levelCounts={levelCounts}
-            totalCompletedCount={completedCount}
-            totalTrackedCount={totalTrackedCount}
-            dueTodayCount={dueReviewCount}
-          />
-        )}
-
-        {/* Recent Activity & Test History */}
-        {session && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-stone-900">Recent Test Activity</h2>
-              <Link
-                href="/dashboard/incorrect"
-                className="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
-              >
-                Open Mistake Tracker <ChevronRight size={14} />
-              </Link>
-            </div>
-
-            {recentSessions.length === 0 ? (
-              <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 p-8 text-center shadow-sm">
-                <Clock size={36} className="mx-auto text-stone-300 mb-2" />
-                <p className="text-sm font-bold text-stone-700">No test attempts yet</p>
-                <p className="text-xs text-stone-400 mt-1">Start practicing PYQs or Syllabus units to see your score history and mistakes logged here.</p>
-              </div>
-            ) : (
-              <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden divide-y divide-stone-100">
-                {recentSessions.map((rs) => {
-                  const filters = (rs.filters as any) || {};
-                  const dateObj = rs.completed_at ?? rs.started_at;
-                  const displayTitle =
-                    filters.paperTitle ||
-                    filters.titleEnglish ||
-                    (filters.year ? `Year ${filters.year} Paper` : `${rs.mode.replace('_', ' ').toUpperCase()} Practice`);
-                  const accuracy = rs.total_questions > 0 ? Math.round((rs.correct_count / rs.total_questions) * 100) : 0;
-
-                  return (
-                    <div key={rs.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-stone-50/80 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
-                            accuracy >= 70
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : accuracy >= 40
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-rose-100 text-rose-800'
-                          }`}
-                        >
-                          {accuracy}%
-                        </div>
-                        <div>
-                          <div className="font-extrabold text-stone-900 text-sm">{displayTitle}</div>
-                          <div className="text-xs text-stone-500 font-medium flex items-center gap-2 mt-0.5">
-                            <span>{rs.total_questions} Questions</span>
-                            <span>•</span>
-                            <span>{formatRelativeDate(dateObj)}</span>
-                            {rs.incorrect_count > 0 && (
-                              <>
-                                <span>•</span>
-                                <span className="text-rose-600 font-bold">{rs.incorrect_count} Mistakes</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 self-end sm:self-center">
-                        {rs.incorrect_count > 0 && (
-                          <Link
-                            href="/dashboard/incorrect"
-                            className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors"
-                          >
-                            Review {rs.incorrect_count} Mistakes
-                          </Link>
-                        )}
-                        <div className="text-right pl-2 hidden sm:block">
-                          <div className="font-black text-stone-900 text-sm">{rs.score} pts</div>
-                          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">Score</div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Sign In Prompt */}
-        {!session && (
-          <div className="bg-gradient-to-r from-stone-900 to-stone-800 rounded-3xl shadow-xl p-8 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-            <div className="absolute right-0 top-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
-            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20 backdrop-blur-md z-10">
-              <AlertCircle size={32} className="text-accent" />
-            </div>
-            <div className="flex-1 text-center md:text-left z-10">
-              <h3 className="font-bold text-white text-xl">Unlock Your Full Potential</h3>
-              <p className="text-stone-300 text-sm mt-2 max-w-xl">
-                Create a free account to permanently save your test attempts, track your accuracy across different units, and review your bookmarked questions anytime.
+              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+                {nextAction.description}
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 z-10 w-full md:w-auto">
-              <Link href="/signup" className="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors shadow-lg text-center">
-                Create Free Account
+
+            <div className="shrink-0">
+              <Link
+                href={nextAction.ctaHref}
+                className="px-7 py-4 bg-stone-900 hover:bg-stone-800 text-white font-black text-sm sm:text-base rounded-2xl transition-all shadow-md inline-flex items-center gap-2 active:scale-95"
+              >
+                <span>{nextAction.ctaText}</span>
               </Link>
-              <Link href="/login" className="px-6 py-3 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 transition-colors border border-white/20 text-center">
-                Log In
+            </div>
+          </div>
+        </div>
+
+        {/* ── 4. WEAK AREAS & UNIT MASTERY (What am I weak at?) ── */}
+        {weakestUnits.length > 0 && (
+          <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-8 shadow-sm mb-10">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4 mb-6">
+              <div>
+                <h3 className="text-lg font-black text-stone-900">Your Weak Areas</h3>
+                <p className="text-xs text-stone-500 font-medium mt-0.5">
+                  Units with the highest concentration of mistakes based on your practice.
+                </p>
+              </div>
+
+              <Link
+                href="/dashboard/incorrect"
+                className="text-xs font-bold text-rose-700 hover:text-rose-900 transition-colors flex items-center gap-1"
+              >
+                <span>All Mistakes ({incorrectCount})</span>
+                <ChevronRight size={14} />
               </Link>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-3.5">
+              {weakestUnits.slice(0, 3).map((w) => (
+                <Link
+                  key={w.unit_number}
+                  href={`/syllabus/${w.unit_number}`}
+                  className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 hover:border-rose-300 transition-all group flex flex-col justify-between space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="w-7 h-7 rounded-xl bg-white border border-rose-200 text-rose-900 font-bold text-xs flex items-center justify-center">
+                      U{w.unit_number}
+                    </span>
+                    <span className="text-xs font-bold text-rose-700">
+                      {w.count} {w.count === 1 ? 'mistake' : 'mistakes'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div
+                      dir="rtl"
+                      lang="ar"
+                      className="font-arabic font-bold text-stone-900 text-base line-clamp-1 text-right"
+                    >
+                      {w.name_arabic}
+                    </div>
+                    <div className="text-xs font-bold text-stone-600 line-clamp-1 mt-0.5">
+                      {w.name_english}
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] font-bold text-rose-800 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    <span>Practice this unit →</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         )}
 
-        {session && (
-          <div className="mt-12 pt-10 border-t border-stone-200">
-            <details>
-              <summary className="text-sm font-semibold text-stone-500 cursor-pointer hover:text-stone-700">Account Settings ›</summary>
-              <div className="mt-4">
-                <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
-                <p className="text-stone-500 text-sm">Once you delete your account, there is no going back. Please be certain.</p>
-                <DeleteAccountButton />
-              </div>
-            </details>
+        {/* ── 5. 5-LEVEL SPACED REPETITION & COMPLETION TRACKER (What should I remember?) ── */}
+        <SpacedPyqTracker
+          completedItems={completedSpacedItems}
+          activeItems={activeSpacedItems}
+          levelCounts={levelCounts}
+          totalCompletedCount={completedCount}
+          totalTrackedCount={totalTrackedCount}
+          dueTodayCount={dueReviewCount}
+        />
+
+        {/* ── 6. RECENT TEST ACTIVITY (What did I do?) ── */}
+        <div className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-8 shadow-sm mb-12">
+          <div className="flex items-center justify-between border-b border-stone-100 pb-4 mb-6">
+            <div>
+              <h3 className="text-lg font-black text-stone-900">Recent Test Activity</h3>
+              <p className="text-xs text-stone-500 font-medium mt-0.5">
+                Past mock test attempts and scores.
+              </p>
+            </div>
+
+            <Link
+              href="/pyq"
+              className="text-xs font-bold text-emerald-800 hover:text-emerald-950 transition-colors flex items-center gap-1"
+            >
+              <span>Browse All Papers</span>
+              <ChevronRight size={14} />
+            </Link>
           </div>
-        )}
+
+          {recentSessions.length === 0 ? (
+            <div className="text-center py-8 px-4 space-y-2">
+              <Clock size={32} className="mx-auto text-stone-300" />
+              <p className="text-sm font-bold text-stone-700">No test attempts yet</p>
+              <p className="text-xs text-stone-400 max-w-sm mx-auto">
+                Start practicing PYQs or Syllabus units to see your score history logged here.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-stone-100">
+              {recentSessions.map((rs) => {
+                const filters = (rs.filters as any) || {};
+                const displayTitle =
+                  filters.paperTitle ||
+                  filters.titleEnglish ||
+                  (filters.year ? `Year ${filters.year} Paper` : `${rs.mode.replace('_', ' ').toUpperCase()} Practice`);
+                const accuracy = rs.total_questions > 0 ? Math.round((rs.correct_count / rs.total_questions) * 100) : 0;
+                const isOngoing = rs.status === 'in_progress';
+
+                return (
+                  <div
+                    key={rs.id}
+                    className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-stone-900 text-sm">{displayTitle}</span>
+                        {isOngoing && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px]">
+                            In Progress
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-stone-400 font-medium">
+                        {rs.started_at ? formatRelativeDate(rs.started_at) : 'Recently'} • {rs.total_questions} questions
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      {!isOngoing ? (
+                        <div className="text-right">
+                          <div className="text-sm font-black text-stone-900">{rs.score} pts</div>
+                          <div className="text-xs font-bold text-emerald-700">{accuracy}% accuracy</div>
+                        </div>
+                      ) : (
+                        <Link
+                          href={`/practice?sessionId=${rs.id}`}
+                          className="px-3.5 py-1.5 rounded-xl bg-stone-900 text-white font-bold text-xs hover:bg-stone-800 transition-colors"
+                        >
+                          Resume
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ── 7. ACCOUNT SETTINGS (Subordinate Section) ── */}
+        <div id="account-settings" className="border-t border-stone-200 pt-8 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 rounded-2xl p-6 border border-stone-200 text-xs">
+            <div>
+              <div className="font-bold text-stone-900">Account Management</div>
+              <div className="text-stone-500 mt-0.5">Signed in as {session?.user?.email || 'Student'}</div>
+            </div>
+            {session && <DeleteAccountButton />}
+          </div>
+        </div>
 
       </div>
     </div>
   );
 }
-

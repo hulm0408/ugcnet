@@ -1,369 +1,466 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookMarked, GraduationCap, Calendar, Search, ChevronRight, Award, Brain, Zap, BookOpen } from 'lucide-react';
+import {
+  BookOpen,
+  Calendar,
+  Layers,
+  ArrowRight,
+  Brain,
+  CheckCircle2,
+  Trophy,
+  Target,
+  FileText,
+  Sparkles,
+} from 'lucide-react';
 import prisma from '@/lib/db';
+import PreparationJourneySvg from '@/components/home/PreparationJourneySvg';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
-  
+
   return {
-    title: 'Arabic NET/JRF Practice — UGC NET Arabic Previous Year Questions',
-    description: `Practice ${totalQuestions.toLocaleString()} UGC NET/JRF Arabic Previous Year Questions (PYQ). Year-wise, Unit-wise, Topic-wise practice. Free, bilingual (Arabic & English) platform.`,
+    title: 'UGC NET Arabic Preparation — Official Syllabus, Real PYQs & Memory Retention',
+    description: `Prepare for UGC NET/JRF Arabic. Study the official 10 units, solve ${totalQuestions.toLocaleString()}+ previous year questions (2004–2024), and lock your recall with 5-level spaced memory connections.`,
     alternates: { canonical: '/' },
   };
 }
 
-export const dynamic = 'force-dynamic';
-
-const features = [
-  { icon: Award, title: 'Authentic PYQs', desc: 'Sourced directly from NTA official papers.' },
-  { icon: Brain, title: 'Bilingual Interface', desc: 'Seamlessly switch between Arabic and English.' },
-  { icon: Zap, title: 'Detailed Analytics', desc: 'Track your speed, accuracy, and weak units.' },
-];
-
-const modes = [
-  { icon: Calendar, title: 'Year-wise PYQ', titleAr: 'تدرُّب حسب السنة', desc: 'Browse full papers from 2004 to 2023 in NTA exam format.', href: '/pyq' },
-  { icon: GraduationCap, title: 'Unit-wise Practice', titleAr: 'تدرُّب حسب الوحدة', desc: 'Master specific syllabus units at your own pace.', href: '/syllabus' },
-  { icon: BookMarked, title: 'Saved Items', titleAr: 'العناصر المحفوظة', desc: 'Review your bookmarked questions and mistakes.', href: '/dashboard' },
-  { icon: Search, title: 'Global Search', titleAr: 'البحث', desc: 'Find specific questions by keyword or topic.', href: '/search' },
-];
-
-const units = [
-  { n: 1, ar: 'الشِّعْرُ الْعَرَبِيُّ', en: 'Arabic Poetry' },
-  { n: 2, ar: 'النَّثْرُ الْعَرَبِيُّ', en: 'Arabic Prose' },
-  { n: 3, ar: 'أَدَبُ الْمَهْجَرِ', en: 'Mahjar Literature' },
-  { n: 4, ar: 'النَّقْدُ الْأَدَبِيُّ', en: 'Literary Criticism' },
-  { n: 5, ar: 'الْبَلَاغَةُ وَالْعَرُوضُ', en: 'Rhetoric & Prosody' },
-  { n: 6, ar: 'الْمَصَادِرُ', en: 'Sources & References' },
-  { n: 7, ar: 'الْأَدَبُ الْحَدِيثُ', en: 'Modern Literature' },
-  { n: 8, ar: 'الاِتِّجَاهَاتُ', en: 'Literary Movements' },
-  { n: 9, ar: 'الْأَدَبُ الْهِنْدِيُّ', en: 'Indo-Arabic Literature' },
-  { n: 10, ar: 'التَّرْجَمَةُ', en: 'Translation' },
-];
-
 export default async function HomePage() {
-  const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
-  const totalPapers = await prisma.examPaper.count({ where: { content_status: 'PUBLISHED' } });
-  const totalUnits = await prisma.syllabusUnit.count();
-  
-  const papers = await prisma.examPaper.findMany({
-    where: { content_status: 'PUBLISHED' },
-    select: { year: true }
-  });
-  const totalYears = new Set(papers.map(p => p.year)).size;
+  const [totalQuestions, totalPapers, totalUnits, papers, unitsList] = await Promise.all([
+    prisma.question.count({ where: { content_status: 'PUBLISHED' } }),
+    prisma.examPaper.count({ where: { content_status: 'PUBLISHED' } }),
+    prisma.syllabusUnit.count(),
+    prisma.examPaper.findMany({
+      where: { content_status: 'PUBLISHED' },
+      select: { year: true, paper_number: true, display_name: true },
+      orderBy: { year: 'desc' },
+    }),
+    prisma.syllabusUnit.findMany({
+      orderBy: { unit_number: 'asc' },
+      include: {
+        _count: {
+          select: { broad_topics: true, questions: true },
+        },
+      },
+    }),
+  ]);
 
-  const stats = [
-    { value: totalQuestions.toLocaleString(), label: 'Questions', labelAr: 'أسئلة' },
-    { value: totalYears.toString(), label: 'Years', labelAr: 'سنوات' },
-    { value: totalUnits.toString(), label: 'Units', labelAr: 'وحدات' },
-    { value: totalPapers.toString(), label: 'Papers', labelAr: 'أوراق' },
-  ];
+  const uniqueYears = Array.from(new Set(papers.map((p) => p.year))).sort((a, b) => b - a);
 
   return (
-    <div className="flex-1 overflow-hidden">
-
-      {/* ── Hero Section (Psychology: Authority & Aspiration) ── */}
-      <section className="relative bg-slate-950 text-white overflow-hidden pb-12 pt-0 sm:pt-2">
-        {/* Abstract Background Glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-40 -left-40 w-[400px] h-[400px] bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+    <div className="flex-1 overflow-hidden bg-white text-stone-900">
+      {/* ── 1. HERO SECTION: Value Proposition & Preparation Journey ── */}
+      <section className="relative bg-stone-950 text-white pt-12 pb-16 sm:pt-16 sm:pb-24 border-b border-stone-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
-            {/* LHS: Text Content */}
-            <div className="text-left text-center lg:text-left">
-              {/* Trust Badge */}
-              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm font-medium mb-8 backdrop-blur-md shadow-2xl transition-transform hover:scale-105 cursor-default">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="text-slate-300">Updated for 2024 Syllabus</span>
+            {/* Left Column: Clear Core Proposition */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold tracking-wider uppercase">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                UGC NET / JRF ARABIC • OFFICIAL PREPARATION
               </div>
 
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 leading-tight mb-6 tracking-tight">
-                Master UGC NET Arabic <br />
-                <span className="text-emerald-400">The Smart Way.</span>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
+                Prepare from the actual syllabus.<br />
+                Practice the actual PYQs.<br />
+                <span className="text-emerald-400">Remember what you learn.</span>
               </h1>
-              
-              <p dir="rtl" lang="ar" className="font-arabic text-3xl sm:text-4xl text-emerald-300/90 leading-loose mb-6 drop-shadow-md text-center lg:text-right">
-                أتقن أسئلة الامتحانات السابقة بذكاء
-              </p>
-              
-              <p className="text-slate-400 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 font-medium">
-                Join thousands of JRF aspirants. Practice <strong className="text-white">{totalQuestions.toLocaleString()}</strong> official PYQs, track your accuracy, and conquer all {totalUnits} syllabus units.
+
+              <div
+                dir="rtl"
+                lang="ar"
+                className="font-arabic text-xl sm:text-2xl text-emerald-200/90 leading-relaxed font-bold pt-1"
+              >
+                ادرس المنهج الرسمي • تدرب على أسئلة الامتحانات السابقة • ثبّت حفظك بالروابط الذهنية
+              </div>
+
+              <p className="text-stone-300 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
+                A focused, academic platform designed specifically for UGC NET Arabic aspirants.
+                Master every author, era, diwan, and grammatical rule with authentic NTA exam papers
+                and a deterministic 5-level spaced retention system.
               </p>
 
-              {/* Primary CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-                <Link
-                  href="/pyq"
-                  className="group relative inline-flex items-center gap-3 px-8 py-4 bg-emerald-700 text-white font-bold text-lg rounded-xl overflow-hidden transition-all hover:scale-105 hover:bg-emerald-600 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] w-full sm:w-auto justify-center"
-                >
-                  <BookOpen size={22} className="relative z-10" />
-                  <span className="relative z-10">Explore PYQs</span>
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
-                </Link>
-                
+              {/* Two Primary CTAs Only */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <Link
                   href="/syllabus"
-                  className="inline-flex items-center gap-3 justify-center px-8 py-4 bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-lg rounded-xl transition-all border border-slate-800 hover:border-slate-700 w-full sm:w-auto"
+                  className="px-7 py-3.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-lg hover:shadow-emerald-900/40 text-center inline-flex items-center justify-center gap-2"
                 >
-                  <GraduationCap size={22} />
-                  Browse Syllabus
+                  <Layers size={18} />
+                  <span>Explore Syllabus</span>
+                </Link>
+                <Link
+                  href="/pyq"
+                  className="px-7 py-3.5 bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-200 hover:text-white font-bold text-sm sm:text-base rounded-xl transition-all text-center inline-flex items-center justify-center gap-2"
+                >
+                  <BookOpen size={18} />
+                  <span>Browse PYQs</span>
                 </Link>
               </div>
             </div>
 
-            {/* RHS: SVG Illustration */}
-            <div className="hidden lg:flex justify-center items-center relative w-full">
-              {/* Glow backdrop */}
-              <div className="absolute inset-0 bg-emerald-500/10 blur-[120px] rounded-full"></div>
-              
-              <svg viewBox="-20 -70 420 500" className="w-full h-auto max-w-[500px] relative z-10 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  {/* Defs for glow */}
-                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="12" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-                
-                {/* The dashed connection line */}
-                <polyline points="30,320 110,260 190,190 270,110 350,-10" fill="none" stroke="#eab308" strokeWidth="3" strokeDasharray="8,8" className="animate-[pulse_2s_infinite]" />
-                
-                {/* 3D Pillars */}
-                <g className="transition-transform duration-700 hover:-translate-y-2 cursor-default">
-                  {/* P1 */}
-                  <g transform="translate(0, 320)">
-                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
-                    <polygon points="0,0 30,15 30,75 0,60" fill="#10b981" />
-                    <polygon points="30,15 60,0 60,60 30,75" fill="#047857" />
-                  </g>
-                  
-                  {/* P2 */}
-                  <g transform="translate(80, 260)">
-                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
-                    <polygon points="0,0 30,15 30,105 0,90" fill="#10b981" />
-                    <polygon points="30,15 60,0 60,90 30,105" fill="#047857" />
-                  </g>
-
-                  {/* P3 */}
-                  <g transform="translate(160, 190)">
-                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
-                    <polygon points="0,0 30,15 30,145 0,130" fill="#10b981" />
-                    <polygon points="30,15 60,0 60,130 30,145" fill="#047857" />
-                  </g>
-
-                  {/* P4 */}
-                  <g transform="translate(240, 110)">
-                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
-                    <polygon points="0,0 30,15 30,195 0,180" fill="#10b981" />
-                    <polygon points="30,15 60,0 60,180 30,195" fill="#047857" />
-                  </g>
-
-                  {/* P5 */}
-                  <g transform="translate(320, 10)">
-                    <polygon points="0,0 30,-15 60,0 30,15" fill="#4ade80" />
-                    <polygon points="0,0 30,15 30,265 0,250" fill="#10b981" />
-                    <polygon points="30,15 60,0 60,250 30,265" fill="#047857" />
-                  </g>
-                </g>
-
-                {/* JRF Sunburst Logo */}
-                <g transform="translate(350, -10)" className="group cursor-pointer">
-                  {/* Outer Glow */}
-                  <circle cx="0" cy="0" r="34" fill="#eab308" filter="url(#glow)" opacity="0.5" className="animate-pulse" />
-                  
-                  {/* Sunburst Rays */}
-                  <g stroke="#eab308" strokeWidth="2.5" strokeLinecap="round" className="animate-[spin_10s_linear_infinite]">
-                    <line x1="0" y1="-42" x2="0" y2="-52" />
-                    <line x1="0" y1="42" x2="0" y2="52" />
-                    <line x1="-42" y1="0" x2="-52" y2="0" />
-                    <line x1="42" y1="0" x2="52" y2="0" />
-                    <line x1="-30" y1="-30" x2="-37" y2="-37" />
-                    <line x1="30" y1="30" x2="37" y2="37" />
-                    <line x1="-30" y1="30" x2="-37" y2="37" />
-                    <line x1="30" y1="-30" x2="37" y2="-37" />
-                  </g>
-
-                  {/* Center Circle */}
-                  <circle cx="0" cy="0" r="32" fill="#020617" stroke="#eab308" strokeWidth="3" />
-                  
-                  {/* Default JRF Text */}
-                  <text x="0" y="7" fontFamily="sans-serif" fontSize="20" fontWeight="900" fill="#eab308" textAnchor="middle" letterSpacing="1" className="group-hover:opacity-0 transition-opacity duration-300">JRF</text>
-                  
-                  {/* Hover "PARHLE BHAI" Text */}
-                  <text x="0" y="2" fontFamily="sans-serif" fontSize="10" fontWeight="900" fill="#eab308" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <tspan x="0" dy="-4">PARHLE</tspan>
-                    <tspan x="0" dy="12">BHAI</tspan>
-                  </text>
-                </g>
-              </svg>
+            {/* Right Column: Architectural SVG Visualization */}
+            <div className="lg:col-span-5 flex justify-center">
+              <PreparationJourneySvg />
             </div>
 
           </div>
+        </div>
+      </section>
 
-          {/* Stats Grid (Full Width Below) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 border-t border-white/10 pt-10">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center group">
-                <div className="text-3xl sm:text-4xl font-black text-white group-hover:text-emerald-400 transition-colors">{s.value}</div>
-                <div className="text-sm text-slate-400 mt-1 font-medium uppercase tracking-wider">{s.label}</div>
-                <div dir="rtl" lang="ar" className="text-sm text-slate-500 font-arabic mt-1">{s.labelAr}</div>
-              </div>
-            ))}
+      {/* ── 2. DATABASE-DRIVEN METRICS BAR ── */}
+      <section className="bg-stone-900 text-stone-300 py-6 border-b border-stone-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-stone-800">
+            <div className="pt-4 md:pt-0">
+              <div className="text-2xl sm:text-3xl font-black text-white">{totalQuestions.toLocaleString()}+</div>
+              <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mt-0.5">Exam Questions</div>
+            </div>
+            <div className="pt-4 md:pt-0">
+              <div className="text-2xl sm:text-3xl font-black text-white">{totalPapers}</div>
+              <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mt-0.5">Past Exam Papers</div>
+            </div>
+            <div className="pt-4 md:pt-0">
+              <div className="text-2xl sm:text-3xl font-black text-white">{totalUnits}</div>
+              <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mt-0.5">Syllabus Units</div>
+            </div>
+            <div className="pt-4 md:pt-0">
+              <div className="text-2xl sm:text-3xl font-black text-white">{uniqueYears[uniqueYears.length - 1]} – {uniqueYears[0]}</div>
+              <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mt-0.5">Years Archive</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Value Prop Section ── */}
-      <section className="bg-slate-50 py-16 border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((f, idx) => (
-              <div key={idx} className="flex flex-col items-center text-center p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-600">
-                  <f.icon size={28} />
+      {/* ── 3. HOW YOUR PREPARATION WORKS (The 4-Step Blueprint) ── */}
+      <section className="py-20 bg-stone-50/60 border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
+            <div className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-800">
+              METHODOLOGY
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-stone-900">
+              How Your Preparation Works
+            </h2>
+            <p className="text-stone-500 text-sm sm:text-base font-medium">
+              A structured four-phase system engineered to take you from syllabus mastery to permanent recall.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Step 01 */}
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200/90 shadow-sm flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-black text-sm">
+                  01
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">{f.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="text-lg font-black text-stone-900">Official Syllabus</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
+                  Know exactly what NTA expects. Explore the complete 10-unit hierarchy from Classical Poetry to Indian Arabic Literature.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div className="pt-2 text-xs font-bold text-emerald-800 flex items-center gap-1">
+                <span>Unit-by-Unit Tree</span>
+              </div>
+            </div>
 
-      {/* ── Practice Modes (Psychology: Choice Architecture) ── */}
-      <section className="bg-white py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Choose Your Practice Mode</h2>
-            <p dir="rtl" lang="ar" className="text-slate-500 font-arabic text-xl">اختر طريقة التدريب المناسبة لك</p>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 gap-6">
-            {modes.map((m, idx) => (
-              <Link
-                key={m.href}
-                href={m.href}
-                className={`group relative p-8 rounded-3xl border-2 transition-all duration-300 overflow-hidden ${
-                  idx === 0 
-                    ? 'border-emerald-500 bg-emerald-50/50 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-500/20' 
-                    : 'border-slate-100 bg-white hover:border-slate-900 hover:shadow-xl'
-                }`}
-              >
-                {idx === 0 && (
-                  <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">RECOMMENDED</div>
-                )}
-                <div className="flex items-start gap-5">
-                  <div className={`p-4 rounded-2xl transition-colors ${
-                    idx === 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-900 group-hover:text-white'
-                  }`}>
-                    <m.icon size={32} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl text-slate-900 mb-1">{m.title}</h3>
-                    <p dir="rtl" lang="ar" className="text-slate-500 font-arabic text-lg mb-2">{m.titleAr}</p>
-                    <p className="text-slate-600 text-sm leading-relaxed">{m.desc}</p>
-                  </div>
+            {/* Step 02 */}
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200/90 shadow-sm flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-black text-sm">
+                  02
                 </div>
-              </Link>
-            ))}
+                <h3 className="text-lg font-black text-stone-900">Real PYQs</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
+                  Solve actual exam questions from 2004 to 2024. Full Arabic text with tashkeel, authentic options, and verified official keys.
+                </p>
+              </div>
+              <div className="pt-2 text-xs font-bold text-emerald-800 flex items-center gap-1">
+                <span>20+ Years Archive</span>
+              </div>
+            </div>
+
+            {/* Step 03 */}
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200/90 shadow-sm flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-black text-sm">
+                  03
+                </div>
+                <h3 className="text-lg font-black text-stone-900">Targeted Practice</h3>
+                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
+                  Simulate real CBT exams with instant evaluations, automatic mistake tracking, and unit-wise performance diagnostics.
+                </p>
+              </div>
+              <div className="pt-2 text-xs font-bold text-emerald-800 flex items-center gap-1">
+                <span>Mistake Logging</span>
+              </div>
+            </div>
+
+            {/* Step 04 */}
+            <div className="bg-emerald-950 text-white rounded-3xl p-6 sm:p-7 border border-emerald-800 shadow-md flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-800 text-emerald-300 border border-emerald-700 flex items-center justify-center font-black text-sm">
+                  04
+                </div>
+                <h3 className="text-lg font-black text-white">Memory & Recall</h3>
+                <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-medium">
+                  Don&apos;t just solve and forget. Craft your personal memory tricks and review them across strict 5-level spaced intervals.
+                </p>
+              </div>
+              <div className="pt-2 text-xs font-bold text-emerald-400 flex items-center gap-1">
+                <span>5-Level Retention</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Units Grid (Psychology: Progress & Completion) ── */}
-      <section className="bg-slate-50 py-20 border-y border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+      {/* ── 4. EXPLORE THE SYLLABUS: Concise Preview ── */}
+      <section className="py-20 border-b border-stone-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
             <div>
-              <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Master All 10 Units</h2>
-              <p className="text-slate-500">Systematically cover the entire NTA UGC NET syllabus.</p>
-            </div>
-            <Link href="/syllabus" className="text-emerald-600 font-semibold hover:text-emerald-700 flex items-center gap-1">
-              View Detailed Syllabus <ChevronRight size={18} />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {units.map((u) => (
-              <Link
-                key={u.n}
-                href={`/syllabus`}
-                className="group relative bg-white border border-slate-200 rounded-2xl p-5 hover:border-emerald-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between aspect-square"
-              >
-                <div>
-                  <div className="text-xs font-black text-slate-300 group-hover:text-emerald-200 transition-colors mb-2 text-right">0{u.n}</div>
-                  <div dir="rtl" lang="ar" className="font-arabic font-bold text-slate-900 text-lg leading-snug group-hover:text-emerald-700 transition-colors">{u.ar}</div>
-                </div>
-                <div className="text-slate-500 text-xs font-medium leading-tight group-hover:text-slate-900 transition-colors mt-4 border-t border-slate-100 pt-3">{u.en}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Final CTA ── */}
-      <section className="bg-emerald-600 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-700 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/4"></div>
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">Ready to crack JRF?</h2>
-          <p className="text-emerald-100 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-            Stop guessing and start practicing with actual exam data. Join today and take your Arabic preparation to the next level.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/signup" className="px-8 py-4 bg-white text-emerald-700 font-bold text-lg rounded-2xl hover:bg-slate-50 hover:scale-105 transition-all shadow-xl w-full sm:w-auto">
-              Create Free Account
-            </Link>
-            <Link href="/practice" className="px-8 py-4 text-white font-semibold text-lg rounded-2xl hover:bg-emerald-700 transition-all border border-emerald-500 w-full sm:w-auto">
-              Practice as Guest
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ── */}
-      <footer className="bg-slate-950 text-slate-400 py-12 border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <div className="text-white font-bold text-xl mb-4">
-                <span dir="rtl" lang="ar" className="font-arabic text-emerald-400">الْعَرَبِيَّةُ</span>
-                {' '}NET/JRF
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-800 mb-1">
+                SYLLABUS MATRIX
               </div>
-              <p className="text-sm leading-relaxed max-w-sm">
-                The ultimate platform for UGC NET/JRF Arabic preparation. Practice previous year questions, track progress, and master the syllabus.
+              <h2 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+                Explore the Official 10 Units
+              </h2>
+              <p className="text-stone-500 text-sm font-medium mt-0.5">
+                Every unit is mapped with its major authors, literary schools, and past questions.
               </p>
             </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Practice</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/pyq" className="hover:text-emerald-400 transition-colors">PYQ Papers</Link></li>
-                <li><Link href="/syllabus" className="hover:text-emerald-400 transition-colors">Unit-wise Tests</Link></li>
-                <li><Link href="/dashboard" className="hover:text-emerald-400 transition-colors">My Dashboard</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Account</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/login" className="hover:text-emerald-400 transition-colors">Sign In</Link></li>
-                <li><Link href="/signup" className="hover:text-emerald-400 transition-colors">Create Account</Link></li>
-              </ul>
-            </div>
+
+            <Link
+              href="/syllabus"
+              className="text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition-colors inline-flex items-center gap-1.5 shrink-0"
+            >
+              <span>View Complete Syllabus Hierarchy</span>
+              <ArrowRight size={15} />
+            </Link>
           </div>
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-            <p>© {new Date().getFullYear()} Arabic NET/JRF. All rights reserved.</p>
-            <p>Built for the Arabic academic community.</p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            {unitsList.slice(0, 10).map((u) => (
+              <Link
+                key={u.id}
+                href={`/syllabus/${u.unit_number}`}
+                className="bg-stone-50/80 hover:bg-emerald-50/50 border border-stone-200 hover:border-emerald-300 rounded-2xl p-4 transition-all group flex flex-col justify-between space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="w-7 h-7 rounded-xl bg-white border border-stone-200 text-stone-700 font-bold text-xs flex items-center justify-center">
+                    {u.unit_number}
+                  </span>
+                  <span className="text-[11px] font-bold text-stone-400 group-hover:text-emerald-700 transition-colors">
+                    {u._count.questions} Questions
+                  </span>
+                </div>
+
+                <div>
+                  <div
+                    dir="rtl"
+                    lang="ar"
+                    className="font-arabic font-bold text-stone-900 text-base line-clamp-1 text-right mb-0.5"
+                  >
+                    {u.name_arabic}
+                  </div>
+                  <div className="text-xs font-bold text-stone-600 line-clamp-1">
+                    {u.name_english}
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
-      </footer>
+      </section>
 
+      {/* ── 5. PRACTICE REAL PYQs: Concise Year Preview ── */}
+      <section className="py-20 bg-stone-50/50 border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+            <div>
+              <div className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-800 mb-1">
+                EXAM PAPERS ARCHIVE
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+                Practice Real Past Papers (2004–2024)
+              </h2>
+              <p className="text-stone-500 text-sm font-medium mt-0.5">
+                Authentic papers with Paper II (Core) and Paper III (Advanced) configurations.
+              </p>
+            </div>
+
+            <Link
+              href="/pyq"
+              className="text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 transition-colors inline-flex items-center gap-1.5 shrink-0"
+            >
+              <span>Browse All Exam Papers</span>
+              <ArrowRight size={15} />
+            </Link>
+          </div>
+
+          {/* Clean Years Grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
+            {uniqueYears.map((yr) => {
+              const count = papers.filter((p) => p.year === yr).length;
+              return (
+                <Link
+                  key={yr}
+                  href={`/pyq/${yr}`}
+                  className="bg-white border border-stone-200 hover:border-emerald-400 hover:bg-emerald-50/40 rounded-2xl p-3.5 text-center transition-all group"
+                >
+                  <div className="text-lg font-black text-stone-900 group-hover:text-emerald-900 transition-colors">
+                    {yr}
+                  </div>
+                  <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mt-0.5">
+                    {count} {count === 1 ? 'Paper' : 'Papers'}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. "DON'T JUST SOLVE. REMEMBER." (The Personal Memory Feature Spotlight) ── */}
+      <section className="py-20 bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-bold tracking-wider uppercase">
+                <Brain size={14} />
+                THE MEMORY DIFFERENTIATOR
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight leading-tight">
+                Don&apos;t Just Solve.<br />
+                <span className="text-emerald-700">Remember What You Learn.</span>
+              </h2>
+
+              <p className="text-stone-600 text-sm sm:text-base leading-relaxed font-medium">
+                Arabic literature requires remembering hundreds of authors, birth/death dates, diwans,
+                and linguistic terms. Standard practice tools let you guess and move on.
+              </p>
+
+              <div className="space-y-3.5 pt-2">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 size={18} className="text-emerald-700 shrink-0 mt-0.5" />
+                  <div className="text-xs sm:text-sm text-stone-700 font-medium">
+                    <strong className="text-stone-900">Personal Mnemonics & Formulas:</strong> Write your own memory tricks on any question card.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 size={18} className="text-emerald-700 shrink-0 mt-0.5" />
+                  <div className="text-xs sm:text-sm text-stone-700 font-medium">
+                    <strong className="text-stone-900">Question-to-Question Linking:</strong> Connect questions sharing the same author, era, or counter-concept.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 size={18} className="text-emerald-700 shrink-0 mt-0.5" />
+                  <div className="text-xs sm:text-sm text-stone-700 font-medium">
+                    <strong className="text-stone-900">Strict 5-Level Spaced Recall:</strong> Review at 24h, 3d, 1w, 2-3w, and 1-2mo to lock permanent mastery.
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/memories"
+                  className="px-6 py-3 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm rounded-xl transition-all inline-flex items-center gap-2 shadow-sm"
+                >
+                  <span>Explore Memory Engine</span>
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
+            </div>
+
+            {/* Visual Card Demonstrating Memory Connection */}
+            <div className="lg:col-span-6">
+              <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 border border-stone-800 shadow-2xl space-y-6">
+                <div className="flex items-center justify-between border-b border-stone-800 pb-4 text-xs">
+                  <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[11px] border border-emerald-500/30">
+                    SAMPLE QUESTION CARD
+                  </span>
+                  <span className="text-stone-400 font-mono">2023 Paper II • Q14</span>
+                </div>
+
+                {/* Question */}
+                <div
+                  dir="rtl"
+                  lang="ar"
+                  className="font-arabic font-extrabold text-white text-lg sm:text-xl leading-relaxed text-right"
+                >
+                  من مؤلف كتاب &quot;الأغاني&quot; في الأدب العربي؟
+                </div>
+
+                {/* Student's Personal Memory Anchor */}
+                <div className="bg-emerald-950/60 rounded-2xl p-4 border border-emerald-500/40 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                    <span>Your Personal Memory Connection</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-800 text-white text-[10px]">Trick</span>
+                  </div>
+                  <p
+                    dir="rtl"
+                    lang="ar"
+                    className="font-arabic font-bold text-emerald-100 text-sm leading-relaxed text-right"
+                  >
+                    أبو الفرج الأصفهاني = (أصفهان + 24 جزء + طرب الأغاني)
+                  </p>
+                </div>
+
+                {/* 5-Level Progress Visual */}
+                <div className="pt-2 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono text-stone-400">
+                    <span>5-Level Retention Status</span>
+                    <span className="text-emerald-400 font-bold">Level 3 of 5 (1 Week)</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    <div className="h-2 rounded-full bg-emerald-500" />
+                    <div className="h-2 rounded-full bg-emerald-500" />
+                    <div className="h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/40" />
+                    <div className="h-2 rounded-full bg-stone-700" />
+                    <div className="h-2 rounded-full bg-stone-700" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. FINAL CALL TO ACTION ── */}
+      <section className="py-20 bg-stone-950 text-white text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
+            Start your preparation with structure and clarity.
+          </h2>
+          <p className="text-stone-400 text-sm sm:text-base max-w-xl mx-auto font-medium">
+            Join students preparing for UGC NET/JRF Arabic with official syllabus coverage and previous years&apos; question papers.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <Link
+              href="/syllabus"
+              className="px-8 py-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm sm:text-base rounded-xl transition-all shadow-lg text-center inline-flex items-center justify-center gap-2"
+            >
+              <Layers size={18} />
+              <span>Explore Syllabus</span>
+            </Link>
+            <Link
+              href="/pyq"
+              className="px-8 py-4 bg-stone-900 hover:bg-stone-800 border border-stone-700 text-stone-200 hover:text-white font-bold text-sm sm:text-base rounded-xl transition-all text-center inline-flex items-center justify-center gap-2"
+            >
+              <BookOpen size={18} />
+              <span>Browse PYQs</span>
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
-
