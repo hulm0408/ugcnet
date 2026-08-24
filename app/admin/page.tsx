@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { Users, FileQuestion, BookOpen, Layers, CheckCircle2, TrendingUp, Sparkles } from 'lucide-react';
+import { Users, FileQuestion, BookOpen, Layers, CheckCircle2, TrendingUp } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-stone-900 tracking-tight flex items-center gap-3">
-            Dashboard Overview <Sparkles className="text-accent" size={24} />
+            Dashboard Overview
           </h1>
           <p className="mt-2 text-base text-stone-500 font-medium">Manage users, questions, and view system health.</p>
         </div>

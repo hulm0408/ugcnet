@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import prisma from '@/lib/db';
 import SearchClient from './SearchClient';
-import { Search, Sparkles } from 'lucide-react';
+import { Search, Compass } from 'lucide-react';
 import { buildArabicRegexPattern } from '@/lib/arabicUtils';
 
 export async function generateMetadata({
@@ -179,7 +179,7 @@ export default async function SearchPage({
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mb-1.5">
-            <Sparkles size={16} /> Question Discovery Engine
+            <Compass size={16} /> Question Discovery Engine
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
             Search Question Bank

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useTransition } from 'react';
 import {
   X,
-  Sparkles,
+  Zap,
   Key,
   BookOpen,
   Lightbulb,
@@ -409,7 +409,7 @@ export default function MemoryConnectionModal({
               <div className="bg-stone-50/80 rounded-2xl p-4 border border-stone-200/80">
                 <div className="text-xs font-extrabold text-stone-700 uppercase tracking-wider mb-2 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-amber-500" /> Fast Quick Memory
+                    <Zap size={14} className="text-amber-500" /> Fast Quick Memory
                   </span>
                   {quickSavedSuccess && (
                     <span className="text-emerald-700 text-xs font-bold flex items-center gap-1">

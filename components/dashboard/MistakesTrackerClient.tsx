@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   RotateCcw,
-  Sparkles,
   Layers,
   ArrowRight,
   TrendingDown,

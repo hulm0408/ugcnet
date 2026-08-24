@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Edit3, ArrowUpRight } from 'lucide-react';
+import { Edit3, ArrowUpRight } from 'lucide-react';
 import { BrainSparkIcon } from './MemoryIcons';
 
 interface QuestionMemoryStripProps {

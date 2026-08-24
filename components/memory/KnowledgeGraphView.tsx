@@ -7,7 +7,7 @@ import {
   BrainSparkIcon,
   LinkConnectionIcon,
 } from './MemoryIcons';
-import { Sparkles, ArrowRight, BookOpen, Layers, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Layers, X } from 'lucide-react';
 import { RELATIONSHIP_TYPES } from '@/lib/memoryEngine';
 
 export interface GraphNode {

@@ -8,15 +8,18 @@ import {
   LinkConnectionIcon,
 } from './MemoryIcons';
 import {
+  Brain,
   CheckCircle2,
   XCircle,
-  Eye,
-  EyeOff,
-  Sparkles,
+  RotateCcw,
   ArrowRight,
-  RefreshCw,
+  Clock,
+  ThumbsUp,
+  ThumbsDown,
+  Volume2,
+  Edit3,
   Trophy,
-  HelpCircle,
+  Eye,
   Check,
   ChevronRight,
 } from 'lucide-react';
@@ -330,7 +333,7 @@ export default function MemoryReviewEngine({ items, onFinish }: MemoryReviewEngi
               <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl p-5 border border-emerald-300 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="text-xs font-black uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
-                    <Sparkles size={15} className="text-amber-600" />
+                    <Brain size={15} className="text-emerald-700" />
                     Your Personal Memory Connection
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-emerald-700 text-white text-[10px] font-bold">

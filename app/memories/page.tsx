@@ -15,7 +15,6 @@ import {
   Edit3,
   BookOpen,
   ArrowRight,
-  Sparkles,
   Plus,
   Clock,
   Layers,

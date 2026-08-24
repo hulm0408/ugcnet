@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   ChevronDown, ChevronRight, PlayCircle, BookOpen,
   CheckCircle2, Eye, EyeOff, Layers, User,
-  ChevronsDown, ChevronsUp, FileQuestion, Sparkles
+  ChevronsDown, ChevronsUp, FileQuestion
 } from 'lucide-react';
 
 export type QuestionItem = {

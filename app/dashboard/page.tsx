@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, Sparkles, Brain } from 'lucide-react';
+import { BookOpen, Target, Clock, TrendingUp, BookMarked, AlertCircle, ChevronRight, Zap, Brain } from 'lucide-react';
 import { BrainSparkIcon, SpacedRepetitionIcon, KnowledgeGraphIcon } from '@/components/memory/MemoryIcons';
 import { auth } from '@/lib/auth';
 import DeleteAccountButton from '@/components/dashboard/DeleteAccountButton';
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
         {/* Quick Actions */}
         <div className="mb-12">
           <h2 className="text-lg font-bold text-stone-900 mb-4 flex items-center gap-2">
-            <Sparkles size={18} className="text-accent" /> Quick Actions
+            <Zap size={18} className="text-accent" /> Quick Actions
           </h2>
           <div className="grid sm:grid-cols-3 gap-4">
             {quickActions.map(({ label, href, icon: Icon, color, desc }) => (
