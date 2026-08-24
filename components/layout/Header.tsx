@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search, LogOut } from 'lucide-react';
+import { Home, LayoutDashboard, BookMarked, Menu, X, GraduationCap, User, Search, LogOut, Sparkles } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import ProfileSidePanel from '@/components/layout/ProfileSidePanel';
 import SubjectSwitcher from '@/components/layout/SubjectSwitcher';
@@ -12,6 +12,7 @@ const navLinks = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/pyq', label: 'PYQs', icon: BookMarked },
   { href: '/syllabus', label: 'Syllabus', icon: GraduationCap },
+  { href: '/studio', label: 'AI Studio', icon: Sparkles },
   { href: '/memories', label: 'Memories', icon: LayoutDashboard },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
 ];

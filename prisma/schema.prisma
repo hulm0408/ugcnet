@@ -31,6 +31,7 @@ model Subject {
   subscriptions      UserSubscription[]
   practice_sessions  PracticeSession[]
   users_as_active    User[]            @relation("ActiveSubject")
+  visual_projects    VisualLearningProject[]
 
   @@index([is_active, order_index])
   @@index([is_paper_1])
@@ -238,6 +239,7 @@ model User {
   question_connections   QuestionConnection[]
   spaced_memory_queue    SpacedMemoryQueue[]
   memory_review_logs     MemoryReviewLog[]
+  visual_projects        VisualLearningProject[]
 
   @@map("User")
 }
@@ -577,3 +579,64 @@ model MemoryReviewLog {
   @@index([user_id, question_id])
   @@index([user_id, reviewed_at])
 }
+
+// ═══════════════════════════════════════════════════
+// PERSONALIZED VISUAL LEARNING STUDIO & PROJECTS
+// ═══════════════════════════════════════════════════
+
+model VisualLearningProject {
+  id              String   @id @default(cuid())
+  user_id         String
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  subject_id      String?
+  subject         Subject? @relation(fields: [subject_id], references: [id], onDelete: SetNull)
+  
+  title           String
+  description     String?
+  academic_level  String   @default("INTERMEDIATE") // BEGINNER | INTERMEDIATE | ADVANCED | JRF_ASPIRANT
+  visual_theme    String   @default("ACADEMIC_CLEAN") // ACADEMIC_CLEAN | VINTAGE_PARCHMENT | MODERN_MINIMAL | HIGH_CONTRAST
+  color_system    String   @default("EMERALD_SLATE")
+  
+  entity_index    Json?    // Tracks entities/concepts already covered to prevent repetition
+  is_public       Boolean  @default(false)
+  
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  pages           VisualLearningPage[]
+
+  @@index([user_id, updated_at])
+  @@index([subject_id])
+}
+
+model VisualLearningPage {
+  id                   String                @id @default(cuid())
+  project_id           String
+  project              VisualLearningProject @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  
+  page_number          Int
+  title                String
+  concept_target       String
+  visual_format        String                // SVG_MAP | CHRONOLOGY_TIMELINE | CAUSE_EFFECT | PROCESS_FLOW | COMPARISON_MATRIX | HIERARCHY_TREE | ANNOTATED_ARTIFACT | SPATIAL_INFOGRAPHIC | SYNTHESIS_CANVAS
+  
+  page_purpose         String
+  visual_argument      String
+  user_action_prompt   String
+  memory_target        String
+  
+  difficulty_level     String                @default("INTERMEDIATE")
+  svg_content          String                @db.Text
+  content_payload      Json?
+  
+  thinking_space_title String?               @default("Your Thinking & Connection Space")
+  thinking_space_prompt String?
+  user_notes           String?               @db.Text
+  user_annotations     Json?
+  
+  created_at           DateTime              @default(now())
+  updated_at           DateTime              @updatedAt
+
+  @@unique([project_id, page_number])
+  @@index([project_id, page_number])
+}
+
