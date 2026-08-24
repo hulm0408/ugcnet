@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/db';
 import { AlertCircle, Clock, FileText, CheckCircle2 } from 'lucide-react';
+import { formatTestDuration } from '@/lib/dateUtils';
 
 import InstructionsClient from './InstructionsClient';
 
@@ -29,9 +30,9 @@ export default async function InstructionsPage({ params }: PageProps) {
     redirect('/pyq');
   }
 
-  // Calculate generic time limit based on questions (e.g. 1 min per question or standard 120 mins)
+  // Calculate dynamic time limit based on 1 minute 20 seconds (80s) per question
   const questionCount = paper._count.questions;
-  const timeLimit = questionCount > 50 ? 120 : 60; // Just a mock estimate
+  const durationInfo = formatTestDuration(questionCount);
 
   return (
     <div className="flex-1 bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -42,7 +43,7 @@ export default async function InstructionsPage({ params }: PageProps) {
           <h1 className="text-2xl font-bold text-slate-900 mb-2">{paper.display_name}</h1>
           <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500">
             <div className="flex items-center gap-1.5"><FileText size={16} /> {questionCount} Questions</div>
-            <div className="flex items-center gap-1.5"><Clock size={16} /> {timeLimit} Minutes</div>
+            <div className="flex items-center gap-1.5"><Clock size={16} /> {durationInfo.formattedText} (1m 20s / Q)</div>
             <div className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold">{paper.year}</div>
             {paper.session && <div className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">{paper.session}</div>}
           </div>

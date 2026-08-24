@@ -64,3 +64,45 @@ export function formatFullDateTime(dateInput: Date | string | number): string {
     hour12: true,
   });
 }
+
+/**
+ * Calculates CBT / mock test duration based on 1 minute 20 seconds (80 seconds) per question.
+ */
+export function calculateTestDurationSeconds(totalQuestions: number): number {
+  const count = Math.max(1, totalQuestions || 1);
+  return count * 80;
+}
+
+/**
+ * Formats duration in human-readable text (e.g. "66 Mins 40 Secs", "1 Hr 6 Mins 40 Secs", etc.)
+ */
+export function formatTestDuration(totalQuestions: number): {
+  totalSeconds: number;
+  minutes: number;
+  formattedText: string;
+  shortText: string;
+} {
+  const totalSeconds = calculateTestDurationSeconds(totalQuestions);
+  const hours = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+
+  let formattedText = '';
+  if (hours > 0) {
+    formattedText = `${hours} hr${hours > 1 ? 's' : ''}${mins > 0 ? ` ${mins} min${mins > 1 ? 's' : ''}` : ''}${secs > 0 ? ` ${secs} sec${secs > 1 ? 's' : ''}` : ''}`.trim();
+  } else if (mins > 0) {
+    formattedText = `${mins} min${mins > 1 ? 's' : ''}${secs > 0 ? ` ${secs} sec${secs > 1 ? 's' : ''}` : ''}`.trim();
+  } else {
+    formattedText = `${secs} sec${secs > 1 ? 's' : ''}`;
+  }
+
+  const shortText = `${Math.ceil(totalSeconds / 60)} Mins`;
+
+  return {
+    totalSeconds,
+    minutes: Math.ceil(totalSeconds / 60),
+    formattedText,
+    shortText,
+  };
+}
+

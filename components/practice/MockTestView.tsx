@@ -6,6 +6,7 @@ import { getOptionText } from '@/lib/arabicUtils';
 import MemoryButton from '@/components/memory/MemoryButton';
 import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
 import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
+import { calculateTestDurationSeconds } from '@/lib/dateUtils';
 
 interface MockTestViewProps {
   year?: string;
@@ -42,19 +43,40 @@ export default function MockTestView({
 }: MockTestViewProps) {
   const currentQ = questions[currentIndex] || questions[0];
   
-  // Timer logic (120 mins countdown)
-  const [timeLeft, setTimeLeft] = useState(120 * 60);
+  // Dynamic Timer logic: 1 minute 20 seconds (80 seconds) per question
+  const initialDuration = calculateTestDurationSeconds(questions?.length || 1);
+  const [timeLeft, setTimeLeft] = useState(initialDuration);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [memoryModalOpen, setMemoryModalOpen] = useState(false);
   const [memoryRefresh, setMemoryRefresh] = useState(0);
 
+  // Update timer whenever question count changes
+  useEffect(() => {
+    if (questions && questions.length > 0) {
+      setTimeLeft(calculateTestDurationSeconds(questions.length));
+    }
+  }, [questions?.length]);
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => Math.max(0, prev - 1));
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Auto-submit when time reaches zero
+  useEffect(() => {
+    if (timeLeft === 0 && !submitting) {
+      onSubmit();
+    }
+  }, [timeLeft, submitting, onSubmit]);
 
   const hours = Math.floor(timeLeft / 3600);
   const minutes = Math.floor((timeLeft % 3600) / 60);

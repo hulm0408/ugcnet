@@ -4,6 +4,7 @@ import { ArrowRight, ChevronRight, Info } from 'lucide-react';
 import YearFolderSvg from '@/components/ui/YearFolderSvg';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/db';
+import { formatTestDuration } from '@/lib/dateUtils';
 
 export const metadata: Metadata = {
   title: 'Select Paper — PYQs',
@@ -31,15 +32,15 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
   });
 
   const papers = dbPapers.map((paper) => {
-    // Basic heuristic: 2 marks per question, and assuming 1 minute per question + a bit of buffer usually
-    // Standard NET: Paper II = 100Qs, 200Marks, 120mins
+    const duration = formatTestDuration(paper.total_questions);
     return {
       id: paper.id,
       title: paper.display_name || paper.paper_number,
       subtitle: `(${paper.session || 'UGC NET Arabic'})`,
       questions: paper.total_questions,
       marks: paper.total_questions * 2,
-      minutes: paper.total_questions === 100 ? 120 : paper.total_questions === 75 ? 150 : paper.total_questions * 1.5,
+      durationText: duration.formattedText,
+      shortDuration: duration.shortText,
     };
   });
 
@@ -97,7 +98,7 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
                     <div className="text-stone-900 font-semibold">{paper.marks} Marks</div>
                   </div>
                   <div>
-                    <div className="text-stone-900 font-semibold">{paper.minutes} Minutes</div>
+                    <div className="text-stone-900 font-semibold">{paper.durationText}</div>
                   </div>
                 </div>
 

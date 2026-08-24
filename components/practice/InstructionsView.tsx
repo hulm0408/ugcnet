@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import InstructionsSvg from '@/components/ui/InstructionsSvg';
+import { formatTestDuration } from '@/lib/dateUtils';
 
 interface InstructionsViewProps {
   onStart: () => void;
@@ -46,7 +47,12 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
               </div>
               <div className="flex justify-between border-b border-stone-200 pb-2">
                 <span className="text-stone-500 font-medium">Duration</span>
-                <span className="font-bold text-stone-900">120 Minutes</span>
+                <span className="font-bold text-stone-900">
+                  {formatTestDuration(totalQuestions).formattedText}
+                  <span className="text-[11px] text-stone-400 font-normal block sm:inline sm:ml-1">
+                    (1m 20s / Q)
+                  </span>
+                </span>
               </div>
               <div className="flex justify-between border-b border-stone-200 pb-2">
                 <span className="text-stone-500 font-medium">Negative Marking</span>
