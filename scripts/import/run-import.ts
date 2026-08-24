@@ -210,7 +210,8 @@ async function runImport() {
   await prisma.syllabusUnit.deleteMany({});
 
   // Insert Hierarchy into DB
-    const arabicSubject = await prisma.subject.findUnique({ where: { code: '29' } });
+  const arabicSubject = await prisma.subject.findUnique({ where: { code: '29' } });
+  for (const [unitNum, unitObj] of Array.from(hierarchyMap.entries()).sort((a, b) => a[0] - b[0])) {
     const createdUnit = await prisma.syllabusUnit.upsert({
       where: {
         subject_id_unit_number: {
