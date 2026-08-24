@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db';
 import { Layers, Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { buildArabicRegexPattern } from '@/lib/arabicUtils';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,34 +10,89 @@ export default async function AdminQuestionsPage(props: {
   searchParams?: Promise<{ query?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const query = searchParams?.query || '';
+  const query = searchParams?.query?.trim() || '';
   const currentPage = Number(searchParams?.page) || 1;
   const pageSize = 50;
 
-  // Build the where clause for searching
-  const where = query
-    ? {
-        OR: [
-          { question_arabic: { contains: query, mode: 'insensitive' as const } },
-          { id: { contains: query, mode: 'insensitive' as const } },
-        ],
-      }
-    : {};
+  const isArabic = /[\u0600-\u06FF]/.test(query);
 
-  // Fetch data and total count concurrently
-  const [questions, totalQuestions] = await Promise.all([
-    prisma.question.findMany({
-      where,
-      take: pageSize,
-      skip: (currentPage - 1) * pageSize,
-      orderBy: { created_at: 'desc' },
-      include: {
-        unit: true,
-        broad_topic: true,
-      },
-    }),
-    prisma.question.count({ where }),
-  ]);
+  let questions: any[] = [];
+  let totalQuestions = 0;
+
+  if (isArabic && query) {
+    const pattern = buildArabicRegexPattern(query);
+    const countResult = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+      `SELECT COUNT(*)::bigint as count
+       FROM "Question"
+       WHERE question_arabic ~* $1 OR specific_entity_name_arabic ~* $1 OR question_micro_focus_arabic ~* $1;`,
+      pattern
+    );
+    totalQuestions = Number(countResult[0]?.count || 0);
+
+    const offset = (currentPage - 1) * pageSize;
+    const rows = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT q.id, q.source_question_id, q.original_question_number,
+              q.question_arabic, q.question_english, q.content_status,
+              u.name_english as "unit_name_english", u.unit_number as "unit_unit_number",
+              bt.name_english as "broad_topic_name_english"
+       FROM "Question" q
+       LEFT JOIN "SyllabusUnit" u ON q.unit_id = u.id
+       LEFT JOIN "BroadTopic" bt ON q.broad_topic_id = bt.id
+       WHERE q.question_arabic ~* $1 OR q.specific_entity_name_arabic ~* $1 OR q.question_micro_focus_arabic ~* $1
+       ORDER BY q.created_at DESC
+       LIMIT ${pageSize} OFFSET ${offset};`,
+      pattern
+    );
+
+    questions = rows.map((r) => ({
+      id: r.id,
+      source_question_id: r.source_question_id,
+      original_question_number: r.original_question_number,
+      question_arabic: r.question_arabic,
+      question_english: r.question_english,
+      content_status: r.content_status,
+      unit: r.unit_name_english
+        ? {
+            unit_number: r.unit_unit_number,
+            name_english: r.unit_name_english,
+          }
+        : null,
+      broad_topic: r.broad_topic_name_english
+        ? {
+            name_english: r.broad_topic_name_english,
+          }
+        : null,
+    }));
+  } else {
+    // Build the where clause for searching
+    const where = query
+      ? {
+          OR: [
+            { question_arabic: { contains: query, mode: 'insensitive' as const } },
+            { id: { contains: query, mode: 'insensitive' as const } },
+            { source_question_id: { contains: query, mode: 'insensitive' as const } },
+            { question_english: { contains: query, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const [prismaQuestions, count] = await Promise.all([
+      prisma.question.findMany({
+        where,
+        take: pageSize,
+        skip: (currentPage - 1) * pageSize,
+        orderBy: { created_at: 'desc' },
+        include: {
+          unit: true,
+          broad_topic: true,
+        },
+      }),
+      prisma.question.count({ where }),
+    ]);
+
+    questions = prismaQuestions;
+    totalQuestions = count;
+  }
 
   const totalPages = Math.ceil(totalQuestions / pageSize);
 
@@ -53,7 +109,7 @@ export default async function AdminQuestionsPage(props: {
             </span>
           </h1>
           <p className="mt-2 text-base text-stone-500 font-medium">
-            Manage, search, and verify the mapped 3,149 UGC NET Arabic questions.
+            Manage, search, and verify all {totalQuestions.toLocaleString()} UGC NET Arabic questions.
           </p>
         </div>
 

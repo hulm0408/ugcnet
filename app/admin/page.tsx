@@ -14,7 +14,7 @@ export default async function AdminDashboard() {
     { name: 'Total Users', value: totalUsers, icon: Users, color: 'text-primary', bgColor: 'bg-primary/10', border: 'border-primary/20' },
     { name: 'Total Questions', value: totalQuestions, icon: FileQuestion, color: 'text-primary-dark', bgColor: 'bg-primary-dark/10', border: 'border-primary-dark/20' },
     { name: 'Syllabus Units', value: totalUnits, icon: BookOpen, color: 'text-accent', bgColor: 'bg-accent/10', border: 'border-accent/20' },
-    { name: 'Mapped to DB', value: '3,149', icon: Layers, color: 'text-stone-700', bgColor: 'bg-stone-500/10', border: 'border-stone-500/20' },
+    { name: 'Mapped to DB', value: totalQuestions.toLocaleString(), icon: Layers, color: 'text-stone-700', bgColor: 'bg-stone-500/10', border: 'border-stone-500/20' },
   ];
 
   return (
@@ -66,7 +66,7 @@ export default async function AdminDashboard() {
               <div>
                 <h4 className="font-semibold text-stone-900">Database Synchronization</h4>
                 <p className="text-sm text-stone-500 mt-1">
-                  Successfully mapped <strong>3,149</strong> UGC NET Arabic previous year questions to the 10 official syllabus units. Questions are now dynamically identifiable.
+                  Successfully mapped <strong>{totalQuestions.toLocaleString()}</strong> UGC NET Arabic previous year questions to the 10 official syllabus units. Questions are now dynamically identifiable.
                 </p>
               </div>
             </div>
