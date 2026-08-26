@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, ChevronRight, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ChevronRight, Lock, Sparkles, CheckCircle2, Play, BookOpen } from 'lucide-react';
 import YearFolderSvg from '@/components/ui/YearFolderSvg';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/db';
 import { formatTestDuration } from '@/lib/dateUtils';
 import { auth } from '@/lib/auth';
 import { verifyPaperAccess } from '@/lib/accessControl';
-
 import { getActiveSubjectServer } from '@/lib/subjectContext';
 
 export const metadata: Metadata = {
@@ -58,127 +57,121 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
   );
 
   return (
-    <div className="flex-1 bg-stone-50 min-h-screen font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="flex-1 bg-[#F8FAFC] min-h-screen font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-sm text-stone-500 mb-8">
-          <Link href="/pyq" className="hover:text-primary transition-colors">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <Link href="/pyq" className="hover:text-emerald-700 transition-colors">
             PYQs ({activeSubject.name})
           </Link>
-          <ChevronRight size={14} />
-          <span className="font-semibold text-stone-900">{year}</span>
+          <ChevronRight size={13} />
+          <span className="font-bold text-slate-900">Year {year}</span>
         </div>
 
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between bg-white rounded-3xl border border-stone-200/90 shadow-sm p-8 mb-8 overflow-hidden relative">
-          <div className="flex-1 relative z-10">
-            <h1 className="text-4xl font-black text-stone-900 mb-2 tracking-tight">
+        <div className="flex flex-col md:flex-row items-center justify-between bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8 overflow-hidden relative gap-6">
+          <div className="flex-1 relative z-10 space-y-2">
+            <span className="inline-block px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[11px] font-bold uppercase tracking-wider border border-emerald-200">
+              Exam Cycle Archive
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-serif font-extrabold text-slate-900 tracking-tight">
               {activeSubject.name} — Year {year}
             </h1>
             {activeSubject.name_native && (
               <p
                 dir={activeSubject.direction}
-                className={`text-2xl font-bold text-amber-600 mb-4 ${
-                  activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
-                }`}
+                className={`text-xl sm:text-2xl font-bold text-emerald-700 font-arabic`}
               >
                 {activeSubject.name_native} ({year})
               </p>
             )}
-            <p className="text-stone-500 text-sm font-medium">
-              Select the paper or part you want to practice under authentic NTA exam conditions.
+            <p className="text-slate-600 text-xs sm:text-sm font-medium max-w-xl">
+              Select the paper or part you want to practice under authentic NTA exam conditions with verified answer keys.
             </p>
           </div>
 
-          <div className="w-full md:w-[350px] shrink-0 mt-8 md:mt-0 relative">
-            <YearFolderSvg year={year} className="w-full h-auto drop-shadow-xl" />
+          <div className="w-full md:w-[280px] shrink-0 mt-4 md:mt-0 relative flex justify-center">
+            <YearFolderSvg year={year} className="w-full h-auto max-h-[160px] drop-shadow-md" />
           </div>
         </div>
 
         {/* Papers Grid */}
         {papersWithAccess.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {papersWithAccess.map((paper) => (
               <div
                 key={paper.id}
-                className={`bg-white border rounded-3xl p-6 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full ${
+                className={`bg-white border rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between h-full space-y-4 ${
                   paper.isFree
                     ? 'border-emerald-300 ring-2 ring-emerald-500/20 hover:border-emerald-500'
-                    : 'border-stone-200/80 hover:border-primary/40'
+                    : 'border-slate-200 hover:border-emerald-500/80'
                 }`}
               >
-                {/* Highlight Top Accent Bar */}
-                <div
-                  className={`absolute top-0 left-0 w-full h-1.5 transition-colors ${
-                    paper.isFree
-                      ? 'bg-emerald-500'
-                      : paper.hasAccess
-                      ? 'bg-primary'
-                      : 'bg-stone-300 group-hover:bg-amber-500'
-                  }`}
-                />
-
                 {/* Badge Header */}
-                <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center justify-between gap-2">
                   {paper.isFree ? (
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 shadow-sm">
-                      <Sparkles size={12} className="text-emerald-700" /> Free Benchmark Exam
+                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300">
+                      <Sparkles size={11} className="text-emerald-700" /> Free Benchmark
                     </span>
                   ) : paper.hasAccess ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary-dark bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                       <CheckCircle2 size={11} /> Pro Unlocked
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
                       <Lock size={11} /> Pro Access
                     </span>
                   )}
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="text-lg font-black text-stone-900 group-hover:text-primary transition-colors tracking-tight">
+                <div>
+                  <h3 className="text-lg font-serif font-bold text-slate-900 group-hover:text-emerald-700 transition-colors tracking-tight">
                     {paper.title}
                   </h3>
-                  <p className="text-xs font-semibold text-stone-500 mt-1">{paper.subtitle}</p>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">{paper.subtitle}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs font-semibold mt-auto mb-6 pt-4 border-t border-stone-100">
+                <div className="grid grid-cols-2 gap-y-2 gap-x-2 text-xs font-semibold pt-3 border-t border-slate-100">
                   <div>
-                    <div className="text-stone-900">{paper.questions} Questions</div>
-                    <div className="text-[10px] text-stone-400 font-medium uppercase">Total Qs</div>
+                    <div className="text-slate-900 font-bold">{paper.questions} Questions</div>
+                    <div className="text-[10px] text-slate-400 font-medium uppercase">Total Qs</div>
                   </div>
                   <div>
-                    <div className="text-stone-900">{paper.marks} Marks</div>
-                    <div className="text-[10px] text-stone-400 font-medium uppercase">Full Marks</div>
+                    <div className="text-slate-900 font-bold">{paper.marks} Marks</div>
+                    <div className="text-[10px] text-slate-400 font-medium uppercase">Full Marks</div>
                   </div>
                   <div className="col-span-2">
-                    <div className="text-stone-900">{paper.durationText}</div>
-                    <div className="text-[10px] text-stone-400 font-medium uppercase">Official Timer</div>
+                    <div className="text-slate-900 font-bold">{paper.durationText}</div>
+                    <div className="text-[10px] text-slate-400 font-medium uppercase">Official Timer</div>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100">
                   <Link
                     href={`/practice?year=${year}&paperId=${paper.id}&paperTitle=${encodeURIComponent(paper.title)}&type=practice`}
-                    className="flex-1 py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl text-center transition-colors"
+                    className="flex-1 py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl text-center transition-colors inline-flex items-center justify-center gap-1"
                   >
-                    Learn / Solutions
+                    <BookOpen size={13} />
+                    <span>Solutions</span>
                   </Link>
                   <Link
                     href={`/practice?year=${year}&paperId=${paper.id}&paperTitle=${encodeURIComponent(paper.title)}&type=mock`}
-                    className="flex-1 py-2.5 px-3 bg-[#0C6240] hover:bg-[#094d32] text-white text-xs font-bold rounded-xl text-center transition-colors shadow-sm"
+                    className="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl text-center transition-colors shadow-2xs inline-flex items-center justify-center gap-1"
                   >
-                    Take CBT Mock
+                    <Play size={12} fill="currentColor" />
+                    <span>CBT Mock</span>
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-3xl border border-stone-200">
-            <p className="text-stone-500">No papers found for this year.</p>
+          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+            <p className="text-slate-500 font-medium">No papers found for this year.</p>
           </div>
         )}
+
       </div>
     </div>
   );

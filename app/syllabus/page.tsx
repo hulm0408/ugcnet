@@ -42,18 +42,19 @@ export default async function SyllabusLandingPage() {
   const totalQuestions = units.reduce((acc, u) => acc + u._count.questions, 0);
 
   return (
-    <div className="flex-1 min-h-screen pt-8 pb-20 bg-[#F8F9FA] text-[#202124] font-sans">
+    <div className="flex-1 min-h-screen pt-8 pb-20 bg-[#F8FAFC] text-slate-900 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Title Section: Google Academic Style */}
-        <div className="mb-8 text-left border-b border-[#DADCE0] pb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F0FE] border border-[#D2E3FC] text-[#1A73E8] text-[11px] font-bold tracking-wider uppercase mb-2.5">
-            <GraduationCap size={13} className="text-[#1A73E8]" />
+        
+        {/* Header Title Section */}
+        <div className="mb-8 text-left border-b border-slate-200 pb-6">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wider uppercase mb-2.5">
+            <GraduationCap size={13} className="text-emerald-700" />
             <span>Official NTA Curriculum • {activeSubject.name} (Code {activeSubject.code})</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-serif font-bold text-[#202124] tracking-tight mb-1.5">
+          <h1 className="text-2xl sm:text-4xl font-serif font-extrabold text-slate-900 tracking-tight mb-1.5">
             {activeSubject.name} Syllabus Units
           </h1>
-          <p className="text-[#5F6368] text-xs sm:text-sm font-medium max-w-2xl">
+          <p className="text-slate-600 text-xs sm:text-sm font-medium max-w-2xl">
             Browse official UGC NET {activeSubject.name} units. Select a unit to explore its topics and practice questions.
           </p>
         </div>
@@ -64,26 +65,26 @@ export default async function SyllabusLandingPage() {
           {/* Main Column: Units List */}
           <main className="flex-1 min-w-0 w-full">
             <div className="mb-3 flex items-center justify-between px-1">
-              <h2 className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Official Units (10)
               </h2>
-              <span className="text-[11px] text-stone-500 font-medium">
+              <span className="text-[11px] text-slate-500 font-medium">
                 Click a unit to view topics
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {units.map((unit) => (
                 <Link
                   key={unit.id}
                   href={`/syllabus/${unit.unit_number}`}
-                  className="group block p-4 sm:p-5 bg-white border border-[#DADCE0] rounded-2xl hover:border-[#1A73E8]/50 hover:shadow-md transition-all"
+                  className="group block p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl hover:border-emerald-500/80 hover:shadow-xs transition-all cursor-pointer"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     
                     {/* Left: Unit Number & Arabic/English Titles */}
                     <div className="flex items-center gap-4 min-w-0 flex-1">
-                      <div className="w-9 h-9 rounded-xl bg-[#F8F9FA] border border-[#DADCE0] text-[#5F6368] group-hover:bg-[#E8F0FE] group-hover:text-[#1A73E8] flex items-center justify-center font-bold text-xs shrink-0 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 group-hover:bg-emerald-50 group-hover:text-emerald-700 group-hover:border-emerald-200 flex items-center justify-center font-bold text-xs shrink-0 transition-colors">
                         {unit.unit_number.toString().padStart(2, '0')}
                       </div>
 
@@ -91,28 +92,28 @@ export default async function SyllabusLandingPage() {
                         <div
                           dir="rtl"
                           lang="ar"
-                          className="font-arabic font-semibold text-xl sm:text-2xl text-[#202124] leading-[2.2] group-hover:text-[#1A73E8] transition-colors"
+                          className="font-arabic font-semibold text-xl sm:text-2xl text-slate-950 leading-[2.2] group-hover:text-emerald-800 transition-colors"
                         >
                           {unit.name_arabic}
                         </div>
-                        <div className="text-[#5F6368] text-xs sm:text-sm font-medium line-clamp-1">
+                        <div className="text-slate-600 text-xs sm:text-sm font-medium line-clamp-1">
                           {unit.name_english}
                         </div>
                       </div>
                     </div>
 
                     {/* Right: Metadata Chips & Subtle Chevron */}
-                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#DADCE0]">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                       <div className="flex items-center gap-2 text-[11px]">
-                        <span className="px-2.5 py-1 rounded-md bg-[#F8F9FA] border border-[#DADCE0] text-[#5F6368] font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 font-bold">
                           {unit._count.broad_topics} Topics
                         </span>
-                        <span className="px-2.5 py-1 rounded-md bg-[#E8F0FE] text-[#1A73E8] font-bold border border-[#D2E3FC]">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
                           {unit._count.questions} Qs
                         </span>
                       </div>
 
-                      <div className="text-[#5F6368] group-hover:text-[#1A73E8] transition-colors pl-1">
+                      <div className="text-slate-400 group-hover:text-emerald-700 transition-colors pl-1">
                         <ChevronRight size={16} />
                       </div>
                     </div>

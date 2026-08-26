@@ -4,25 +4,26 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  GraduationCap,
-  User,
   Search,
-  Lock,
   Menu,
   X,
+  Bell,
+  BookOpen,
+  Brain,
+  Layers,
+  GraduationCap,
+  Play,
 } from 'lucide-react';
 import ProfileSidePanel from '@/components/layout/ProfileSidePanel';
 import SubjectSwitcher from '@/components/layout/SubjectSwitcher';
-import AuthPreviewModal from '@/components/layout/AuthPreviewModal';
 import AuthModal from '@/components/layout/AuthModal';
 
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/pyq', label: 'PYQs' },
-  { href: '/syllabus', label: 'Syllabus' },
-  { href: '/mocks', label: 'Mock Tests' },
-  { href: '/practice', label: 'Practice Sets' },
-  { href: '/memories', label: '5 Level Memory' },
+  { href: '/pyq', label: 'PYQ', icon: BookOpen },
+  { href: '/mocks', label: 'Mock', icon: Play },
+  { href: '/memories', label: 'Memory', icon: Brain },
+  { href: '/dashboard', label: 'Dashboard', icon: Layers },
+  { href: '/syllabus', label: 'Syllabus', icon: GraduationCap },
 ];
 
 export default function Header({
@@ -44,22 +45,22 @@ export default function Header({
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[#041A12] border-b border-[#134E3A] font-sans text-white transition-colors">
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 font-sans text-slate-900 transition-colors shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             
             {/* Brand & Logo */}
             <div className="flex items-center gap-3 shrink-0">
               <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="w-8 h-8 bg-[#00E699] text-[#03140E] rounded-lg flex items-center justify-center font-bold text-lg shadow-sm">
+                <div className="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-bold text-lg shadow-xs group-hover:bg-emerald-700 transition-colors">
                   ع
                 </div>
                 <div className="flex flex-col leading-tight">
-                  <span className="text-white font-bold text-sm tracking-tight">
-                    Arabic NET/JRF
+                  <span className="text-slate-900 font-bold text-sm tracking-tight group-hover:text-emerald-700 transition-colors">
+                    Arabic NET JRF
                   </span>
-                  <span className="text-[#8EBDAE] text-[10px] font-mono tracking-wider">
-                    PYQ Platform
+                  <span className="text-slate-500 text-[10px] font-medium tracking-wide">
+                    UGC NET Preparation
                   </span>
                 </div>
               </Link>
@@ -68,7 +69,7 @@ export default function Header({
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+            <nav className="hidden md:flex items-center gap-1 text-xs font-semibold">
               {navLinks.map(({ href, label }) => {
                 const isActive =
                   pathname === href || (pathname.startsWith(href + '/') && href !== '/');
@@ -76,10 +77,10 @@ export default function Header({
                   <Link
                     key={href}
                     href={href}
-                    className={`transition-all px-3 py-1.5 rounded-lg flex items-center gap-1.5 ${
+                    className={`transition-all px-3.5 py-2 rounded-xl flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-[#0D3A2B] text-[#00E699] font-bold border border-[#134E3A]'
-                        : 'text-[#8EBDAE] hover:text-white hover:bg-[#0A3325]'
+                        ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80 shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
                     <span>{label}</span>
@@ -90,10 +91,10 @@ export default function Header({
               {user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? (
                 <Link
                   href="/admin"
-                  className={`px-3 py-1.5 rounded-lg font-bold ${
+                  className={`px-3 py-1.5 rounded-xl font-bold ${
                     pathname.startsWith('/admin')
-                      ? 'bg-[#0D3A2B] text-[#00E699] border border-[#134E3A]'
-                      : 'text-[#00E699] hover:bg-[#0A3325]'
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-700 hover:bg-slate-100'
                   }`}
                 >
                   Admin
@@ -102,46 +103,51 @@ export default function Header({
             </nav>
 
             {/* Right Action Icons & User Info */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Link
                 href="/search"
-                className="w-9 h-9 rounded-full bg-[#0A3325] hover:bg-[#0D3A2B] border border-[#134E3A] text-[#8EBDAE] hover:text-white flex items-center justify-center transition-colors hidden sm:flex"
+                className="h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-600 hover:text-slate-900 flex items-center gap-2 transition-colors text-xs font-medium"
                 aria-label="Search"
               >
-                <Search size={15} />
+                <Search size={14} className="text-slate-500" />
+                <span className="hidden sm:inline text-slate-500">Search...</span>
+                <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-white text-slate-500 border border-slate-200 rounded shadow-2xs">
+                  /
+                </kbd>
               </Link>
 
-              {/* Bell notification */}
-              <div className="relative hidden sm:block">
-                <button
-                  type="button"
-                  className="w-9 h-9 rounded-full bg-[#0A3325] hover:bg-[#0D3A2B] border border-[#134E3A] text-[#8EBDAE] hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <span className="w-2 h-2 rounded-full bg-[#00E699] absolute top-2 right-2 ring-2 ring-[#041A12]" />
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                </button>
-              </div>
+              {/* Notification bell */}
+              <Link
+                href="/dashboard"
+                className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors relative"
+                aria-label="Notifications"
+              >
+                <Bell size={15} />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-2 right-2 ring-2 ring-white" />
+              </Link>
 
               {/* Profile Avatar / Trigger */}
               {user ? (
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2.5 p-1 pr-3 rounded-full bg-[#0A3325] hover:bg-[#0D3A2B] border border-[#134E3A] transition-colors cursor-pointer"
+                  className="flex items-center gap-2 p-1 pr-3 rounded-full bg-slate-100 hover:bg-slate-200/80 border border-slate-200 transition-colors cursor-pointer"
                 >
-                  <div className="w-7 h-7 rounded-full bg-[#00E699] text-[#03140E] flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
                     {userName.charAt(0)}
                   </div>
                   <div className="hidden sm:flex flex-col text-left leading-tight">
-                    <span className="text-xs font-bold text-white max-w-[100px] truncate">{userName}</span>
-                    <span className="text-[10px] text-[#8EBDAE]">Aspirant</span>
+                    <span className="text-xs font-bold text-slate-900 max-w-[110px] truncate">
+                      {userName}
+                    </span>
+                    <span className="text-[10px] text-slate-500">Aspirant</span>
                   </div>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => setAuthModalOpen(true)}
-                  className="px-4 py-2 bg-[#00E699] hover:bg-[#00B377] text-[#03140E] font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -151,7 +157,7 @@ export default function Header({
               <button
                 type="button"
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 text-stone-300 hover:text-white rounded-lg hover:bg-[#0A3325] transition-colors"
+                className="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors"
                 aria-label="Toggle Menu"
               >
                 {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -163,26 +169,31 @@ export default function Header({
 
         {/* Mobile Navigation Drawer */}
         {mobileOpen && (
-          <div className="lg:hidden border-t border-[#134E3A] bg-[#041A12] px-4 py-4 space-y-2 text-white">
-            {navLinks.map(({ href, label }) => (
+          <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 text-slate-900 shadow-lg">
+            {navLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between py-2.5 px-3 rounded-xl text-xs font-semibold text-[#8EBDAE] hover:text-white hover:bg-[#0A3325]"
+                className={`flex items-center gap-2.5 py-2.5 px-3.5 rounded-xl text-xs font-semibold ${
+                  pathname === href || pathname.startsWith(href + '/')
+                    ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
               >
+                <Icon size={16} className="text-slate-500" />
                 <span>{label}</span>
               </Link>
             ))}
             {!user && (
-              <div className="pt-3 border-t border-[#134E3A] flex gap-2">
+              <div className="pt-3 border-t border-slate-200 flex gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setMobileOpen(false);
                     setAuthModalOpen(true);
                   }}
-                  className="flex-1 py-2 text-center text-xs font-bold text-[#03140E] bg-[#00E699] hover:bg-[#00B377] rounded-xl cursor-pointer"
+                  className="flex-1 py-2.5 text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl cursor-pointer shadow-xs"
                 >
                   Sign In
                 </button>
