@@ -5,6 +5,7 @@ import { ChevronRight, Target, BookOpen, Layers } from 'lucide-react';
 import prisma from '@/lib/db';
 import SyllabusBreadcrumb from '@/components/syllabus/SyllabusBreadcrumb';
 import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
+import { getActiveSubjectServer } from '@/lib/subjectContext';
 
 export async function generateMetadata({
   params,
@@ -15,18 +16,23 @@ export async function generateMetadata({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return { title: 'Unit Not Found' };
 
+  const activeSubject = await getActiveSubjectServer();
   const unit = await prisma.syllabusUnit.findFirst({
-    where: { unit_number: unitNum },
+    where: { unit_number: unitNum, subject_id: activeSubject.id },
     select: { name_english: true, name_arabic: true, unit_number: true },
   });
 
   if (!unit) return { title: 'Unit Not Found' };
 
+  const displayTitle = unit.name_arabic || unit.name_english;
+
   return {
-    title: `Unit ${unit.unit_number}: ${unit.name_english} (${unit.name_arabic}) — Syllabus`,
-    description: `Explore topics under Unit ${unit.unit_number} of the UGC NET Arabic syllabus.`,
+    title: `Unit ${unit.unit_number}: ${unit.name_english} — ${activeSubject.name} Syllabus`,
+    description: `Explore topics under Unit ${unit.unit_number} of the UGC NET ${activeSubject.name} syllabus.`,
   };
 }
+
+export const dynamic = 'force-dynamic';
 
 export default async function UnitPage({
   params,
@@ -37,9 +43,11 @@ export default async function UnitPage({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return notFound();
 
-  // Fetch the Unit and its Broad Topics with question counts
+  const activeSubject = await getActiveSubjectServer();
+
+  // Fetch the Unit and its Broad Topics with question counts scoped to active subject
   const unit = await prisma.syllabusUnit.findFirst({
-    where: { unit_number: unitNum },
+    where: { unit_number: unitNum, subject_id: activeSubject.id },
     include: {
       broad_topics: {
         orderBy: { order_index: 'asc' },
@@ -73,7 +81,7 @@ export default async function UnitPage({
           items={[
             {
               label: `Unit ${unit.unit_number}: ${unit.name_english}`,
-              labelAr: unit.name_arabic,
+              labelAr: unit.name_arabic || undefined,
             },
           ]}
         />
@@ -86,18 +94,22 @@ export default async function UnitPage({
             {/* Unit Title Header Panel */}
             <div className="bg-white border border-stone-200/80 rounded-2xl p-5 sm:p-6 mb-6 space-y-1">
               <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
-                Unit {unit.unit_number}
+                {activeSubject.name} • Unit {unit.unit_number}
               </div>
               <h1
-                dir="rtl"
-                lang="ar"
-                className="font-arabic font-bold text-2xl sm:text-3xl text-stone-900 leading-snug"
+                dir={activeSubject.direction}
+                lang={activeSubject.primary_language}
+                className={`font-bold text-2xl sm:text-3xl text-stone-900 leading-snug ${
+                  activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
+                }`}
               >
-                {unit.name_arabic}
+                {unit.name_arabic || unit.name_english}
               </h1>
-              <p className="text-stone-500 font-medium text-xs sm:text-sm">
-                {unit.name_english}
-              </p>
+              {unit.name_arabic && unit.name_english && unit.name_arabic !== unit.name_english && (
+                <p className="text-stone-500 font-medium text-xs sm:text-sm">
+                  {unit.name_english}
+                </p>
+              )}
             </div>
 
             {/* Topics Section Header */}
@@ -128,15 +140,19 @@ export default async function UnitPage({
 
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <div
-                          dir="rtl"
-                          lang="ar"
-                          className="font-arabic font-bold text-base sm:text-lg text-stone-900 leading-snug group-hover:text-emerald-950 transition-colors"
+                          dir={activeSubject.direction}
+                          lang={activeSubject.primary_language}
+                          className={`font-bold text-base sm:text-lg text-stone-900 leading-snug group-hover:text-emerald-950 transition-colors ${
+                            activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
+                          }`}
                         >
-                          {topic.name_arabic}
+                          {topic.name_arabic || topic.name_english}
                         </div>
-                        <div className="text-stone-500 font-medium text-xs sm:text-sm line-clamp-1">
-                          {topic.name_english}
-                        </div>
+                        {topic.name_arabic && topic.name_english && topic.name_arabic !== topic.name_english && (
+                          <div className="text-stone-500 font-medium text-xs sm:text-sm line-clamp-1">
+                            {topic.name_english}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -171,15 +187,15 @@ export default async function UnitPage({
           {/* Right Column: Contextual Sidebar */}
           <SyllabusContextSidebar
             levelBadge={`Unit ${unit.unit_number} Context`}
-            titleAr={unit.name_arabic}
+            titleAr={unit.name_arabic || undefined}
             title={unit.name_english}
-            subtitle={`This unit covers ${unit.broad_topics.length} broad topics across classical and modern Arabic literature.`}
+            subtitle={`This unit covers ${unit.broad_topics.length} broad topics in the official ${activeSubject.name} curriculum.`}
             metrics={[
               { label: 'Topics', value: unit.broad_topics.length, icon: Target },
               { label: 'Sub-topics', value: totalSubtopics, icon: Layers },
               { label: 'Total Questions', value: unit._count.questions, icon: BookOpen },
             ]}
-            practiceHref={`/practice?unit=${unit.unit_number}`}
+            practiceHref={`/practice?unit=${unit.unit_number}&subject=${activeSubject.slug}`}
             practiceLabel={`Practice Unit ${unit.unit_number}`}
             quickTips={[
               'Click any topic above to explore its sub-topics.',

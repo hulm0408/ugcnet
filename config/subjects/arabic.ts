@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { arabicSyllabus, arabicSyllabusSource } from '../../data/syllabus/arabic';
 
 export const arabicConfig: SubjectConfig = {
   code: '29',
@@ -16,46 +17,77 @@ export const arabicConfig: SubjectConfig = {
     fontFamily: 'font-arabic',
     scriptDirection: 'rtl',
     heroSvgIllustration: `
-      <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
+      <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none" direction="rtl">
         <defs>
-          <linearGradient id="bgArabic" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#06241C" />
-            <stop offset="100%" stop-color="#020C09" />
+          <linearGradient id="bgArab" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#021E14" />
+            <stop offset="100%" stop-color="#010C08" />
           </linearGradient>
-          <linearGradient id="goldArabic" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#F59E0B" />
-            <stop offset="100%" stop-color="#10B981" />
+          <linearGradient id="goldArab" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FDE68A" />
+            <stop offset="50%" stop-color="#F59E0B" />
+            <stop offset="100%" stop-color="#B45309" />
           </linearGradient>
+          <path id="bottomArc" d="M 130 250 A 120 120 0 0 0 370 250" fill="none" />
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgArabic)" stroke="#064E3B" stroke-width="1.5" />
+        <rect width="500" height="360" rx="20" fill="url(#bgArab)" />
 
-        <!-- Calligraphic Header Line -->
-        <rect x="40" y="60" width="420" height="60" rx="10" fill="#041812" stroke="#059669" stroke-width="1" />
-        <text x="250" y="96" text-anchor="middle" fill="#A7F3D0" font-size="16" font-weight="bold" font-family="serif">قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ • بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ</text>
+        <!-- Subject Title -->
+        <text x="470" y="40" fill="#F59E0B" font-size="18" font-weight="900" text-anchor="end" font-family="serif">العربية</text>
+        <text x="470" y="58" fill="#6EE7B7" font-size="12" text-anchor="end" font-family="serif">CODE 29 • اللغة العربية وآدابها</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="215" r="55" fill="#062E24" stroke="url(#goldArabic)" stroke-width="2.5" />
-        <text x="250" y="210" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="900">العربية</text>
-        <text x="250" y="232" text-anchor="middle" fill="#34D399" font-size="10" font-weight="bold" letter-spacing="1">CODE 29</text>
+        <!-- Astrolabe Centerpiece -->
+        <g transform="translate(250, 190)">
+          <!-- Outer Rim -->
+          <circle cx="0" cy="0" r="130" fill="#042F22" stroke="url(#goldArab)" stroke-width="4" />
+          <circle cx="0" cy="0" r="120" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.5" />
+          
+          <!-- Degree Markings -->
+          <g stroke="#F59E0B" stroke-width="1" opacity="0.7">
+            <line x1="0" y1="-130" x2="0" y2="-120" />
+            <line x1="0" y1="120" x2="0" y2="130" />
+            <line x1="-130" y1="0" x2="-120" y2="0" />
+            <line x1="120" y1="0" x2="130" y2="0" />
+            <line x1="-92" y1="-92" x2="-85" y2="-85" />
+            <line x1="92" y1="92" x2="85" y2="85" />
+            <line x1="-92" y1="92" x2="-85" y2="85" />
+            <line x1="92" y1="-92" x2="85" y2="-85" />
+          </g>
 
-        <!-- Left Node: Classical Poetry -->
-        <rect x="40" y="170" width="130" height="90" rx="12" fill="#041A14" stroke="#065F46" stroke-width="1" />
-        <text x="105" y="200" text-anchor="middle" fill="#34D399" font-size="11" font-weight="bold">الشعر القديم</text>
-        <text x="105" y="220" text-anchor="middle" fill="#D1D5DB" font-size="9">المعلقات • المخضرمون</text>
-        <text x="105" y="238" text-anchor="middle" fill="#9CA3AF" font-size="8">النقائض • العصر العباسي</text>
+          <!-- Cardinal Labels -->
+          <text x="0" y="-100" fill="#A7F3D0" font-size="12" font-weight="bold" text-anchor="middle" font-family="serif">الشعر</text>
+          <text x="0" y="110" fill="#A7F3D0" font-size="12" font-weight="bold" text-anchor="middle" font-family="serif">الأدب</text>
+          <text x="100" y="5" fill="#A7F3D0" font-size="12" font-weight="bold" text-anchor="middle" font-family="serif">النحو</text>
+          <text x="-100" y="5" fill="#A7F3D0" font-size="12" font-weight="bold" text-anchor="middle" font-family="serif">البلاغة</text>
 
-        <!-- Right Node: Arabic in India -->
-        <rect x="330" y="170" width="130" height="90" rx="12" fill="#041A14" stroke="#065F46" stroke-width="1" />
-        <text x="395" y="200" text-anchor="middle" fill="#34D399" font-size="11" font-weight="bold">الأدب في الهند</text>
-        <text x="395" y="220" text-anchor="middle" fill="#D1D5DB" font-size="9">الشاه ولي الله الدهلوي</text>
-        <text x="395" y="238" text-anchor="middle" fill="#9CA3AF" font-size="8">آزاد البلكرامي • الندوي</text>
+          <!-- Geometric Pattern (Inner Star) -->
+          <g stroke="url(#goldArab)" stroke-width="1.5" fill="none" opacity="0.6">
+            <polygon points="0,-70 21,-21 70,0 21,21 0,70 -21,21 -70,0 -21,-21" />
+            <polygon points="0,-50 15,-15 50,0 15,15 0,50 -15,15 -50,0 -15,-15" />
+            <circle cx="0" cy="0" r="70" />
+            <circle cx="0" cy="0" r="50" />
+          </g>
 
-        <path d="M 170 215 L 195 215" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 215 L 330 215" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
+          <!-- Rete (Pointers) -->
+          <g stroke="#FCD34D" stroke-width="2" fill="none">
+            <path d="M 0 0 L -60 -40 L -40 -60 Z" fill="#047857" opacity="0.5" />
+            <path d="M 0 0 L 50 60 L 30 70 Z" fill="#047857" opacity="0.5" />
+            <circle cx="-50" cy="-50" r="3" fill="#FCD34D" />
+            <circle cx="40" cy="65" r="3" fill="#FCD34D" />
+          </g>
 
-        <text x="250" y="315" text-anchor="middle" fill="#9CA3AF" font-size="10" font-weight="bold">١٠ وحدات معتمدة • ٤٥+ امتحاناً مع نماذج الإجابة</text>
+          <!-- Central Pivot -->
+          <circle cx="0" cy="0" r="6" fill="#F59E0B" />
+          <circle cx="0" cy="0" r="2" fill="#021E14" />
+        </g>
+        
+        <!-- Verse Along Arc -->
+        <text font-size="10" fill="#6EE7B7" font-family="serif" font-weight="bold" opacity="0.8">
+          <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ</textPath>
+        </text>
       </svg>
     `,
+    visualConcept: 'Astrolabe instrument with Islamic geometric pattern and cardinal Arabic discipline labels',
   },
   pillars: [
     {
@@ -106,4 +138,6 @@ export const arabicConfig: SubjectConfig = {
     'نظام تتبع الأخطاء ونقاط الضعف التلقائي',
     'محاكي NTA CBT الكامل بالاختبارات الموقوتة',
   ],
+  officialSyllabus: arabicSyllabus,
+  syllabusSource: arabicSyllabusSource,
 };

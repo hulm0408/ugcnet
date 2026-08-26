@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { politicalScienceSyllabus, politicalScienceSyllabusSource } from '../../data/syllabus/political-science';
 
 export const politicalScienceConfig: SubjectConfig = {
   code: '02',
@@ -15,46 +16,77 @@ export const politicalScienceConfig: SubjectConfig = {
     surfaceGradient: 'from-[#100F2E] to-[#040412]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Constitutional governance wheel with radial branches for Legislature, Executive, Judiciary',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgPol" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#1E1B4B" />
-            <stop offset="100%" stop-color="#070617" />
+            <stop offset="0%" stop-color="#2A0F06" />
+            <stop offset="100%" stop-color="#110602" />
           </linearGradient>
-          <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#818CF8" />
-            <stop offset="100%" stop-color="#6366F1" />
+          <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#EA580C" />
+            <stop offset="100%" stop-color="#C2410C" />
           </linearGradient>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgPol)" stroke="#3730A3" stroke-width="1.5" />
+        
+        <rect width="500" height="360" rx="20" fill="url(#bgPol)" stroke="#7C2D12" stroke-width="1.5" />
+        
+        <!-- Concentric Rings -->
+        <circle cx="250" cy="200" r="110" fill="none" stroke="#7C2D12" stroke-width="1" stroke-dasharray="4,4" />
+        <circle cx="250" cy="200" r="140" fill="none" stroke="#7C2D12" stroke-width="1" stroke-dasharray="8,4" />
+        
+        <path id="ring1" d="M 140 200 A 110 110 0 1 1 360 200 A 110 110 0 1 1 140 200" fill="none" />
+        <text font-size="10" fill="#EA580C" font-weight="bold" letter-spacing="2">
+          <textPath href="#ring1" startOffset="25%" text-anchor="middle">FUNDAMENTAL RIGHTS</textPath>
+        </text>
+        <path id="ring2" d="M 110 200 A 140 140 0 1 1 390 200 A 140 140 0 1 1 110 200" fill="none" />
+        <text font-size="10" fill="#EA580C" font-weight="bold" letter-spacing="2">
+          <textPath href="#ring2" startOffset="75%" text-anchor="middle">DIRECTIVE PRINCIPLES</textPath>
+        </text>
 
-        <!-- Constitutional Preamble Silhouette -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#0C0A26" stroke="#4338CA" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#C7D2FE" font-size="12" font-weight="bold">WE, THE PEOPLE OF INDIA • SOVEREIGN SOCIALIST SECULAR DEMOCRATIC REPUBLIC</text>
-        <text x="250" y="98" text-anchor="middle" fill="#818CF8" font-size="9">JUSTICE • LIBERTY • EQUALITY • FRATERNITY (Basic Structure Doctrine)</text>
+        <!-- Radial Spokes -->
+        <!-- Legislature (Top) -->
+        <line x1="250" y1="200" x2="250" y2="80" stroke="#EA580C" stroke-width="3" />
+        <!-- Executive (Bottom Right) -->
+        <line x1="250" y1="200" x2="350" y2="280" stroke="#EA580C" stroke-width="3" />
+        <!-- Judiciary (Bottom Left) -->
+        <line x1="250" y1="200" x2="150" y2="280" stroke="#EA580C" stroke-width="3" />
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#131138" stroke="url(#indigoGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900">POL SCIENCE</text>
-        <text x="250" y="227" text-anchor="middle" fill="#818CF8" font-size="10" font-weight="bold" letter-spacing="1">CODE 02</text>
+        <!-- Nodes -->
+        <!-- Legislature Icon (Parliament Dome) -->
+        <g transform="translate(250, 60)">
+          <circle cx="0" cy="0" r="24" fill="#431407" stroke="#EA580C" stroke-width="2" />
+          <path d="M -12 5 L -12 -2 A 12 12 0 0 1 12 -2 L 12 5 Z" fill="#FDBA74" />
+          <rect x="-14" y="5" width="28" height="4" fill="#FDBA74" />
+          <text x="0" y="38" text-anchor="middle" fill="#FFEDD5" font-size="11" font-weight="bold">LEGISLATURE</text>
+        </g>
+        
+        <!-- Executive Icon (Shield) -->
+        <g transform="translate(365, 290)">
+          <circle cx="0" cy="0" r="24" fill="#431407" stroke="#EA580C" stroke-width="2" />
+          <path d="M -10 -10 L 10 -10 L 10 2 C 10 8 0 14 0 14 C 0 14 -10 8 -10 2 Z" fill="#FDBA74" />
+          <text x="0" y="38" text-anchor="middle" fill="#FFEDD5" font-size="11" font-weight="bold">EXECUTIVE</text>
+        </g>
+        
+        <!-- Judiciary Icon (Scales) -->
+        <g transform="translate(135, 290)">
+          <circle cx="0" cy="0" r="24" fill="#431407" stroke="#EA580C" stroke-width="2" />
+          <line x1="0" y1="-10" x2="0" y2="10" stroke="#FDBA74" stroke-width="2" />
+          <line x1="-12" y1="-6" x2="12" y2="-6" stroke="#FDBA74" stroke-width="2" />
+          <path d="M -12 -6 L -16 4 A 4 4 0 0 0 -8 4 Z" fill="#FDBA74" />
+          <path d="M 12 -6 L 8 4 A 4 4 0 0 0 16 4 Z" fill="#FDBA74" />
+          <rect x="-6" y="10" width="12" height="2" fill="#FDBA74" />
+          <text x="0" y="38" text-anchor="middle" fill="#FFEDD5" font-size="11" font-weight="bold">JUDICIARY</text>
+        </g>
 
-        <!-- Left Node: Political Thinkers -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#0C0A26" stroke="#3730A3" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#A5B4FC" font-size="11" font-weight="bold">Theory & Thinkers</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Plato • Machiavelli • Gramsci</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Kautilya • Gandhi • Ambedkar</text>
-
-        <!-- Right Node: IR & Governance -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#0C0A26" stroke="#3730A3" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#A5B4FC" font-size="11" font-weight="bold">Institutions & IR</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Parliament • Judicial Review</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Realism • Constructivism • UN</text>
-
-        <path d="M 175 210 L 195 210" stroke="#818CF8" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#818CF8" stroke-width="2" stroke-dasharray="3,3" />
-
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Center Seal -->
+        <circle cx="250" cy="200" r="45" fill="#7C2D12" stroke="url(#orangeGrad)" stroke-width="4" />
+        <circle cx="250" cy="200" r="38" fill="#2A0F06" />
+        <text x="250" y="195" text-anchor="middle" fill="#FFEDD5" font-size="12" font-weight="bold">WE, THE</text>
+        <text x="250" y="210" text-anchor="middle" fill="#FFEDD5" font-size="12" font-weight="bold">PEOPLE</text>
+        
+        <text x="250" y="30" text-anchor="middle" fill="#FDBA74" font-size="16" font-weight="bold" letter-spacing="1">CONSTITUTIONAL GOVERNANCE</text>
       </svg>
     `,
   },
@@ -107,4 +139,6 @@ export const politicalScienceConfig: SubjectConfig = {
     'Thinkers, Books, Articles & Case-Law Mistake Tracker',
     'Official NTA CBT Mock Simulator with Live Timer',
   ],
+  officialSyllabus: politicalScienceSyllabus,
+  syllabusSource: politicalScienceSyllabusSource,
 };

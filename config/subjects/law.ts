@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { lawSyllabus, lawSyllabusSource } from '../../data/syllabus/law';
 
 export const lawConfig: SubjectConfig = {
   code: '58',
@@ -15,46 +16,64 @@ export const lawConfig: SubjectConfig = {
     surfaceGradient: 'from-[#271704] to-[#0D0701]',
     fontFamily: 'font-serif',
     scriptDirection: 'ltr',
+    visualConcept: 'Scales of justice with legal codification book and constitutional article pillar',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgLaw" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#2D1C05" />
-            <stop offset="100%" stop-color="#0E0801" />
+            <stop offset="100%" stop-color="#0A0601" />
           </linearGradient>
-          <linearGradient id="goldLaw" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="goldLaw" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#FACC15" />
-            <stop offset="100%" stop-color="#CA8A04" />
+            <stop offset="100%" stop-color="#854D0E" />
           </linearGradient>
         </defs>
         <rect width="500" height="360" rx="20" fill="url(#bgLaw)" stroke="#854D0E" stroke-width="1.5" />
 
-        <!-- Scales of Justice Banner -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1A0F02" stroke="#A16207" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#FEF08A" font-size="12" font-weight="bold">FIAT JUSTITIA RUAT CAELUM • LET JUSTICE BE DONE THOUGH HEAVENS FALL</text>
-        <text x="250" y="98" text-anchor="middle" fill="#CA8A04" font-size="9">Audi Alteram Partem • Nemo Judex In Causa Sua • Basic Structure</text>
+        <!-- Background Book -->
+        <path d="M 150 280 C 150 280, 250 250, 250 250 C 250 250, 350 280, 350 280 L 350 150 C 350 150, 250 120, 250 120 C 250 120, 150 150, 150 150 Z" fill="#150901" stroke="#854D0E" stroke-width="2" />
+        <path d="M 250 120 L 250 250" stroke="#854D0E" stroke-width="2" />
+        <!-- Book Pages lines -->
+        <path d="M 160 160 C 160 160, 240 135, 240 135" stroke="#422006" stroke-width="1" />
+        <path d="M 160 180 C 160 180, 240 155, 240 155" stroke="#422006" stroke-width="1" />
+        <path d="M 340 160 C 340 160, 260 135, 260 135" stroke="#422006" stroke-width="1" />
+        <path d="M 340 180 C 340 180, 260 155, 260 155" stroke="#422006" stroke-width="1" />
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#201303" stroke="url(#goldLaw)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="19" font-weight="900">LAW</text>
-        <text x="250" y="227" text-anchor="middle" fill="#FACC15" font-size="10" font-weight="bold" letter-spacing="1">CODE 58</text>
+        <!-- Pillar (Center) -->
+        <rect x="235" y="160" width="30" height="130" fill="#2D1C05" stroke="url(#goldLaw)" stroke-width="2" />
+        <rect x="225" y="290" width="50" height="15" fill="url(#goldLaw)" />
+        <rect x="225" y="145" width="50" height="15" fill="url(#goldLaw)" />
+        <!-- Pillar inscriptions -->
+        <text x="250" y="190" text-anchor="middle" fill="#FACC15" font-size="10" font-weight="bold">ART. 14</text>
+        <text x="250" y="220" text-anchor="middle" fill="#FACC15" font-size="10" font-weight="bold">ART. 19</text>
+        <text x="250" y="250" text-anchor="middle" fill="#FACC15" font-size="10" font-weight="bold">ART. 21</text>
 
-        <!-- Left Node: Jurisprudence & Constitution -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#150B01" stroke="#854D0E" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#FDE047" font-size="11" font-weight="bold">Jurisprudence & Const.</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Hart • Kelsen • Fuller • Pound</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Articles 14, 19, 21 • Basic Str.</text>
+        <!-- Crossbar -->
+        <path d="M 140 120 L 360 120" stroke="url(#goldLaw)" stroke-width="4" />
+        
+        <!-- Left Pan (Rights - Higher) -->
+        <path d="M 140 120 L 110 200 L 170 200 Z" fill="none" stroke="#A16207" stroke-width="1" />
+        <path d="M 110 200 C 110 230, 170 230, 170 200 Z" fill="url(#goldLaw)" />
+        <text x="140" y="215" text-anchor="middle" fill="#1A0F02" font-size="10" font-weight="bold">RIGHTS</text>
 
-        <!-- Right Node: Crimes & International Law -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#150B01" stroke="#854D0E" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#FDE047" font-size="11" font-weight="bold">Crimes & Int. Law</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">IPC • Mens Rea • Exceptions</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">UNCLOS • ICJ • Treaties</text>
+        <!-- Right Pan (Duties - Lower) -->
+        <path d="M 360 120 L 330 220 L 390 220 Z" fill="none" stroke="#A16207" stroke-width="1" />
+        <path d="M 330 220 C 330 250, 390 250, 390 220 Z" fill="url(#goldLaw)" />
+        <text x="360" y="235" text-anchor="middle" fill="#1A0F02" font-size="10" font-weight="bold">DUTIES</text>
 
-        <path d="M 175 210 L 195 210" stroke="#FACC15" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#FACC15" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Ribbon at Top -->
+        <path d="M 100 60 Q 250 40 400 60 L 390 80 Q 250 60 110 80 Z" fill="#422006" stroke="#FACC15" stroke-width="1.5" />
+        <text x="250" y="72" text-anchor="middle" fill="#FEF08A" font-size="12" font-weight="bold" letter-spacing="1">FIAT JUSTITIA RUAT CAELUM</text>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Small Gavel Bottom Corner -->
+        <g transform="translate(410, 280) rotate(-30)">
+          <rect x="0" y="0" width="10" height="40" fill="#854D0E" rx="3" />
+          <rect x="-15" y="-10" width="40" height="15" fill="url(#goldLaw)" rx="2" />
+        </g>
+
+        <!-- Labels -->
+        <text x="250" y="340" text-anchor="middle" fill="#FDE047" font-size="18" font-weight="900">LAW (CODE 58)</text>
       </svg>
     `,
   },
@@ -107,4 +126,6 @@ export const lawConfig: SubjectConfig = {
     'Case-Law, Maxim & Article Mistake Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: lawSyllabus,
+  syllabusSource: lawSyllabusSource,
 };

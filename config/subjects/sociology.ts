@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { sociologySyllabus, sociologySyllabusSource } from '../../data/syllabus/sociology';
 
 export const sociologyConfig: SubjectConfig = {
   code: '05',
@@ -15,46 +16,93 @@ export const sociologyConfig: SubjectConfig = {
     surfaceGradient: 'from-[#240626] to-[#0A010B]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Social network sociogram with institutional nodes, tie strength edges, and micro-meso-macro zones',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgSoc" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#340838" />
-            <stop offset="100%" stop-color="#0E020F" />
+            <stop offset="0%" stop-color="#2E1065" />
+            <stop offset="100%" stop-color="#4C1D95" />
           </linearGradient>
-          <linearGradient id="fuchsiaGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#E879F9" />
-            <stop offset="100%" stop-color="#C026D3" />
-          </linearGradient>
+          <radialGradient id="zoneMacro" cx="50%" cy="50%" r="50%">
+            <stop offset="90%" stop-color="transparent" />
+            <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.3" />
+          </radialGradient>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgSoc)" stroke="#701A75" stroke-width="1.5" />
+        <rect width="500" height="360" rx="20" fill="url(#bgSoc)" stroke="#7C3AED" stroke-width="1.5" />
 
-        <!-- Social Structure Network Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1A031C" stroke="#86198F" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#F5D0FE" font-size="12" font-weight="bold">SOCIAL FACTS • HISTORICAL MATERIALISM • PROTESTANT ETHIC & CAPITALISM</text>
-        <text x="250" y="98" text-anchor="middle" fill="#E879F9" font-size="9">Durkheim • Marx • Weber • Parsons AGIL • Merton Manifest/Latent Functions</text>
+        <!-- Concentric Zones: Micro, Meso, Macro -->
+        <circle cx="250" cy="180" r="140" fill="none" stroke="#6D28D9" stroke-width="1" stroke-dasharray="4,4" />
+        <text x="250" y="55" fill="#A78BFA" font-size="10" text-anchor="middle" opacity="0.7">MACRO LEVEL (Society / Global)</text>
+        
+        <circle cx="250" cy="180" r="85" fill="none" stroke="#7C3AED" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="250" y="110" fill="#C4B5FD" font-size="10" text-anchor="middle" opacity="0.8">MESO LEVEL (Institutions)</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#200423" stroke="url(#fuchsiaGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900">SOCIOLOGY</text>
-        <text x="250" y="227" text-anchor="middle" fill="#E879F9" font-size="10" font-weight="bold" letter-spacing="1">CODE 05</text>
+        <!-- Network Edges -->
+        <!-- Strong ties (solid) -->
+        <g stroke="#A78BFA" stroke-width="2" opacity="0.8">
+          <line x1="250" y1="180" x2="180" y2="130" /> <!-- Self to Family -->
+          <line x1="250" y1="180" x2="320" y2="130" /> <!-- Self to Education -->
+          <line x1="250" y1="180" x2="250" y2="260" /> <!-- Self to Economy -->
+          <line x1="180" y1="130" x2="140" y2="100" /> <!-- Family to extended -->
+          <line x1="320" y1="130" x2="360" y2="90" /> <!-- Education to higher ed -->
+        </g>
+        
+        <!-- Weak ties (dotted) -->
+        <g stroke="#C4B5FD" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6">
+          <line x1="250" y1="180" x2="120" y2="220" /> <!-- Self to Religion -->
+          <line x1="250" y1="180" x2="380" y2="220" /> <!-- Self to State -->
+          <line x1="180" y1="130" x2="320" y2="130" /> <!-- Family to Education -->
+          <line x1="120" y1="220" x2="250" y2="260" /> <!-- Religion to Economy -->
+          <line x1="380" y1="220" x2="250" y2="260" /> <!-- State to Economy -->
+        </g>
 
-        <!-- Left Node: Classical & Modern Thinkers -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#140216" stroke="#701A75" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#F5D0FE" font-size="11" font-weight="bold">Classical & Modern</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Durkheim • Marx • Weber</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Bourdieu Habitus • Giddens</text>
+        <!-- Macro connections (faint) -->
+        <g stroke="#8B5CF6" stroke-width="1" opacity="0.3">
+          <line x1="140" y1="100" x2="80" y2="150" />
+          <line x1="360" y1="90" x2="420" y2="140" />
+          <line x1="250" y1="260" x2="250" y2="320" />
+        </g>
 
-        <!-- Right Node: Indian Society & Methods -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#140216" stroke="#701A75" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#F5D0FE" font-size="11" font-weight="bold">Indian Thinkers</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">M.N. Srinivas Sanskritization</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Ambedkar • Ghurye • Dube</text>
+        <!-- Nodes -->
+        <!-- Central Node: Self/Individual -->
+        <circle cx="250" cy="180" r="22" fill="#C4B5FD" stroke="#F5F3FF" stroke-width="2" />
+        <text x="250" y="184" fill="#2E1065" font-size="10" font-weight="bold" text-anchor="middle">SELF</text>
+        <text x="250" y="215" fill="#DDD6FE" font-size="9" text-anchor="middle">Micro</text>
 
-        <path d="M 175 210 L 195 210" stroke="#E879F9" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#E879F9" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Meso Nodes: Institutions -->
+        <circle cx="180" cy="130" r="16" fill="#8B5CF6" />
+        <text x="180" y="120" fill="#F5F3FF" font-size="10" font-weight="bold" text-anchor="middle">Family</text>
+        
+        <circle cx="320" cy="130" r="18" fill="#8B5CF6" />
+        <text x="320" y="120" fill="#F5F3FF" font-size="10" font-weight="bold" text-anchor="middle">Education</text>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <circle cx="120" cy="220" r="15" fill="#7C3AED" />
+        <text x="120" y="245" fill="#F5F3FF" font-size="10" font-weight="bold" text-anchor="middle">Religion</text>
+        
+        <circle cx="380" cy="220" r="17" fill="#7C3AED" />
+        <text x="380" y="245" fill="#F5F3FF" font-size="10" font-weight="bold" text-anchor="middle">State</text>
+        
+        <circle cx="250" cy="260" r="20" fill="#6D28D9" />
+        <text x="250" y="288" fill="#F5F3FF" font-size="10" font-weight="bold" text-anchor="middle">Economy</text>
+
+        <!-- Macro Nodes (clusters) -->
+        <circle cx="140" cy="100" r="8" fill="#5B21B6" />
+        <circle cx="360" cy="90" r="10" fill="#5B21B6" />
+        <circle cx="80" cy="150" r="6" fill="#5B21B6" />
+        <circle cx="420" cy="140" r="7" fill="#5B21B6" />
+        <circle cx="250" cy="320" r="12" fill="#5B21B6" />
+
+        <!-- Legend -->
+        <rect x="20" y="20" width="120" height="70" rx="6" fill="#3B0764" opacity="0.8" />
+        <text x="30" y="35" fill="#C4B5FD" font-size="10" font-weight="bold">TIE STRENGTH</text>
+        <line x1="30" y1="50" x2="60" y2="50" stroke="#A78BFA" stroke-width="2" />
+        <text x="70" y="53" fill="#E2E8F0" font-size="9">Strong Tie</text>
+        <line x1="30" y1="70" x2="60" y2="70" stroke="#C4B5FD" stroke-width="1.5" stroke-dasharray="3,3" />
+        <text x="70" y="73" fill="#E2E8F0" font-size="9">Weak Tie</text>
+        
+        <!-- Subject Title -->
+        <text x="470" y="335" fill="#FFFFFF" font-size="18" font-weight="900" text-anchor="end">SOCIOLOGY (05)</text>
       </svg>
     `,
   },
@@ -107,4 +155,6 @@ export const sociologyConfig: SubjectConfig = {
     'Thinkers, Concepts, Field Studies & Books Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: sociologySyllabus,
+  syllabusSource: sociologySyllabusSource,
 };

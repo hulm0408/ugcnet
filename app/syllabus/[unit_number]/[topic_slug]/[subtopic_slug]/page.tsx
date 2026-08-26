@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Layers, BookOpen, Target, PlayCircle, User } from 'lucide-react';
+import { ChevronRight, Layers, BookOpen, Target } from 'lucide-react';
 import prisma from '@/lib/db';
 import SyllabusBreadcrumb from '@/components/syllabus/SyllabusBreadcrumb';
 import SyllabusContextSidebar from '@/components/syllabus/SyllabusContextSidebar';
 import { resolveCanonicalEntity, slugify } from '@/lib/syllabusHierarchy';
+import { getActiveSubjectServer } from '@/lib/subjectContext';
 
 export async function generateMetadata({
   params,
@@ -16,20 +17,23 @@ export async function generateMetadata({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return { title: 'Sub-topic Not Found' };
 
+  const activeSubject = await getActiveSubjectServer();
   const topic = await prisma.broadTopic.findFirst({
     where: {
       slug: resolvedParams.topic_slug,
-      unit: { unit_number: unitNum },
+      unit: { unit_number: unitNum, subject_id: activeSubject.id },
     },
   });
 
   if (!topic) return { title: 'Topic Not Found' };
 
   return {
-    title: `${resolvedParams.subtopic_slug} — ${topic.name_english} | Syllabus`,
-    description: `Explore learning nodes and specific concept questions in UGC NET Arabic.`,
+    title: `${resolvedParams.subtopic_slug} — ${topic.name_english || topic.name_arabic} | ${activeSubject.name} Syllabus`,
+    description: `Explore learning nodes and specific concept questions in UGC NET ${activeSubject.name}.`,
   };
 }
+
+export const dynamic = 'force-dynamic';
 
 export default async function SubtopicNodesPage({
   params,
@@ -40,11 +44,13 @@ export default async function SubtopicNodesPage({
   const unitNum = parseInt(resolvedParams.unit_number, 10);
   if (isNaN(unitNum)) return notFound();
 
-  // Fetch Topic and all its published questions
+  const activeSubject = await getActiveSubjectServer();
+
+  // Fetch Topic and all its published questions scoped to active subject
   const topic = await prisma.broadTopic.findFirst({
     where: {
       slug: resolvedParams.topic_slug,
-      unit: { unit_number: unitNum },
+      unit: { unit_number: unitNum, subject_id: activeSubject.id },
     },
     include: {
       unit: true,
@@ -88,6 +94,13 @@ export default async function SubtopicNodesPage({
     subtopicNameEn = firstC.nameEn;
   }
 
+  if (!subtopicNameEn) {
+    subtopicNameEn = resolvedParams.subtopic_slug.replace(/-/g, ' ');
+  }
+  if (!subtopicNameAr) {
+    subtopicNameAr = subtopicNameEn;
+  }
+
   // Group matching questions into distinct Learning Nodes / Micro-Themes
   const nodesMap = new Map<
     string,
@@ -100,7 +113,7 @@ export default async function SubtopicNodesPage({
   >();
 
   for (const q of questionsToUse) {
-    const nodeAr = q.question_micro_focus_arabic?.trim() || 'أسئلة عامة وتطبيقات';
+    const nodeAr = q.question_micro_focus_arabic?.trim() || 'Core Concept';
     const nodeEn = q.question_micro_focus_english?.trim() || 'General Questions & Analysis';
     const nodeSlug = slugify(nodeEn || nodeAr);
 
@@ -127,17 +140,17 @@ export default async function SubtopicNodesPage({
           items={[
             {
               label: `Unit ${topic.unit.unit_number}: ${topic.unit.name_english}`,
-              labelAr: topic.unit.name_arabic,
+              labelAr: topic.unit.name_arabic || undefined,
               href: `/syllabus/${topic.unit.unit_number}`,
             },
             {
-              label: topic.name_english,
-              labelAr: topic.name_arabic,
+              label: topic.name_english || topic.name_arabic,
+              labelAr: topic.name_arabic || undefined,
               href: `/syllabus/${topic.unit.unit_number}/${topic.slug}`,
             },
             {
               label: subtopicNameEn,
-              labelAr: subtopicNameAr,
+              labelAr: subtopicNameAr !== subtopicNameEn ? subtopicNameAr : undefined,
             },
           ]}
         />
@@ -150,24 +163,28 @@ export default async function SubtopicNodesPage({
             {/* Subtopic Header Card */}
             <div className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 mb-8 shadow-sm">
               <div className="text-xs font-bold text-primary uppercase tracking-widest mb-1.5">
-                Unit {topic.unit.unit_number} • {topic.name_english} Sub-topic
+                {activeSubject.name} • Unit {topic.unit.unit_number} • {topic.name_english}
               </div>
               <h1
-                dir="rtl"
-                lang="ar"
-                className="font-arabic font-extrabold text-3xl sm:text-4xl text-stone-900 leading-snug mb-2"
+                dir={activeSubject.direction}
+                lang={activeSubject.primary_language}
+                className={`font-extrabold text-3xl sm:text-4xl text-stone-900 leading-snug mb-2 ${
+                  activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
+                }`}
               >
                 {subtopicNameAr}
               </h1>
-              <p className="text-stone-500 font-semibold text-base sm:text-lg">
-                {subtopicNameEn}
-              </p>
+              {subtopicNameAr !== subtopicNameEn && (
+                <p className="text-stone-500 font-semibold text-base sm:text-lg">
+                  {subtopicNameEn}
+                </p>
+              )}
             </div>
 
             {/* Nodes Section Header */}
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">
-                Learning Nodes & Micro-Themes ({nodesList.length})
+                Learning Nodes &amp; Concepts ({nodesList.length})
               </h2>
               <span className="text-xs text-stone-400 font-semibold">
                 Click a node to view its questions
@@ -193,15 +210,19 @@ export default async function SubtopicNodesPage({
 
                       <div className="min-w-0 flex-1">
                         <div
-                          dir="rtl"
-                          lang="ar"
-                          className="font-arabic font-extrabold text-xl sm:text-2xl text-stone-900 leading-snug mb-1"
+                          dir={activeSubject.direction}
+                          lang={activeSubject.primary_language}
+                          className={`font-extrabold text-xl sm:text-2xl text-stone-900 leading-snug mb-1 ${
+                            activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
+                          }`}
                         >
                           {nodeItem.nameAr}
                         </div>
-                        <div className="text-stone-500 font-semibold text-xs sm:text-sm">
-                          {nodeItem.nameEn}
-                        </div>
+                        {nodeItem.nameAr !== nodeItem.nameEn && (
+                          <div className="text-stone-500 font-semibold text-xs sm:text-sm">
+                            {nodeItem.nameEn}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -232,17 +253,17 @@ export default async function SubtopicNodesPage({
           {/* Right Column: Contextual Sidebar */}
           <SyllabusContextSidebar
             levelBadge="Sub-topic Context"
-            titleAr={subtopicNameAr}
+            titleAr={subtopicNameAr !== subtopicNameEn ? subtopicNameAr : undefined}
             title={subtopicNameEn}
-            subtitle={`Contains ${nodesList.length} micro-learning nodes with ${questionsToUse.length} official questions.`}
+            subtitle={`Contains ${nodesList.length} micro-learning nodes in ${activeSubject.name}.`}
             metrics={[
               { label: 'Learning Nodes', value: nodesList.length, icon: Target },
               { label: 'Total Questions', value: questionsToUse.length, icon: BookOpen },
             ]}
-            practiceHref={`/practice?unit=${topic.unit.unit_number}&topic=${topic.slug}&subtopic=${targetSubSlug}`}
+            practiceHref={`/practice?unit=${topic.unit.unit_number}&topic=${topic.slug}&subtopic=${targetSubSlug}&subject=${activeSubject.slug}`}
             practiceLabel="Practice Sub-topic"
             quickTips={[
-              'Click any node above to inspect its verified previous year questions.',
+              'Click any node above to inspect verified previous year questions.',
               'Use answer reveal to check explanations and official NTA keys.',
             ]}
           />

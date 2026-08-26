@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { historySyllabus, historySyllabusSource } from '../../data/syllabus/history';
 
 export const historyConfig: SubjectConfig = {
   code: '06',
@@ -15,47 +16,93 @@ export const historyConfig: SubjectConfig = {
     surfaceGradient: 'from-[#231206] to-[#0A0502]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Archaeological stratigraphy cross-section with labeled excavation layers from Harappa to Modern era',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgHist" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#2D1507" />
-            <stop offset="100%" stop-color="#0F0602" />
+            <stop offset="0%" stop-color="#1F0D04" />
+            <stop offset="100%" stop-color="#0F0501" />
           </linearGradient>
-          <linearGradient id="amberHist" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#F59E0B" />
-            <stop offset="100%" stop-color="#D97706" />
+          <linearGradient id="layerModern" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#3D1C08" />
+            <stop offset="100%" stop-color="#2D1305" />
           </linearGradient>
+          <linearGradient id="layerMughal" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#4A2209" />
+            <stop offset="100%" stop-color="#361706" />
+          </linearGradient>
+          <linearGradient id="layerSultanate" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5B290B" />
+            <stop offset="100%" stop-color="#421C07" />
+          </linearGradient>
+          <linearGradient id="layerGupta" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6F320C" />
+            <stop offset="100%" stop-color="#512208" />
+          </linearGradient>
+          <linearGradient id="layerMaurya" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#853C0E" />
+            <stop offset="100%" stop-color="#612909" />
+          </linearGradient>
+          <linearGradient id="layerHarappa" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#9C4510" />
+            <stop offset="100%" stop-color="#73300A" />
+          </linearGradient>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#D97706" stroke-width="0.5" stroke-opacity="0.3"/>
+          </pattern>
         </defs>
+        
         <rect width="500" height="360" rx="20" fill="url(#bgHist)" stroke="#78350F" stroke-width="1.5" />
         
-        <!-- Stratigraphic Timeline & Ashokan Inscription Banner -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1B0C04" stroke="#92400E" stroke-width="1.5" />
-        <line x1="70" y1="82" x2="430" y2="82" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="8,4" />
-        <text x="250" y="78" text-anchor="middle" fill="#FDE68A" font-size="11" font-weight="bold">॥ देवानांप्रिय प्रियदर्शी राजा • धम्म विजय ॥</text>
-        <text x="250" y="98" text-anchor="middle" fill="#9CA3AF" font-size="9">Edicts of Ashoka (Major Rock Edicts XIII & Kalinga)</text>
+        <!-- Excavation Grid on the right -->
+        <rect x="350" y="0" width="150" height="360" fill="url(#grid)" />
+        
+        <!-- Title -->
+        <text x="30" y="40" fill="#FDE68A" font-size="18" font-weight="900" letter-spacing="1">ARCHAEOLOGICAL STRATIGRAPHY</text>
+        <text x="30" y="55" fill="#9CA3AF" font-size="10">Cross-section of Indian History</text>
 
-        <!-- Center Emblem: Chronology Matrix -->
-        <circle cx="250" cy="210" r="55" fill="#241005" stroke="url(#amberHist)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="17" font-weight="900">HISTORY</text>
-        <text x="250" y="227" text-anchor="middle" fill="#F59E0B" font-size="10" font-weight="bold" letter-spacing="1">CODE 06</text>
+        <!-- Modern Layer -->
+        <path d="M 20 70 L 480 70 L 480 110 L 20 110 Z" fill="url(#layerModern)" />
+        <line x1="20" y1="110" x2="480" y2="110" stroke="#78350F" stroke-width="2" />
+        <text x="35" y="95" fill="#FDE68A" font-size="12" font-weight="bold">Modern Era (1857 CE)</text>
+        <text x="360" y="95" fill="#D97706" font-size="10" font-family="monospace">Depth: 1m</text>
 
-        <!-- Left Node: Ancient & Medieval -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#180A03" stroke="#78350F" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#FBBF24" font-size="11" font-weight="bold">Ancient & Medieval</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Harappa • Mauryas • Guptas</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Iqta • Mansabdari • Vijayanagar</text>
+        <!-- Mughal Layer -->
+        <path d="M 20 110 L 480 110 L 480 150 L 20 150 Z" fill="url(#layerMughal)" />
+        <line x1="20" y1="150" x2="480" y2="150" stroke="#78350F" stroke-width="2" />
+        <text x="35" y="135" fill="#FDE68A" font-size="12" font-weight="bold">Mughal Empire (1526 CE)</text>
+        <text x="360" y="135" fill="#D97706" font-size="10" font-family="monospace">Depth: 3m</text>
 
-        <!-- Right Node: Modern & Historiography -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#180A03" stroke="#78350F" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#FBBF24" font-size="11" font-weight="bold">Modern & Method</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Land Settlements • 1857</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Nationalist • Subaltern School</text>
+        <!-- Delhi Sultanate Layer -->
+        <path d="M 20 150 L 480 150 L 480 190 L 20 190 Z" fill="url(#layerSultanate)" />
+        <line x1="20" y1="190" x2="480" y2="190" stroke="#78350F" stroke-width="2" />
+        <text x="35" y="175" fill="#FDE68A" font-size="12" font-weight="bold">Delhi Sultanate (1206 CE)</text>
+        <text x="360" y="175" fill="#D97706" font-size="10" font-family="monospace">Depth: 5m</text>
 
-        <path d="M 175 210 L 195 210" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Gupta Layer -->
+        <path d="M 20 190 L 480 190 L 480 230 L 20 230 Z" fill="url(#layerGupta)" />
+        <line x1="20" y1="230" x2="480" y2="230" stroke="#78350F" stroke-width="2" />
+        <text x="35" y="215" fill="#FDE68A" font-size="12" font-weight="bold">Gupta Period (320 CE)</text>
+        <circle cx="280" cy="210" r="10" fill="#F59E0B" stroke="#B45309" stroke-width="1" />
+        <text x="280" y="213" text-anchor="middle" fill="#78350F" font-size="8" font-weight="bold">C</text>
+        <text x="360" y="215" fill="#D97706" font-size="10" font-family="monospace">Depth: 8m</text>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Maurya Layer -->
+        <path d="M 20 230 L 480 230 L 480 270 L 20 270 Z" fill="url(#layerMaurya)" />
+        <line x1="20" y1="270" x2="480" y2="270" stroke="#78350F" stroke-width="2" />
+        <text x="35" y="255" fill="#FDE68A" font-size="12" font-weight="bold">Maurya Empire (322 BCE)</text>
+        <path d="M 275 260 L 275 240 L 285 240 L 285 260 Z" fill="#9CA3AF" />
+        <circle cx="280" cy="235" r="5" fill="#9CA3AF" />
+        <text x="360" y="255" fill="#D97706" font-size="10" font-family="monospace">Depth: 12m</text>
+
+        <!-- Harappa Layer -->
+        <path d="M 20 270 L 480 270 L 480 330 L 20 330 Z" fill="url(#layerHarappa)" />
+        <line x1="20" y1="330" x2="480" y2="330" stroke="#78350F" stroke-width="2" />
+        <text x="35" y="305" fill="#FDE68A" font-size="12" font-weight="bold">Harappan Civilization (3300 BCE)</text>
+        <rect x="270" y="290" width="20" height="20" fill="#D4D4D8" stroke="#71717A" stroke-width="1" />
+        <circle cx="280" cy="300" r="4" fill="#3F3F46" />
+        <text x="360" y="305" fill="#D97706" font-size="10" font-family="monospace">Depth: 18m</text>
       </svg>
     `,
   },
@@ -108,4 +155,6 @@ export const historyConfig: SubjectConfig = {
     'Dynasty, Inscription & Chronology Mistake Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: historySyllabus,
+  syllabusSource: historySyllabusSource,
 };

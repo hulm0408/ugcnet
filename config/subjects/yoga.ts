@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { yogaSyllabus, yogaSyllabusSource } from '../../data/syllabus/yoga';
 
 export const yogaConfig: SubjectConfig = {
   code: '100',
@@ -15,46 +16,96 @@ export const yogaConfig: SubjectConfig = {
     surfaceGradient: 'from-[#2C1004] to-[#0D0401]',
     fontFamily: 'font-devanagari',
     scriptDirection: 'ltr',
+    visualConcept: 'Ashtanga 8-petal lotus with chakra spine and Om center',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgYoga" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#3B1706" />
-            <stop offset="100%" stop-color="#140601" />
+            <stop offset="0%" stop-color="#1E1430" />
+            <stop offset="100%" stop-color="#0F0A1A" />
           </linearGradient>
-          <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#FB923C" />
-            <stop offset="100%" stop-color="#F97316" />
-          </linearGradient>
+          <radialGradient id="lotusCenter" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#A78BFA" />
+            <stop offset="100%" stop-color="#5B21B6" />
+          </radialGradient>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgYoga)" stroke="#C2410C" stroke-width="1.5" />
+        <rect width="500" height="360" rx="20" fill="url(#bgYoga)" stroke="#7C3AED" stroke-width="1.5" />
+        
+        <!-- Sanskrit Text Title -->
+        <text x="250" y="50" text-anchor="middle" fill="#FFFFFF" font-size="18" font-family="sans-serif, Arial Unicode MS, Devanagari" font-weight="900" letter-spacing="2">YOGA (योग)</text>
+        <text x="250" y="70" text-anchor="middle" fill="#A78BFA" font-size="12" font-weight="bold" font-family="sans-serif, Arial Unicode MS, Devanagari" letter-spacing="1">योगश्चित्तवृत्तिनिरोधः</text>
 
-        <!-- Patanjali Yoga Sutra Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1C0A02" stroke="#EA580C" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#FFEDD5" font-size="13" font-weight="bold">॥ योगश्चित्तवृत्तिनिरोधः • तदा द्रष्टुः स्वरूपेऽवस्थानम् ॥</text>
-        <text x="250" y="98" text-anchor="middle" fill="#FB923C" font-size="9">अष्टाङ्गयोग (यम, नियम, आसन, प्राणायाम, प्रत्याहार, धारणा, ध्यान, समाधि)</text>
+        <!-- 8-Petal Lotus (Center ~ x=300, y=210) -->
+        <g transform="translate(300, 210)">
+          <!-- Petal 1: Yama (Top) -->
+          <path d="M 0 0 Q 20 -40 0 -80 Q -20 -40 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="0" y="-85" text-anchor="middle" fill="#E9D5FF" font-size="10">Yama</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#250F03" stroke="url(#orangeGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900">YOGA</text>
-        <text x="250" y="227" text-anchor="middle" fill="#FB923C" font-size="10" font-weight="bold" letter-spacing="1">CODE 100</text>
+          <!-- Petal 2: Niyama (Top Right) -->
+          <path d="M 0 0 Q 40 -20 56 -56 Q 20 -40 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="65" y="-60" text-anchor="middle" fill="#E9D5FF" font-size="10">Niyama</text>
 
-        <!-- Left Node: Patanjali & Gita -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#170801" stroke="#C2410C" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#FFEDD5" font-size="11" font-weight="bold">पातञ्जल एवं गीता</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">४ पादाः (१९५ सूत्राणि)</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">ज्ञान, कर्म, भक्तियोग</text>
+          <!-- Petal 3: Asana (Right) -->
+          <path d="M 0 0 Q 40 20 80 0 Q 40 -20 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="90" y="5" text-anchor="middle" fill="#E9D5FF" font-size="10">Asana</text>
 
-        <!-- Right Node: Hatha & Therapy -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#170801" stroke="#C2410C" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#FFEDD5" font-size="11" font-weight="bold">हठयोग एवं चिकित्सा</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">षट्कर्म • कुम्भक ८ प्रकार</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">नाड़ी-चक्र एवं शरीरक्रिया</text>
+          <!-- Petal 4: Pranayama (Bottom Right) -->
+          <path d="M 0 0 Q 20 40 56 56 Q 40 20 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="65" y="70" text-anchor="middle" fill="#E9D5FF" font-size="10">Pranayama</text>
 
-        <path d="M 175 210 L 195 210" stroke="#FB923C" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#FB923C" stroke-width="2" stroke-dasharray="3,3" />
+          <!-- Petal 5: Pratyahara (Bottom) -->
+          <path d="M 0 0 Q -20 40 0 80 Q 20 40 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="0" y="95" text-anchor="middle" fill="#E9D5FF" font-size="10">Pratyahara</text>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">१० आधिकारिक इकाइयाँ • NTA प्रश्न संग्रह</text>
+          <!-- Petal 6: Dharana (Bottom Left) -->
+          <path d="M 0 0 Q -40 20 -56 56 Q -20 40 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="-65" y="70" text-anchor="middle" fill="#E9D5FF" font-size="10">Dharana</text>
+
+          <!-- Petal 7: Dhyana (Left) -->
+          <path d="M 0 0 Q -40 -20 -80 0 Q -40 20 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="-90" y="5" text-anchor="middle" fill="#E9D5FF" font-size="10">Dhyana</text>
+
+          <!-- Petal 8: Samadhi (Top Left) -->
+          <path d="M 0 0 Q -20 -40 -56 -56 Q -40 -20 0 0" fill="#7C3AED" stroke="#C4B5FD" stroke-width="1" />
+          <text x="-65" y="-60" text-anchor="middle" fill="#E9D5FF" font-size="10">Samadhi</text>
+
+          <!-- Center Om -->
+          <circle cx="0" cy="0" r="15" fill="url(#lotusCenter)" />
+          <text x="0" y="6" text-anchor="middle" fill="#FFFFFF" font-size="16" font-family="sans-serif, Arial Unicode MS, Devanagari">ओं</text>
+        </g>
+
+        <!-- Vertical Chakra Spine (Left side) -->
+        <g transform="translate(100, 120)">
+          <line x1="0" y1="0" x2="0" y2="180" stroke="#4C1D95" stroke-width="3" />
+          
+          <!-- Sahasrara (Crown) -->
+          <circle cx="0" cy="0" r="7" fill="#E9D5FF" />
+          <text x="-20" y="4" text-anchor="end" fill="#E9D5FF" font-size="10">Sahasrara</text>
+
+          <!-- Ajna (Third Eye) -->
+          <circle cx="0" cy="30" r="7" fill="#4338CA" />
+          <text x="-20" y="34" text-anchor="end" fill="#C4B5FD" font-size="10">Ajna</text>
+
+          <!-- Vishuddha (Throat) -->
+          <circle cx="0" cy="60" r="7" fill="#0EA5E9" />
+          <text x="-20" y="64" text-anchor="end" fill="#C4B5FD" font-size="10">Vishuddha</text>
+
+          <!-- Anahata (Heart) -->
+          <circle cx="0" cy="90" r="7" fill="#22C55E" />
+          <text x="-20" y="94" text-anchor="end" fill="#C4B5FD" font-size="10">Anahata</text>
+
+          <!-- Manipura (Solar Plexus) -->
+          <circle cx="0" cy="120" r="7" fill="#EAB308" />
+          <text x="-20" y="124" text-anchor="end" fill="#C4B5FD" font-size="10">Manipura</text>
+
+          <!-- Svadhishthana (Sacral) -->
+          <circle cx="0" cy="150" r="7" fill="#F97316" />
+          <text x="-20" y="154" text-anchor="end" fill="#C4B5FD" font-size="10">Svadhishthana</text>
+
+          <!-- Muladhara (Root) -->
+          <circle cx="0" cy="180" r="7" fill="#EF4444" />
+          <text x="-20" y="184" text-anchor="end" fill="#C4B5FD" font-size="10">Muladhara</text>
+        </g>
       </svg>
     `,
   },
@@ -107,4 +158,6 @@ export const yogaConfig: SubjectConfig = {
     'हठयोगसूत्राणां शरीरक्रियाविज्ञानस्य च त्रुटिविशलेषणम्',
     'NTA CBT आधिकारिकपरीक्षा-सिम्युलेटरः',
   ],
+  officialSyllabus: yogaSyllabus,
+  syllabusSource: yogaSyllabusSource,
 };

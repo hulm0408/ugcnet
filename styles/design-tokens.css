@@ -1,0 +1,46 @@
+/* Design Tokens – Minimalist Academic Theme */
+:root {
+  /* Palette */
+  --color-bg-primary: #FAF9F6; /* warm parchment */
+  --color-bg-white: #FFFFFF;
+  --color-text-primary: #1C1917; /* dark stone */
+  --color-text-secondary: #57534E; /* gray-600 */
+  --color-accent-primary: #064E3B; /* deep green */
+  --color-accent-secondary: #0F766E; /* teal */
+  --color-border: #E7E5E4; /* light gray */
+
+  /* Spacing */
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Merriweather', serif;
+  --font-mono: 'Fira Code', monospace;
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+
+  /* Border radius */
+  --rounded-sm: 0.125rem;   /* 2px */
+  --rounded-md: 0.25rem;    /* 4px */
+  --rounded-lg: 0.5rem;     /* 8px */
+
+  /* Focus outline */
+  --focus-ring: 2px solid var(--color-accent-primary);
+}
+
+/* Utility classes to expose the tokens to Tailwind (optional) */
+.bg-primary { background-color: var(--color-bg-primary); }
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.border-primary { border-color: var(--color-border); }
+.rounded-md { border-radius: var(--rounded-md); }
+.focus-visible\:ring-primary:focus-visible { outline: var(--focus-ring); }

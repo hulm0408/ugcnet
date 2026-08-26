@@ -173,8 +173,8 @@ export default async function SearchPage({
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="flex-1 min-h-screen bg-[#FCFAF8] pt-10 pb-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex-1 min-h-screen bg-[#FCFAF8] pt-10 pb-24 overflow-x-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         
         {/* Header */}
         <div className="mb-8">

@@ -22,26 +22,28 @@ export async function GET(request: Request) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 250);
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1);
 
-    // Filter construction — always scope to PUBLISHED
-    const where: any = {
-      content_status: 'PUBLISHED',
-    };
+    // Composable Filter Construction — always scope to PUBLISHED
+    const andConditions: any[] = [
+      { content_status: 'PUBLISHED' },
+    ];
 
     if (subjectParam) {
-      where.OR = [
-        { subject_id: subjectParam },
-        { subject: { slug: subjectParam } },
-        { subject: { code: subjectParam } },
-      ];
+      andConditions.push({
+        OR: [
+          { subject_id: subjectParam },
+          { subject: { slug: subjectParam } },
+          { subject: { code: subjectParam } },
+        ],
+      });
     }
 
     // 1. Single Question
     if (questionId) {
-      where.id = questionId;
+      andConditions.push({ id: questionId });
     }
 
     // 2. Exact Paper Access Check
-    else if (paperId) {
+    if (paperId) {
       const session = await auth();
       const access = await verifyPaperAccess(session?.user?.id, paperId);
       if (!access.hasAccess) {
@@ -55,11 +57,11 @@ export async function GET(request: Request) {
           { status: 403 }
         );
       }
-      where.exam_paper_id = paperId;
+      andConditions.push({ exam_paper_id: paperId });
     }
 
     // 3. User-Specific Modes (Requires Auth)
-    else if (mode === 'incorrect') {
+    if (mode === 'incorrect') {
       const session = await auth();
       if (!session?.user?.id) {
         return NextResponse.json({
@@ -87,10 +89,7 @@ export async function GET(request: Request) {
           meta: { total: 0, page: 1, limit, totalPages: 0 },
         });
       }
-      where.id = { in: qIds };
-      if (unit) {
-        where.unit = { unit_number: parseInt(unit, 10) };
-      }
+      andConditions.push({ id: { in: qIds } });
     } else if (mode === 'bookmarked') {
       const session = await auth();
       if (!session?.user?.id) {
@@ -110,7 +109,7 @@ export async function GET(request: Request) {
           meta: { total: 0, page: 1, limit, totalPages: 0 },
         });
       }
-      where.id = { in: qIds };
+      andConditions.push({ id: { in: qIds } });
     } else if (mode === 'unattempted') {
       const session = await auth();
       if (session?.user?.id) {
@@ -120,65 +119,55 @@ export async function GET(request: Request) {
         });
         const attemptedIds = Array.from(new Set(attempts.map((a) => a.question_id)));
         if (attemptedIds.length > 0) {
-          where.id = { notIn: attemptedIds };
+          andConditions.push({ id: { notIn: attemptedIds } });
         }
       }
     }
 
-    // 4. Node / Theme Mode
-    else if (node) {
-      where.OR = [
-        { question_micro_focus_english: { contains: node, mode: 'insensitive' } },
-        { question_micro_focus_arabic: { contains: node } },
-      ];
-      if (subtopic) {
-        where.subtopic = { slug: subtopic };
-      }
-      if (topic) {
-        where.broad_topic = { slug: topic };
-      }
-      if (unit) {
-        where.unit = { unit_number: parseInt(unit, 10) };
-      }
+    // 4. Node / Micro Focus Filter
+    if (node) {
+      andConditions.push({
+        OR: [
+          { question_micro_focus_english: { contains: node, mode: 'insensitive' } },
+          { question_micro_focus_arabic: { contains: node } },
+        ],
+      });
     }
 
-    // 5. Subtopic / Entity Mode
-    else if (subtopic || entity) {
+    // 5. Subtopic / Entity Filter
+    if (subtopic || entity) {
       const targetSub = subtopic || entity;
-      where.OR = [
-        { subtopic: { slug: targetSub } },
-        { specific_entity_name_arabic: targetSub },
-        { specific_entity_name_english: { contains: targetSub, mode: 'insensitive' } },
-      ];
-      if (topic) {
-        where.broad_topic = { slug: topic };
-      }
-      if (unit) {
-        where.unit = { unit_number: parseInt(unit, 10) };
-      }
+      andConditions.push({
+        OR: [
+          { subtopic: { slug: targetSub } },
+          { specific_entity_name_arabic: targetSub },
+          { specific_entity_name_english: { contains: targetSub, mode: 'insensitive' } },
+        ],
+      });
     }
 
-    // 6. Topic Mode
-    else if (topic) {
-      where.broad_topic = { slug: topic };
-      if (unit) {
-        where.unit = { unit_number: parseInt(unit, 10) };
-      }
+    // 6. Broad Topic Filter
+    if (topic) {
+      andConditions.push({ broad_topic: { slug: topic } });
     }
 
-    // 7. Unit Mode
-    else if (unit) {
-      where.unit = { unit_number: parseInt(unit, 10) };
+    // 7. Unit Filter
+    if (unit) {
+      andConditions.push({ unit: { unit_number: parseInt(unit, 10) } });
     } else if (unitId) {
-      where.unit_id = unitId;
+      andConditions.push({ unit_id: unitId });
     }
 
-    // 8. Year Mode
-    else if (year) {
-      where.exam_paper = {
-        year: parseInt(year, 10),
-      };
+    // 8. Year Filter
+    if (year) {
+      andConditions.push({
+        exam_paper: {
+          year: parseInt(year, 10),
+        },
+      });
     }
+
+    const where = { AND: andConditions };
 
     const skip = (page - 1) * limit;
 

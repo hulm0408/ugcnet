@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { economicsSyllabus, economicsSyllabusSource } from '../../data/syllabus/economics';
 
 export const economicsConfig: SubjectConfig = {
   code: '01',
@@ -19,44 +20,71 @@ export const economicsConfig: SubjectConfig = {
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgEcon" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#062E22" />
-            <stop offset="100%" stop-color="#020E0A" />
+            <stop offset="0%" stop-color="#02150F" />
+            <stop offset="100%" stop-color="#010A07" />
           </linearGradient>
-          <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#34D399" />
-            <stop offset="100%" stop-color="#10B981" />
-          </linearGradient>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#065F46" stroke-width="0.5" opacity="0.3" />
+          </pattern>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgEcon)" stroke="#065F46" stroke-width="1.5" />
+        <rect width="500" height="360" rx="20" fill="url(#bgEcon)" />
+        <rect width="500" height="360" rx="20" fill="url(#grid)" />
+        
+        <!-- Subject Title -->
+        <text x="30" y="40" fill="#10B981" font-size="18" font-weight="900" letter-spacing="1">ECONOMICS</text>
+        <text x="30" y="58" fill="#A7F3D0" font-size="12">MACROECONOMIC EQUILIBRIUM</text>
 
-        <!-- IS-LM & Equilibrium Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#041A13" stroke="#047857" stroke-width="1.5" />
-        <text x="75" y="80" fill="#34D399" font-size="11" font-weight="bold">IS-LM EQUILIBRIUM: Y = C(Y-T) + I(r) + G • M/P = L(r, Y)</text>
-        <text x="75" y="98" fill="#6EE7B7" font-size="10">Slutsky Equation • Solow-Swan Steady State: sf(k) = (n+g+δ)k</text>
+        <!-- Axes -->
+        <!-- Y Axis -->
+        <path d="M 70 300 L 70 80" stroke="#A7F3D0" stroke-width="2" fill="none" marker-end="url(#arrowEcon)" />
+        <!-- X Axis -->
+        <path d="M 70 300 L 440 300" stroke="#A7F3D0" stroke-width="2" fill="none" marker-end="url(#arrowEcon)" />
+        
+        <defs>
+          <marker id="arrowEcon" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#A7F3D0" />
+          </marker>
+        </defs>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#06372A" stroke="url(#greenGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900">ECONOMICS</text>
-        <text x="250" y="227" text-anchor="middle" fill="#34D399" font-size="10" font-weight="bold" letter-spacing="1">CODE 01</text>
+        <!-- Axis Labels -->
+        <text x="450" y="315" fill="#A7F3D0" font-size="12" font-weight="bold">Y (Output/Income)</text>
+        <text x="50" y="70" fill="#A7F3D0" font-size="12" font-weight="bold" text-anchor="middle">r</text>
+        <text x="30" y="190" fill="#A7F3D0" font-size="10" transform="rotate(-90, 30, 190)" text-anchor="middle">(Interest Rate)</text>
 
-        <!-- Left Node: Micro & Macro -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#031A12" stroke="#065F46" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#A7F3D0" font-size="11" font-weight="bold">Micro & Macro</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Pareto Optimality • Cournot</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Mundell-Fleming • Phillips</text>
+        <!-- IS Curve (Downward) -->
+        <path d="M 120 120 C 200 180, 280 240, 380 280" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" />
+        <text x="390" y="275" fill="#F59E0B" font-size="12" font-weight="bold">IS</text>
+        <text x="300" y="140" fill="#F59E0B" font-size="10">IS: Y = C + I(r) + G</text>
 
-        <!-- Right Node: Econometrics & Trade -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#031A12" stroke="#065F46" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#A7F3D0" font-size="11" font-weight="bold">Econometrics & Trade</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">OLS • Heteroscedasticity</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Heckscher-Ohlin • Leontief</text>
+        <!-- LM Curve (Upward) -->
+        <path d="M 120 270 C 200 240, 280 180, 380 110" fill="none" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" />
+        <text x="390" y="115" fill="#3B82F6" font-size="12" font-weight="bold">LM</text>
+        <text x="140" y="170" fill="#3B82F6" font-size="10">LM: M/P = L(r,Y)</text>
 
-        <path d="M 175 210 L 195 210" stroke="#34D399" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#34D399" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Equilibrium Point -->
+        <circle cx="240" cy="210" r="5" fill="#10B981" />
+        <text x="250" y="200" fill="#10B981" font-size="14" font-weight="bold">E*</text>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Dashed Lines -->
+        <path d="M 70 210 L 240 210" fill="none" stroke="#10B981" stroke-width="1.5" stroke-dasharray="5,5" />
+        <path d="M 240 300 L 240 210" fill="none" stroke="#10B981" stroke-width="1.5" stroke-dasharray="5,5" />
+
+        <!-- Equilibrium Labels -->
+        <text x="50" y="215" fill="#10B981" font-size="12" font-weight="bold">r*</text>
+        <text x="235" y="320" fill="#10B981" font-size="12" font-weight="bold">Y*</text>
+
+        <!-- Small Demand-Supply Cross in Corner -->
+        <g transform="translate(380, 30)">
+          <rect width="90" height="70" rx="4" fill="#041D15" stroke="#065F46" stroke-width="1" />
+          <path d="M 20 15 L 70 55" stroke="#F43F5E" stroke-width="1.5" />
+          <path d="M 20 55 L 70 15" stroke="#34D399" stroke-width="1.5" />
+          <text x="75" y="60" fill="#F43F5E" font-size="8">D</text>
+          <text x="75" y="20" fill="#34D399" font-size="8">S</text>
+          <circle cx="45" cy="35" r="2" fill="#FFFFFF" />
+        </g>
       </svg>
     `,
+    visualConcept: 'IS-LM equilibrium curve plot with coordinate axes and intersection point',
   },
   pillars: [
     {
@@ -107,4 +135,6 @@ export const economicsConfig: SubjectConfig = {
     'Econometric Formula & Model Diagnostic Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: economicsSyllabus,
+  syllabusSource: economicsSyllabusSource,
 };

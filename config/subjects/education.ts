@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { educationSyllabus, educationSyllabusSource } from '../../data/syllabus/education';
 
 export const educationConfig: SubjectConfig = {
   code: '09',
@@ -15,46 +16,85 @@ export const educationConfig: SubjectConfig = {
     surfaceGradient: 'from-[#04201E] to-[#010B0A]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Bloom taxonomy pyramid with 6 cognitive levels and pedagogy methodology labels',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgEdu" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#083330" />
-            <stop offset="100%" stop-color="#021211" />
+            <stop offset="0%" stop-color="#04201E" />
+            <stop offset="100%" stop-color="#010B0A" />
           </linearGradient>
-          <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="pyr1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#042F2E" />
+            <stop offset="100%" stop-color="#0F766E" />
+          </linearGradient>
+          <linearGradient id="pyr2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0D9488" />
+            <stop offset="100%" stop-color="#14B8A6" />
+          </linearGradient>
+          <linearGradient id="pyr3" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#14B8A6" />
+            <stop offset="100%" stop-color="#2DD4BF" />
+          </linearGradient>
+          <linearGradient id="pyr4" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stop-color="#2DD4BF" />
-            <stop offset="100%" stop-color="#0D9488" />
+            <stop offset="100%" stop-color="#5EEAD4" />
+          </linearGradient>
+          <linearGradient id="pyr5" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5EEAD4" />
+            <stop offset="100%" stop-color="#99F6E4" />
+          </linearGradient>
+          <linearGradient id="pyr6" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#99F6E4" />
+            <stop offset="100%" stop-color="#CCFBF1" />
           </linearGradient>
         </defs>
         <rect width="500" height="360" rx="20" fill="url(#bgEdu)" stroke="#0F766E" stroke-width="1.5" />
+        
+        <!-- Pyramid Base coordinates -->
+        <!-- Level 1 (Bottom): Remember -->
+        <polygon points="120,320 380,320 350,280 150,280" fill="url(#pyr1)" stroke="#04201E" stroke-width="2" />
+        <text x="250" y="305" text-anchor="middle" fill="#CCFBF1" font-size="12" font-weight="bold" letter-spacing="1">REMEMBER</text>
+        <circle cx="170" cy="300" r="5" fill="#14B8A6" />
+        
+        <!-- Level 2: Understand -->
+        <polygon points="152,278 348,278 322,240 178,240" fill="url(#pyr2)" stroke="#04201E" stroke-width="2" />
+        <text x="250" y="264" text-anchor="middle" fill="#042F2E" font-size="11" font-weight="bold" letter-spacing="1">UNDERSTAND</text>
+        <rect x="195" y="256" width="8" height="8" fill="#CCFBF1" />
+        
+        <!-- Level 3: Apply -->
+        <polygon points="180,238 320,238 296,200 204,200" fill="url(#pyr3)" stroke="#04201E" stroke-width="2" />
+        <text x="250" y="224" text-anchor="middle" fill="#042F2E" font-size="11" font-weight="bold" letter-spacing="1">APPLY</text>
+        <path d="M 215 215 L 223 215 L 219 223 Z" fill="#CCFBF1" />
 
-        <!-- Educational Taxonomy Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#041B19" stroke="#115E59" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#CCFBF1" font-size="12" font-weight="bold">CURRICULUM (TYLER & TABA) • PIAGET & VYGOTSKY • ADDIE & GAGNE 9 EVENTS</text>
-        <text x="250" y="98" text-anchor="middle" fill="#2DD4BF" font-size="9">NCTE 2014 Norms • NEP 2020 • PwD Act 2016 (21 Disabilities) • CIPP Model</text>
+        <!-- Level 4: Analyze -->
+        <polygon points="206,198 294,198 274,160 226,160" fill="url(#pyr4)" stroke="#04201E" stroke-width="2" />
+        <text x="250" y="184" text-anchor="middle" fill="#042F2E" font-size="10" font-weight="bold" letter-spacing="1">ANALYZE</text>
+        
+        <!-- Level 5: Evaluate -->
+        <polygon points="228,158 272,158 258,125 242,125" fill="url(#pyr5)" stroke="#04201E" stroke-width="2" />
+        <text x="250" y="146" text-anchor="middle" fill="#042F2E" font-size="9" font-weight="bold" letter-spacing="1">EVALUATE</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#052E2B" stroke="url(#tealGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900">EDUCATION</text>
-        <text x="250" y="227" text-anchor="middle" fill="#2DD4BF" font-size="10" font-weight="bold" letter-spacing="1">CODE 09</text>
+        <!-- Level 6 (Top): Create -->
+        <polygon points="244,123 256,123 250,90" fill="url(#pyr6)" stroke="#04201E" stroke-width="2" />
+        <circle cx="250" cy="115" r="3" fill="#042F2E" />
 
-        <!-- Left Node: Philosophy & Learner -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#031C1A" stroke="#0F766E" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#99F6E4" font-size="11" font-weight="bold">Philosophy & Learner</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Sankhya • Pragmatism • Paulo</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Piaget Schema • Vygotsky ZPD</text>
+        <!-- Labels around the pyramid -->
+        <text x="80" y="220" text-anchor="middle" fill="#2DD4BF" font-size="10" font-weight="bold">Behaviorism</text>
+        <path d="M 120 216 L 160 216" stroke="#0F766E" stroke-width="1" stroke-dasharray="2,2" />
 
-        <!-- Right Node: Tech & Teacher Ed -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#031C1A" stroke="#0F766E" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#99F6E4" font-size="11" font-weight="bold">Tech & Inclusion</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">ADDIE • ASSURE • Gagne</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">RPwD Act 2016 • CIPP Model</text>
+        <text x="90" y="150" text-anchor="middle" fill="#5EEAD4" font-size="10" font-weight="bold">Cognitivism</text>
+        <path d="M 130 146 L 200 146" stroke="#0F766E" stroke-width="1" stroke-dasharray="2,2" />
 
-        <path d="M 175 210 L 195 210" stroke="#2DD4BF" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#2DD4BF" stroke-width="2" stroke-dasharray="3,3" />
+        <text x="400" y="180" text-anchor="middle" fill="#99F6E4" font-size="10" font-weight="bold">Constructivism</text>
+        <path d="M 320 176 L 350 176" stroke="#0F766E" stroke-width="1" stroke-dasharray="2,2" />
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <text x="250" y="50" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900" letter-spacing="2">EDUCATION</text>
+        <text x="250" y="70" text-anchor="middle" fill="#14B8A6" font-size="12" font-weight="bold" letter-spacing="1">BLOOM'S TAXONOMY</text>
+
+        <!-- NEP 2020 Badge -->
+        <rect x="380" y="30" width="90" height="30" rx="4" fill="#0F766E" stroke="#2DD4BF" stroke-width="1" />
+        <text x="425" y="49" text-anchor="middle" fill="#CCFBF1" font-size="10" font-weight="bold">NEP 2020</text>
       </svg>
     `,
   },
@@ -107,4 +147,6 @@ export const educationConfig: SubjectConfig = {
     'Curriculum Models, Thinkers & Evaluation Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: educationSyllabus,
+  syllabusSource: educationSyllabusSource,
 };

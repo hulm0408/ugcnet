@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { hindiSyllabus, hindiSyllabusSource } from '../../data/syllabus/hindi';
 
 export const hindiConfig: SubjectConfig = {
   code: '20',
@@ -15,6 +16,7 @@ export const hindiConfig: SubjectConfig = {
     surfaceGradient: 'from-[#2B0909] to-[#0D0202]',
     fontFamily: 'font-devanagari',
     scriptDirection: 'ltr',
+    visualConcept: 'Devanagari script evolution scroll with literary period arc and calligraphic elements',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
@@ -22,39 +24,67 @@ export const hindiConfig: SubjectConfig = {
             <stop offset="0%" stop-color="#3B0D0D" />
             <stop offset="100%" stop-color="#140303" />
           </linearGradient>
-          <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#F87171" />
-            <stop offset="100%" stop-color="#EF4444" />
+          <linearGradient id="scrollGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#450a0a" />
+            <stop offset="50%" stop-color="#7f1d1d" />
+            <stop offset="100%" stop-color="#450a0a" />
           </linearGradient>
         </defs>
         <rect width="500" height="360" rx="20" fill="url(#bgHindi)" stroke="#991B1B" stroke-width="1.5" />
 
-        <!-- Devanagari Prabandha Kavya Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1C0505" stroke="#B91C1C" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#FECACA" font-size="12" font-weight="bold">॥ पोथी पढ़ि पढ़ि जग मुआ पंडित भया न कोय • ढाई आखर प्रेम का पढ़े सो पंडित hoy ॥</text>
-        <text x="250" y="98" text-anchor="middle" fill="#F87171" font-size="9">आदिकाल (वीरगाथा) • भक्तिकाल (स्वर्णयुग) • रीतिकाल • आधुनिक काल</text>
+        <!-- Literary Period Arc -->
+        <path d="M 60 160 A 250 120 0 0 1 440 160" fill="none" stroke="#EF4444" stroke-width="2" stroke-dasharray="4,4" />
+        
+        <!-- Arc Markers & Labels -->
+        <circle cx="95" cy="98" r="4" fill="#FCA5A5" />
+        <text x="95" y="85" text-anchor="middle" fill="#F87171" font-size="12" font-weight="bold">आदिकाल</text>
+        <text x="95" y="115" text-anchor="middle" fill="#94A3B8" font-size="10">⚔️ Veer-gatha</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#260808" stroke="url(#redGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="19" font-weight="900">हिन्दी</text>
-        <text x="250" y="227" text-anchor="middle" fill="#F87171" font-size="10" font-weight="bold" letter-spacing="1">CODE 20</text>
+        <circle cx="195" cy="55" r="4" fill="#FCA5A5" />
+        <text x="195" y="42" text-anchor="middle" fill="#F87171" font-size="12" font-weight="bold">भक्तिकाल</text>
+        <text x="195" y="72" text-anchor="middle" fill="#94A3B8" font-size="10">🛕 Bhakti</text>
 
-        <!-- Left Node: Bhakti & Riti -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#1A0404" stroke="#991B1B" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#FECACA" font-size="11" font-weight="bold">भक्तिकाल व रीतिकाल</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">कबीर • जायसी • तुलसीदास</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">केशवदास • बिहारी • घनानंद</text>
+        <circle cx="305" cy="55" r="4" fill="#FCA5A5" />
+        <text x="305" y="42" text-anchor="middle" fill="#F87171" font-size="12" font-weight="bold">रीतिकाल</text>
+        <text x="305" y="72" text-anchor="middle" fill="#94A3B8" font-size="10">🦚 Riti</text>
 
-        <!-- Right Node: Modern & Katha Sahitya -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#1A0404" stroke="#991B1B" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#FECACA" font-size="11" font-weight="bold">आधुनिक साहित्य</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">भारतेंदु • छायावाद • प्रगतिवाद</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">गोदान • कामायनी • असाध्य वीणा</text>
+        <circle cx="405" cy="98" r="4" fill="#FCA5A5" />
+        <text x="405" y="85" text-anchor="middle" fill="#F87171" font-size="12" font-weight="bold">आधुनिक काल</text>
+        <text x="405" y="115" text-anchor="middle" fill="#94A3B8" font-size="10">✒️ Modern</text>
 
-        <path d="M 175 210 L 195 210" stroke="#F87171" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#F87171" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Unfurling Scroll Base -->
+        <path d="M 100 170 Q 150 140 250 170 T 400 170 L 400 270 Q 350 240 250 270 T 100 270 Z" fill="url(#scrollGrad)" stroke="#F87171" stroke-width="1.5" />
+        
+        <!-- Scroll Rolls Ends -->
+        <ellipse cx="100" cy="220" rx="10" ry="50" fill="#2a0505" stroke="#F87171" stroke-width="1.5" />
+        <ellipse cx="400" cy="220" rx="10" ry="50" fill="#2a0505" stroke="#F87171" stroke-width="1.5" />
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">१० आधिकारिक इकाइयाँ • विगत २० वर्षों का NTA प्रश्न संग्रह</text>
+        <!-- Evolution of Script on Scroll -->
+        <text x="150" y="215" text-anchor="middle" fill="#FECACA" font-size="14" font-family="serif">𑀅</text>
+        <text x="150" y="235" text-anchor="middle" fill="#94A3B8" font-size="10">Brahmi</text>
+        
+        <path d="M 175 220 L 210 220" stroke="#EF4444" stroke-width="1" />
+        <polygon points="210,217 215,220 210,223" fill="#EF4444" />
+
+        <text x="250" y="215" text-anchor="middle" fill="#FECACA" font-size="16" font-family="sans-serif">अ</text>
+        <text x="250" y="235" text-anchor="middle" fill="#94A3B8" font-size="10">Nagari</text>
+
+        <path d="M 290 220 L 325 220" stroke="#EF4444" stroke-width="1" />
+        <polygon points="325,217 330,220 325,223" fill="#EF4444" />
+
+        <text x="360" y="215" text-anchor="middle" fill="#FFFFFF" font-size="18" font-family="sans-serif" font-weight="bold">अ</text>
+        <text x="360" y="235" text-anchor="middle" fill="#94A3B8" font-size="10">Devanagari</text>
+
+        <!-- Ink Pot and Reed Pen -->
+        <g transform="translate(60, 270)">
+          <path d="M 0 10 L 20 10 L 15 30 L 5 30 Z" fill="#140303" stroke="#F87171" stroke-width="1" />
+          <ellipse cx="10" cy="10" rx="10" ry="3" fill="#7f1d1d" />
+          <!-- Reed Pen -->
+          <path d="M 5 0 L 25 -30 L 28 -28 L 8 2 Z" fill="#fca5a5" />
+        </g>
+
+        <!-- Labels -->
+        <text x="250" y="340" text-anchor="middle" fill="#FECACA" font-size="18" font-weight="900" font-family="sans-serif">हिन्दी (CODE 20)</text>
       </svg>
     `,
   },
@@ -107,4 +137,6 @@ export const hindiConfig: SubjectConfig = {
     'कवि, रचनाकाल, काव्य पंक्तियों का त्रुटि विश्लेषक',
     'NTA CBT आधिकारिक परीक्षा सिम्युलेटर एवं टाइमर',
   ],
+  officialSyllabus: hindiSyllabus,
+  syllabusSource: hindiSyllabusSource,
 };

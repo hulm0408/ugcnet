@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { psychologySyllabus, psychologySyllabusSource } from '../../data/syllabus/psychology';
 
 export const psychologyConfig: SubjectConfig = {
   code: '04',
@@ -15,46 +16,91 @@ export const psychologyConfig: SubjectConfig = {
     surfaceGradient: 'from-[#1A0A33] to-[#06020D]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Brain hemisphere silhouette with labeled cognitive regions, neural pathways, and psychometric bell curve',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgPsych" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#260E4A" />
-            <stop offset="100%" stop-color="#0A0314" />
+            <stop offset="0%" stop-color="#1E1B4B" />
+            <stop offset="100%" stop-color="#312E81" />
           </linearGradient>
-          <linearGradient id="violetGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#A78BFA" />
-            <stop offset="100%" stop-color="#8B5CF6" />
+          <linearGradient id="brainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4338CA" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#3730A3" stop-opacity="0.8" />
           </linearGradient>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgPsych)" stroke="#5B21B6" stroke-width="1.5" />
+        <rect width="500" height="360" rx="20" fill="url(#bgPsych)" stroke="#4F46E5" stroke-width="1.5" />
 
-        <!-- Neural Schema Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#130726" stroke="#6D28D9" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#DDD6FE" font-size="12" font-weight="bold">CLASSICAL & OPERANT CONDITIONING • WORKING MEMORY • PSYCHOMETRIC NORMAL CURVE</text>
-        <text x="250" y="98" text-anchor="middle" fill="#A78BFA" font-size="9">Pavlov • Skinner • Baddeley Working Memory • Reliability & Validity Types</text>
+        <!-- Brain Profile Silhouette -->
+        <path d="M 230 50 C 320 50 370 90 380 150 C 390 220 340 270 280 270 C 230 270 200 240 180 270 C 140 250 130 180 160 120 C 180 80 200 50 230 50 Z" fill="url(#brainGrad)" stroke="#6366F1" stroke-width="2" />
+        
+        <!-- Brain Regions & Labels -->
+        <!-- Frontal Lobe (Executive) -->
+        <path d="M 230 50 C 270 50 310 70 330 120 C 330 160 280 160 250 160 C 220 160 170 120 160 120 C 180 80 200 50 230 50 Z" fill="#4F46E5" opacity="0.4" />
+        <text x="240" y="100" fill="#C7D2FE" font-size="11" font-weight="bold" text-anchor="middle">Frontal</text>
+        <text x="240" y="112" fill="#A5B4FC" font-size="8" text-anchor="middle">Executive</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#1B0A36" stroke="url(#violetGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="900">PSYCHOLOGY</text>
-        <text x="250" y="227" text-anchor="middle" fill="#A78BFA" font-size="10" font-weight="bold" letter-spacing="1">CODE 04</text>
+        <!-- Parietal Lobe (Spatial) -->
+        <path d="M 310 70 C 350 70 370 110 380 150 C 380 180 340 180 310 180 C 280 180 270 120 310 70 Z" fill="#6366F1" opacity="0.4" />
+        <text x="330" y="140" fill="#C7D2FE" font-size="11" font-weight="bold" text-anchor="middle">Parietal</text>
+        <text x="330" y="152" fill="#A5B4FC" font-size="8" text-anchor="middle">Spatial</text>
 
-        <!-- Left Node: Cognitive & Neural -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#0F051E" stroke="#5B21B6" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#DDD6FE" font-size="11" font-weight="bold">Cognitive & Neural</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Limbic System • Synapse</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Atkinson-Shiffrin • Baddeley</text>
+        <!-- Occipital Lobe (Vision) -->
+        <path d="M 380 150 C 390 200 370 230 340 250 C 320 250 310 180 340 180 C 360 180 370 150 380 150 Z" fill="#818CF8" opacity="0.4" />
+        <text x="350" y="210" fill="#C7D2FE" font-size="11" font-weight="bold" text-anchor="middle">Occipital</text>
+        <text x="350" y="222" fill="#A5B4FC" font-size="8" text-anchor="middle">Vision</text>
 
-        <!-- Right Node: Testing & Clinical -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#0F051E" stroke="#5B21B6" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#DDD6FE" font-size="11" font-weight="bold">Testing & Clinical</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Item Analysis • Cronbach Alpha</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">CBT • DSM-5 / ICD-11</text>
+        <!-- Temporal Lobe (Memory/Language) -->
+        <path d="M 220 160 C 280 160 320 180 320 220 C 320 260 280 270 240 270 C 200 270 180 230 220 160 Z" fill="#3730A3" opacity="0.5" />
+        <text x="260" y="210" fill="#C7D2FE" font-size="11" font-weight="bold" text-anchor="middle">Temporal</text>
+        <text x="260" y="222" fill="#A5B4FC" font-size="8" text-anchor="middle">Memory/Language</text>
 
-        <path d="M 175 210 L 195 210" stroke="#A78BFA" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#A78BFA" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Neural Pathway Branches -->
+        <g fill="none" stroke="#A5B4FC" stroke-width="1.5" opacity="0.7">
+          <path d="M 240 160 Q 260 130 280 140 T 310 120" />
+          <path d="M 280 140 Q 290 170 330 190" />
+          <path d="M 240 160 Q 230 190 260 230" />
+          <path d="M 260 230 Q 300 240 330 230" />
+        </g>
+        
+        <!-- Pathway Nodes -->
+        <circle cx="240" cy="160" r="4" fill="#E0E7FF" />
+        <circle cx="280" cy="140" r="3" fill="#E0E7FF" />
+        <circle cx="310" cy="120" r="3" fill="#E0E7FF" />
+        <circle cx="330" cy="190" r="3" fill="#E0E7FF" />
+        <circle cx="260" cy="230" r="4" fill="#E0E7FF" />
+        <circle cx="330" cy="230" r="3" fill="#E0E7FF" />
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Psychometric Gaussian Normal Curve (Bottom Left) -->
+        <g transform="translate(30, 240)">
+          <line x1="0" y1="80" x2="160" y2="80" stroke="#6366F1" stroke-width="1.5" />
+          <path d="M 10 80 Q 40 80 60 40 T 80 10 T 100 40 T 150 80" fill="none" stroke="#A5B4FC" stroke-width="2" />
+          <!-- Mean line -->
+          <line x1="80" y1="10" x2="80" y2="80" stroke="#818CF8" stroke-width="1" stroke-dasharray="3,3" />
+          <text x="80" y="95" fill="#C7D2FE" font-size="9" text-anchor="middle">μ</text>
+          <!-- Signal Detection markers -->
+          <line x1="100" y1="40" x2="100" y2="80" stroke="#818CF8" stroke-width="1" stroke-dasharray="2,2" />
+          <text x="100" y="95" fill="#C7D2FE" font-size="9" text-anchor="middle">Signal</text>
+          <text x="80" y="110" fill="#E0E7FF" font-size="10" font-weight="bold" text-anchor="middle">Normal Distribution</text>
+        </g>
+
+        <!-- Stimulus-Response Diagram (Top Left) -->
+        <g transform="translate(30, 50)">
+          <rect x="0" y="0" width="30" height="20" rx="4" fill="#3730A3" stroke="#818CF8" />
+          <text x="15" y="14" fill="#E0E7FF" font-size="10" text-anchor="middle">S</text>
+          
+          <!-- Ensure marker-end isn't missing an arrow def, but skipping the def and just drawing simple arrow is safer -->
+          <path d="M 35 10 L 65 10" fill="none" stroke="#818CF8" stroke-width="2" />
+          <polygon points="60,6 68,10 60,14" fill="#818CF8" />
+          
+          <rect x="70" y="0" width="30" height="20" rx="4" fill="#3730A3" stroke="#818CF8" />
+          <text x="85" y="14" fill="#E0E7FF" font-size="10" text-anchor="middle">R</text>
+          
+          <text x="50" y="35" fill="#A5B4FC" font-size="8" text-anchor="middle">Conditioning</text>
+        </g>
+
+        <!-- Subject Title -->
+        <text x="470" y="335" fill="#FFFFFF" font-size="18" font-weight="900" text-anchor="end">PSYCHOLOGY (04)</text>
       </svg>
     `,
   },
@@ -107,4 +153,6 @@ export const psychologyConfig: SubjectConfig = {
     'Psychometric Formulas, Statistics & Theories Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: psychologySyllabus,
+  syllabusSource: psychologySyllabusSource,
 };

@@ -121,6 +121,8 @@ model ExamPaper {
   status_reason       String?  // Why it's restricted/unverified
   is_paper_iii        Boolean  @default(false)
   is_free_benchmark   Boolean  @default(false) // TRUE for exactly 1 free benchmark paper per subject
+  is_mock_test        Boolean  @default(false) // TRUE for full-length mock test papers
+  mock_test_number    Int?     // 1, 2, 3...
   access_tier         String   @default("PREMIUM") // FREE | PREMIUM
   display_name        String   // Human-readable name for UI
   created_at          DateTime @default(now())
@@ -130,6 +132,7 @@ model ExamPaper {
   import_jobs         ImportJob[]
 
   @@index([subject_id, is_free_benchmark])
+  @@index([subject_id, is_mock_test, content_status])
   @@index([subject_id, access_tier])
   @@index([subject_id, year, content_status])
   @@index([year, content_status])

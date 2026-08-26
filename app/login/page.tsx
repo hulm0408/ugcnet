@@ -28,12 +28,12 @@ export default async function LoginPage({
   const errorMsg = error ? (errorMessages[error] ?? errorMessages.Default) : null;
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-primary-surface to-white px-4 py-12 min-h-screen">
-      <div className="w-full max-w-sm">
+    <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-primary-surface to-white px-4 py-12 min-h-screen overflow-hidden">
+      <div className="w-full max-w-sm relative">
 
         {/* Brand */}
         <div className="text-center mb-8 relative">
-          <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full -z-10 transform scale-150"></div>
+          <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full -z-10"></div>
           <div className="w-14 h-14 bg-gradient-to-tr from-primary-dark to-primary rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary/20 hover:scale-105 transition-transform duration-300">
             <span className="text-white font-bold text-2xl font-arabic">ع</span>
           </div>

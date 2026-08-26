@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { paper1Syllabus, paper1SyllabusSource } from '../../data/syllabus/paper-1';
 
 export const paper1Config: SubjectConfig = {
   code: '00',
@@ -19,44 +20,80 @@ export const paper1Config: SubjectConfig = {
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgP1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#042C40" />
-            <stop offset="100%" stop-color="#010F17" />
-          </linearGradient>
-          <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#38BDF8" />
-            <stop offset="100%" stop-color="#0284C7" />
+            <stop offset="0%" stop-color="#111827" />
+            <stop offset="100%" stop-color="#1F2937" />
           </linearGradient>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgP1)" stroke="#0369A1" stroke-width="1.5" />
+        <rect width="500" height="360" rx="10" fill="url(#bgP1)" />
+        
+        <text x="250" y="30" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900" letter-spacing="1">GENERAL PAPER 1</text>
 
-        <!-- Indian Logic & Research Aptitude Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#021B28" stroke="#0284C7" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#BAE6FD" font-size="12" font-weight="bold">INDIAN LOGIC (PRAMANAS) • PRATYAKSHA, ANUMANA, UPAMANA, SHABDA</text>
-        <text x="250" y="98" text-anchor="middle" fill="#38BDF8" font-size="9">Hetu & Sadhya • Classical Square of Opposition • NEP 2020 • SDG 17 Goals</text>
+        <!-- 3x3 Reasoning Matrix -->
+        <!-- 150x150 centered around x=150, y=130 -->
+        <g transform="translate(60, 60)">
+          <!-- Grid lines -->
+          <path d="M 0 0 L 150 0 L 150 150 L 0 150 Z" fill="none" stroke="#10B981" stroke-width="2"/>
+          <path d="M 50 0 L 50 150 M 100 0 L 100 150" stroke="#10B981" stroke-width="2"/>
+          <path d="M 0 50 L 150 50 M 0 100 L 150 100" stroke="#10B981" stroke-width="2"/>
+          
+          <!-- Cell 1,1 -->
+          <circle cx="25" cy="25" r="10" fill="none" stroke="#6EE7B7" stroke-width="2"/>
+          <!-- Cell 1,2 -->
+          <rect x="65" y="15" width="20" height="20" fill="none" stroke="#6EE7B7" stroke-width="2"/>
+          <!-- Cell 1,3 -->
+          <polygon points="125,15 135,35 115,35" fill="none" stroke="#6EE7B7" stroke-width="2"/>
+          
+          <!-- Cell 2,1 -->
+          <circle cx="25" cy="75" r="10" fill="#6EE7B7"/>
+          <!-- Cell 2,2 -->
+          <rect x="65" y="65" width="20" height="20" fill="#6EE7B7"/>
+          <!-- Cell 2,3 -->
+          <polygon points="125,65 135,85 115,85" fill="#6EE7B7"/>
+          
+          <!-- Cell 3,1 -->
+          <circle cx="25" cy="125" r="10" fill="none" stroke="#10B981" stroke-width="4"/>
+          <!-- Cell 3,2 -->
+          <rect x="65" y="115" width="20" height="20" fill="none" stroke="#10B981" stroke-width="4"/>
+          <!-- Cell 3,3 (?) -->
+          <text x="125" y="132" text-anchor="middle" fill="#34D399" font-size="20" font-weight="bold">?</text>
+        </g>
+        <text x="135" y="235" text-anchor="middle" fill="#9CA3AF" font-size="10">LOGICAL REASONING</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#032537" stroke="url(#skyGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900">PAPER 1</text>
-        <text x="250" y="227" text-anchor="middle" fill="#38BDF8" font-size="10" font-weight="bold" letter-spacing="1">CODE 00</text>
+        <!-- Syllogism Venn Diagram -->
+        <g transform="translate(350, 130)">
+          <circle cx="-20" cy="-20" r="40" fill="#047857" fill-opacity="0.3" stroke="#10B981" stroke-width="2"/>
+          <circle cx="20" cy="-20" r="40" fill="#059669" fill-opacity="0.3" stroke="#34D399" stroke-width="2"/>
+          <circle cx="0" cy="20" r="40" fill="#065F46" fill-opacity="0.3" stroke="#6EE7B7" stroke-width="2"/>
+          
+          <text x="-35" y="-30" fill="#D1D5DB" font-size="10">All P</text>
+          <text x="25" y="-30" fill="#D1D5DB" font-size="10">Some Q</text>
+          <text x="0" y="45" fill="#D1D5DB" font-size="10" text-anchor="middle">No R</text>
+        </g>
+        <text x="350" y="235" text-anchor="middle" fill="#9CA3AF" font-size="10">SYLLOGISM</text>
 
-        <!-- Left Node: Teaching & Research -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#021C2B" stroke="#0369A1" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#BAE6FD" font-size="11" font-weight="bold">Teaching & Research</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Bloom Taxonomy • Formative</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Type I/II Error • Sampling</text>
-
-        <!-- Right Node: Logic & ICT/Env -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#021C2B" stroke="#0369A1" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#BAE6FD" font-size="11" font-weight="bold">Logic & Env/Higher Ed</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Square of Opposition • Vyapti</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">NEP 2020 • Paris Agreement</text>
-
-        <path d="M 175 210 L 195 210" stroke="#38BDF8" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#38BDF8" stroke-width="2" stroke-dasharray="3,3" />
-
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Aptitude Elements Below -->
+        <g transform="translate(100, 280)">
+          <!-- Bar chart for Research Data -->
+          <line x1="0" y1="40" x2="60" y2="40" stroke="#10B981" stroke-width="1"/>
+          <line x1="0" y1="40" x2="0" y2="0" stroke="#10B981" stroke-width="1"/>
+          <rect x="10" y="20" width="10" height="20" fill="#34D399"/>
+          <rect x="25" y="10" width="10" height="30" fill="#059669"/>
+          <rect x="40" y="30" width="10" height="10" fill="#6EE7B7"/>
+          <text x="30" y="55" text-anchor="middle" fill="#9CA3AF" font-size="10">RESEARCH DATA</text>
+        </g>
+        
+        <g transform="translate(300, 280)">
+          <!-- Teacher at board icon -->
+          <rect x="0" y="0" width="50" height="30" fill="none" stroke="#10B981" stroke-width="2"/>
+          <circle cx="65" cy="15" r="5" fill="#34D399"/>
+          <path d="M 55" /> <!-- Let's remove the half finished path and do simple lines -->
+          <line x1="55" y1="35" x2="65" y2="20" stroke="#34D399" stroke-width="2"/>
+          <line x1="65" y1="20" x2="75" y2="35" stroke="#34D399" stroke-width="2"/>
+          <text x="35" y="55" text-anchor="middle" fill="#9CA3AF" font-size="10">TEACHING APTITUDE</text>
+        </g>
       </svg>
     `,
+    visualConcept: 'Reasoning matrix puzzle grid with syllogism Venn diagram and aptitude elements',
   },
   pillars: [
     {
@@ -107,4 +144,6 @@ export const paper1Config: SubjectConfig = {
     'Indian Logic (Pramanas) & Fallacies Diagnostic Tracker',
     'Official NTA CBT Mock Simulator with 50-Question Countdown Timer',
   ],
+  officialSyllabus: paper1Syllabus,
+  syllabusSource: paper1SyllabusSource,
 };

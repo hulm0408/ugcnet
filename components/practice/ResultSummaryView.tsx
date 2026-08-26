@@ -31,7 +31,11 @@ export default function ResultSummaryView({
   onViewReview
 }: ResultSummaryViewProps) {
   const percentage = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
-  const headerTitle = paper || (year ? `UGC NET Arabic – ${year}` : 'UGC NET Arabic Practice');
+  const headerTitle =
+    paper ||
+    questions[0]?.exam_paper?.display_name ||
+    questions[0]?.exam_paper?.exam_name ||
+    (year ? `UGC NET – ${year}` : 'UGC NET CBT Results');
   
   // Compute Sectional Analysis
   const sectionsMap = new Map<string, { name_arabic: string, name_english: string, total: number, correct: number, incorrect: number, unit_number: number }>();

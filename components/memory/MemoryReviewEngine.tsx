@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { getOptionText } from '@/lib/arabicUtils';
 import { SPACING_LEVELS } from '@/lib/memoryEngine';
+import BilingualText from '@/components/ui/BilingualText';
 
 interface MemoryReviewItem {
   queueId: string;
@@ -315,14 +316,14 @@ export default function MemoryReviewEngine({ items, onFinish }: MemoryReviewEngi
         <div
           dir="rtl"
           lang="ar"
-          className="font-arabic font-extrabold text-stone-900 text-xl sm:text-2xl leading-[2] text-right"
+          className="font-arabic font-semibold text-stone-950 text-2xl sm:text-3xl leading-[2.4] text-right"
         >
           {question.question_arabic}
         </div>
 
         {question.question_english && (
-          <div className="text-stone-500 text-sm italic">
-            {question.question_english}
+          <div className="text-stone-700 text-sm sm:text-base border-l-3 border-emerald-500 pl-4 py-1 leading-relaxed">
+            <BilingualText text={question.question_english} />
           </div>
         )}
 
@@ -366,24 +367,28 @@ export default function MemoryReviewEngine({ items, onFinish }: MemoryReviewEngi
                 return (
                   <div
                     key={opt}
-                    dir="rtl"
-                    lang="ar"
-                    className={`flex items-start gap-3 p-3.5 rounded-2xl text-sm font-arabic border transition-all ${
+                    className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all ${
                       isCorrect
-                        ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold ring-2 ring-emerald-500/20'
-                        : 'bg-stone-50 border-stone-200 text-stone-700 opacity-60'
+                        ? 'bg-emerald-50/90 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20'
+                        : 'bg-stone-50 border-stone-200/80 text-stone-700 opacity-60'
                     }`}
                   >
                     <span
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center font-sans font-black text-xs shrink-0 ${
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center font-sans font-black text-xs shrink-0 shadow-xs ${
                         isCorrect ? 'bg-emerald-600 text-white' : 'bg-stone-200 text-stone-600'
                       }`}
                     >
                       {opt}
                     </span>
-                    <span className="flex-1 leading-relaxed pt-0.5">{optText}</span>
+                    <div
+                      dir="rtl"
+                      lang="ar"
+                      className="flex-1 font-arabic text-xl sm:text-2xl font-semibold leading-[2.2] text-right"
+                    >
+                      {optText}
+                    </div>
                     {isCorrect && (
-                      <span className="text-emerald-700 font-bold text-xs shrink-0 self-center font-sans px-2 py-0.5 bg-emerald-100 rounded-md">
+                      <span className="text-emerald-800 font-bold text-xs shrink-0 self-center font-sans px-2.5 py-1 bg-emerald-100/90 rounded-lg border border-emerald-200">
                         Correct Answer
                       </span>
                     )}

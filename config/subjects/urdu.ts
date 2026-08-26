@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { urduSyllabus, urduSyllabusSource } from '../../data/syllabus/urdu';
 
 export const urduConfig: SubjectConfig = {
   code: '28',
@@ -19,44 +20,60 @@ export const urduConfig: SubjectConfig = {
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgUrdu" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#062E22" />
-            <stop offset="100%" stop-color="#020E0A" />
+            <stop offset="0%" stop-color="#0F172A" />
+            <stop offset="100%" stop-color="#1E3A5F" />
           </linearGradient>
-          <linearGradient id="greenUrdu" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#34D399" />
-            <stop offset="100%" stop-color="#10B981" />
-          </linearGradient>
+          <pattern id="zellige" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M10,0 L20,10 L10,20 L0,10 Z" fill="none" stroke="#60A5FA" stroke-width="0.5" opacity="0.3"/>
+          </pattern>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgUrdu)" stroke="#065F46" stroke-width="1.5" />
+        <rect width="500" height="360" rx="10" fill="url(#bgUrdu)" />
+        <rect width="500" height="360" rx="10" fill="url(#zellige)" />
+        
+        <!-- Outer border -->
+        <rect x="15" y="15" width="470" height="330" rx="8" fill="none" stroke="#60A5FA" stroke-width="2" opacity="0.8"/>
+        <rect x="20" y="20" width="460" height="320" rx="6" fill="none" stroke="#60A5FA" stroke-width="1" opacity="0.5"/>
 
-        <!-- Nastaliq Divan Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#041A13" stroke="#047857" stroke-width="1.5" />
-        <text x="250" y="80" text-anchor="middle" fill="#A7F3D0" font-size="14" font-weight="bold" font-family="serif">ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے • بہت نکلے مرے ارمان لیکن پھر بھی کم نکلے</text>
-        <text x="250" y="98" text-anchor="middle" fill="#34D399" font-size="9">دکنی دور (سب رس) • دبستانِ دہلی و لکھنؤ • علی گڑھ تحریک • ترقی پسند تحریک</text>
+        <!-- Title at Top -->
+        <text x="250" y="45" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900" font-family="serif">URDU / اردو</text>
+        
+        <!-- Central Calligraphy Panel -->
+        <path d="M 100 80 L 400 80 L 420 120 L 400 160 L 100 160 L 80 120 Z" fill="#1E3A5F" stroke="#60A5FA" stroke-width="1.5"/>
+        <text x="250" y="115" text-anchor="middle" fill="#BFDBFE" font-size="14" font-family="serif">ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے</text>
+        <text x="250" y="135" text-anchor="middle" fill="#93C5FD" font-size="12" font-family="serif">بہت نکلے مرے ارمان لیکن پھر بھی کم نکلے</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#06382A" stroke="url(#greenUrdu)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="19" font-weight="900">اردو</text>
-        <text x="250" y="227" text-anchor="middle" fill="#34D399" font-size="10" font-weight="bold" letter-spacing="1">CODE 28</text>
+        <!-- Ghazal Structure Flow (RTL) -->
+        <!-- Right Box: Matla (x=360, w=90) -->
+        <rect x="360" y="200" width="90" height="40" rx="5" fill="#172554" stroke="#60A5FA" stroke-width="1"/>
+        <text x="405" y="225" text-anchor="middle" fill="#FFFFFF" font-size="12" font-family="serif">مطلع (Matla)</text>
 
-        <!-- Left Node: Classical Poetry -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#031A12" stroke="#065F46" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#A7F3D0" font-size="11" font-weight="bold">کلاسک شاعری</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">میر • سودا • غالب • مومن</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">میر انیس مرثیہ • ذوق</text>
+        <!-- Arrow RTL: 360 to 290 -->
+        <path d="M 360 220 L 290 220" stroke="#60A5FA" stroke-width="2" stroke-dasharray="4,4"/>
+        <polygon points="290,220 298,216 298,224" fill="#60A5FA"/>
 
-        <!-- Right Node: Modern Prose & Criticism -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#031A12" stroke="#065F46" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#A7F3D0" font-size="11" font-weight="bold">نثر و جدید تحریکیں</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">باغ و بہار • فسانۂ عجائب</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">پریم چند • منٹو • کلیم الدین</text>
+        <!-- Center Box: Sher (x=200, w=90) -->
+        <rect x="200" y="200" width="90" height="40" rx="5" fill="#172554" stroke="#60A5FA" stroke-width="1"/>
+        <text x="245" y="225" text-anchor="middle" fill="#FFFFFF" font-size="12" font-family="serif">شعر (Sher)</text>
 
-        <path d="M 175 210 L 195 210" stroke="#34D399" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#34D399" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Arrow RTL: 200 to 130 -->
+        <path d="M 200 220 L 130 220" stroke="#60A5FA" stroke-width="2" stroke-dasharray="4,4"/>
+        <polygon points="130,220 138,216 138,224" fill="#60A5FA"/>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">۱۰ معتمد یونٹس • ۲۰+ سالہ پچھلے پرچے (۲۰۰۴–۲۰۲۴)</text>
+        <!-- Left Box: Maqta (x=40, w=90) -->
+        <rect x="40" y="200" width="90" height="40" rx="5" fill="#172554" stroke="#60A5FA" stroke-width="1"/>
+        <text x="85" y="225" text-anchor="middle" fill="#FFFFFF" font-size="12" font-family="serif">مقطع (Maqta)</text>
+
+        <!-- Schools of thought / Dabistan -->
+        <text x="150" y="290" text-anchor="middle" fill="#93C5FD" font-size="12" font-family="serif">دبستان دہلی</text>
+        <circle cx="250" cy="286" r="4" fill="#60A5FA"/>
+        <text x="350" y="290" text-anchor="middle" fill="#93C5FD" font-size="12" font-family="serif">دبستان لکھنؤ</text>
+        
+        <!-- Inkpot & Qalam Silhouette -->
+        <path d="M 235 320 C 235 310, 265 310, 265 320 L 270 340 C 270 345, 230 345, 230 340 Z" fill="#60A5FA" opacity="0.7"/>
+        <path d="M 255 315 L 285 275 L 290 280 L 260 320 Z" fill="#93C5FD" opacity="0.9"/>
       </svg>
     `,
+    visualConcept: 'Nastaliq calligraphy mushaira panel with ghazal structure flow and zellige border',
   },
   pillars: [
     {
@@ -107,4 +124,6 @@ export const urduConfig: SubjectConfig = {
     'شعراء کے سالِ ولادت و وفات اور تصانیف کا ٹریکر',
     'NTA CBT کا اصل ٹیسٹ ماحول اور ٹائمر',
   ],
+  officialSyllabus: urduSyllabus,
+  syllabusSource: urduSyllabusSource,
 };

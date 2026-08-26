@@ -14,9 +14,18 @@ export default function NotFound() {
           404 Error
         </div>
         <h1 className="text-3xl font-black text-stone-900 mb-3">Page Not Found</h1>
-        <p className="text-stone-500 text-sm font-medium mb-8 leading-relaxed">
+        <p className="text-stone-500 text-sm font-medium mb-6 leading-relaxed">
           The page or learning topic you are looking for does not exist or has been relocated in the syllabus hierarchy.
         </p>
+
+        <form action="/search" method="GET" className="mb-8 max-w-sm mx-auto">
+          <input 
+            type="text" 
+            name="q" 
+            placeholder="Search for a question or topic..." 
+            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+          />
+        </form>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link

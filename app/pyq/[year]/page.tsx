@@ -8,6 +8,8 @@ import { formatTestDuration } from '@/lib/dateUtils';
 import { auth } from '@/lib/auth';
 import { verifyPaperAccess } from '@/lib/accessControl';
 
+import { getActiveSubjectServer } from '@/lib/subjectContext';
+
 export const metadata: Metadata = {
   title: 'Select Paper — PYQs',
   description: 'Choose the specific paper or part for the selected year.',
@@ -23,12 +25,14 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
 
   const session = await auth();
   const userId = session?.user?.id;
+  const activeSubject = await getActiveSubjectServer();
 
-  // Fetch actual papers for this year from the database
+  // Fetch actual papers for this year and active subject from the database
   const dbPapers = await prisma.examPaper.findMany({
     where: {
       year: yearInt,
       content_status: 'PUBLISHED',
+      subject_id: activeSubject.id,
     },
     orderBy: [{ is_paper_iii: 'asc' }, { id: 'asc' }],
   });
@@ -42,7 +46,7 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
       return {
         id: paper.id,
         title: paper.display_name || paper.paper_number,
-        subtitle: `(${paper.session || 'UGC NET Arabic'})`,
+        subtitle: `(${paper.session || `UGC NET ${activeSubject.name}`})`,
         questions: paper.total_questions,
         marks: paper.total_questions * 2,
         durationText: duration.formattedText,
@@ -59,7 +63,7 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-sm text-stone-500 mb-8">
           <Link href="/pyq" className="hover:text-primary transition-colors">
-            PYQs
+            PYQs ({activeSubject.name})
           </Link>
           <ChevronRight size={14} />
           <span className="font-semibold text-stone-900">{year}</span>
@@ -68,10 +72,19 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
         {/* Hero Section */}
         <div className="flex flex-col md:flex-row items-center justify-between bg-white rounded-3xl border border-stone-200/90 shadow-sm p-8 mb-8 overflow-hidden relative">
           <div className="flex-1 relative z-10">
-            <h1 className="text-4xl font-black text-stone-900 mb-2 tracking-tight">Year {year}</h1>
-            <p dir="rtl" className="text-2xl font-arabic font-bold text-amber-600 mb-4">
-              سنة {year}
-            </p>
+            <h1 className="text-4xl font-black text-stone-900 mb-2 tracking-tight">
+              {activeSubject.name} — Year {year}
+            </h1>
+            {activeSubject.name_native && (
+              <p
+                dir={activeSubject.direction}
+                className={`text-2xl font-bold text-amber-600 mb-4 ${
+                  activeSubject.direction === 'rtl' ? 'font-arabic' : 'font-sans'
+                }`}
+              >
+                {activeSubject.name_native} ({year})
+              </p>
+            )}
             <p className="text-stone-500 text-sm font-medium">
               Select the paper or part you want to practice under authentic NTA exam conditions.
             </p>

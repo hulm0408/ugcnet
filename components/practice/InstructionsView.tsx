@@ -19,9 +19,8 @@ export default function InstructionsView({ onStart, onBack, year = '2009', paper
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-stone-900 to-stone-600">UGC NET Arabic – {year}</h1>
-          <h2 className="text-2xl font-semibold text-stone-700 mt-1">{paper}</h2>
-          <p dir="rtl" className="text-xl font-arabic font-bold text-accent mt-2">تعليمات الامتحان</p>
+          <h1 className="text-3xl font-bold text-stone-900">{paper || `UGC NET Examination – ${year}`}</h1>
+          <p className="text-sm font-semibold text-stone-500 mt-1">Official NTA Computer-Based Test (CBT) Simulation</p>
         </div>
 
         <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col lg:flex-row">

@@ -94,7 +94,7 @@ export default async function AdminDashboard() {
           <div className="relative z-10">
             <div className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">Environment</div>
             <div className="inline-flex px-3 py-1 bg-white/10 text-white border border-white/20 rounded-lg text-sm font-medium backdrop-blur-md">
-              Production (Next.js 14)
+              Production (Next.js 16 App Router)
             </div>
           </div>
         </div>

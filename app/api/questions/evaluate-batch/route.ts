@@ -4,16 +4,11 @@ import prisma from '@/lib/db';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { answers } = body;
+    const { answers = {}, questionIds: rawQIds } = body;
 
-    if (!answers || typeof answers !== 'object') {
-      return NextResponse.json(
-        { error: 'answers object is required' },
-        { status: 400 }
-      );
-    }
-
-    const questionIds = Object.keys(answers);
+    const questionIds = Array.isArray(rawQIds) && rawQIds.length > 0
+      ? rawQIds
+      : Object.keys(answers);
 
     if (questionIds.length === 0) {
       return NextResponse.json({ results: {} });
@@ -39,9 +34,11 @@ export async function POST(request: Request) {
 
     for (const q of questions) {
       const selectedOption = answers[q.id];
-      const isCorrect = q.correct_answer === selectedOption;
+      const isAnswered = selectedOption !== undefined && selectedOption !== null && selectedOption !== '';
+      const isCorrect = isAnswered && q.correct_answer === selectedOption;
 
       results[q.id] = {
+        isAnswered,
         isCorrect,
         correctAnswer: q.correct_answer,
         correctText: q.correct_answer_text_arabic || q.correct_answer_text_english || null,

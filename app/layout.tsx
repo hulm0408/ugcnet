@@ -5,11 +5,42 @@ import Footer from '@/components/layout/Footer';
 import AuthSessionProvider from '@/components/AuthSessionProvider';
 import ToastHandler from '@/components/ui/ToastHandler';
 import { auth } from '@/lib/auth';
-import { Inter, Amiri } from 'next/font/google';
+import { Inter, Amiri, Noto_Naskh_Arabic, Noto_Sans_Devanagari, Noto_Serif_Bengali } from 'next/font/google';
 import prisma from '@/lib/db';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const amiri = Amiri({ subsets: ['arabic'], weight: ['400', '700'], variable: '--font-amiri' });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const amiri = Amiri({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-amiri',
+});
+
+const notoNaskh = Noto_Naskh_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-noto-naskh',
+});
+
+const notoDevanagari = Noto_Sans_Devanagari({
+  subsets: ['devanagari', 'latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+  variable: '--font-devanagari',
+});
+
+const notoBengali = Noto_Serif_Bengali({
+  subsets: ['bengali', 'latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+  variable: '--font-bengali',
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const totalQuestions = await prisma.question.count({ where: { content_status: 'PUBLISHED' } });
@@ -32,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'UGC NET preparation',
       'Arabic NET mock test',
     ],
-    authors: [{ name: 'Arabic NET/JRF Practice' }],
+    authors: [{ name: 'Arabic NET/JRF Academic Board' }],
     creator: 'Arabic NET/JRF Practice',
     openGraph: {
       type: 'website',
@@ -63,7 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     '@type': 'WebSite',
     name: 'Arabic NET/JRF Practice',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://arabic-net-jrf.vercel.app',
-    description: 'Practice UGC NET/JRF Arabic Previous Year Questions.',
+    description: 'Official UGC NET/JRF Arabic and Multi-Subject Preparation Platform.',
   };
 
   return (
@@ -74,7 +105,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`bg-[#FCFAF8] text-stone-900 min-h-screen flex flex-col antialiased ${inter.variable} ${amiri.variable}`}>
+      <body
+        className={`bg-[#FCFAF8] text-stone-900 min-h-screen flex flex-col antialiased ${inter.variable} ${amiri.variable} ${notoNaskh.variable} ${notoDevanagari.variable} ${notoBengali.variable} font-sans`}
+      >
         <AuthSessionProvider session={session}>
           {/* Sticky header — always on top via z-50 */}
           <Header user={session?.user || null} />

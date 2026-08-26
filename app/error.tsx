@@ -23,11 +23,14 @@ export default function GlobalError({
         </div>
 
         <h1 className="text-2xl font-black text-stone-900 mb-2">Something went wrong</h1>
-        <p className="text-stone-500 text-sm font-medium mb-6 leading-relaxed">
-          {error.message || 'An unexpected error occurred while loading this page. Please try again.'}
-        </p>
+        <div className="mb-6 space-y-2">
+          <p className="text-stone-500 text-sm font-medium leading-relaxed">
+            {error.message || 'An unexpected error occurred while loading this page. Please try again.'}
+          </p>
+          {error.digest && <p className="text-xs text-stone-400 font-mono">Error ID: {error.digest}</p>}
+        </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
           <button
             onClick={() => reset()}
             className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary-dark text-white font-bold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
@@ -39,6 +42,12 @@ export default function GlobalError({
             className="w-full sm:w-auto px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             <Home size={16} /> Go Home
+          </Link>
+        </div>
+        
+        <div className="mt-4 pt-4 border-t border-stone-100">
+          <Link href="/contact" className="text-xs text-emerald-600 hover:text-emerald-700 font-medium">
+            Report this issue
           </Link>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { managementSyllabus, managementSyllabusSource } from '../../data/syllabus/management';
 
 export const managementConfig: SubjectConfig = {
   code: '17',
@@ -15,46 +16,63 @@ export const managementConfig: SubjectConfig = {
     surfaceGradient: 'from-[#0A1A40] to-[#020614]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Porter 5 Forces diamond with directional pressure arrows and BCG matrix corner',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgMgmt" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#0F285C" />
-            <stop offset="100%" stop-color="#030A19" />
+            <stop offset="0%" stop-color="#020617" />
+            <stop offset="100%" stop-color="#0F172A" />
           </linearGradient>
-          <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#60A5FA" />
-            <stop offset="100%" stop-color="#3B82F6" />
+          <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1E3A8A" />
+            <stop offset="100%" stop-color="#1E40AF" />
           </linearGradient>
         </defs>
         <rect width="500" height="360" rx="20" fill="url(#bgMgmt)" stroke="#1E40AF" stroke-width="1.5" />
+        
+        <!-- BCG Matrix in Corner (Top Right) -->
+        <rect x="370" y="30" width="80" height="80" fill="#0F172A" stroke="#3B82F6" stroke-width="1" />
+        <line x1="410" y1="30" x2="410" y2="110" stroke="#3B82F6" stroke-width="1" stroke-dasharray="2,2" />
+        <line x1="370" y1="70" x2="450" y2="70" stroke="#3B82F6" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="390" y="55" text-anchor="middle" fill="#93C5FD" font-size="12">★</text>
+        <text x="430" y="55" text-anchor="middle" fill="#93C5FD" font-size="12">?</text>
+        <text x="390" y="95" text-anchor="middle" fill="#93C5FD" font-size="12">$</text>
+        <text x="430" y="95" text-anchor="middle" fill="#93C5FD" font-size="10">Dog</text>
 
-        <!-- Strategic Management Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#07193D" stroke="#2563EB" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#DBEAFE" font-size="12" font-weight="bold">PORTER 5 FORCES • BCG MATRIX (STARS, CASH COWS, DOGS) • CAPM & BLACK-SCHOLES</text>
-        <text x="250" y="98" text-anchor="middle" fill="#60A5FA" font-size="9">Kotler 4Ps & STP • Maslow & Herzberg 2-Factor • Six Sigma DMAIC • EOQ Formula</text>
+        <!-- Main Title -->
+        <text x="250" y="50" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900" letter-spacing="2">MANAGEMENT</text>
+        <text x="250" y="70" text-anchor="middle" fill="#60A5FA" font-size="12" font-weight="bold" letter-spacing="1">PORTER'S 5 FORCES</text>
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#0A204C" stroke="url(#blueGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="900">MANAGEMENT</text>
-        <text x="250" y="227" text-anchor="middle" fill="#60A5FA" font-size="10" font-weight="bold" letter-spacing="1">CODE 17</text>
+        <!-- Pentagon/Diamond shape for 5 Forces -->
+        <!-- Center Box: Industry Rivalry -->
+        <rect x="180" y="160" width="140" height="70" rx="4" fill="url(#diamondGrad)" stroke="#60A5FA" stroke-width="2" />
+        <text x="250" y="195" text-anchor="middle" fill="#DBEAFE" font-size="12" font-weight="bold">INDUSTRY</text>
+        <text x="250" y="215" text-anchor="middle" fill="#DBEAFE" font-size="11">RIVALRY</text>
 
-        <!-- Left Node: Strategy & Marketing -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#051433" stroke="#1E40AF" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">Strategy & Marketing</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Porter Generic Strategies</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Kotler STP • Brand Equity</text>
+        <!-- Top: New Entrants -->
+        <text x="250" y="105" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">THREAT OF NEW ENTRANTS</text>
+        <path d="M 250 115 L 250 150" stroke="#3B82F6" stroke-width="2" />
+        <polygon points="246,146 254,146 250,154" fill="#3B82F6" />
 
-        <!-- Right Node: Finance & Operations -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#051433" stroke="#1E40AF" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">Finance & Operations</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Capital Budgeting • Black-Scholes</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Six Sigma • CPM & PERT</text>
+        <!-- Bottom: Substitutes -->
+        <text x="250" y="305" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">THREAT OF SUBSTITUTES</text>
+        <path d="M 250 280 L 250 240" stroke="#3B82F6" stroke-width="2" />
+        <polygon points="246,244 254,244 250,236" fill="#3B82F6" />
 
-        <path d="M 175 210 L 195 210" stroke="#60A5FA" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#60A5FA" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Left: Suppliers -->
+        <text x="80" y="195" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">BARGAINING</text>
+        <text x="80" y="210" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">POWER OF</text>
+        <text x="80" y="225" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">SUPPLIERS</text>
+        <path d="M 130 195 L 170 195" stroke="#3B82F6" stroke-width="2" />
+        <polygon points="166,191 166,199 174,195" fill="#3B82F6" />
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Right: Buyers -->
+        <text x="420" y="195" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">BARGAINING</text>
+        <text x="420" y="210" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">POWER OF</text>
+        <text x="420" y="225" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="bold">BUYERS</text>
+        <path d="M 370 195 L 330 195" stroke="#3B82F6" stroke-width="2" />
+        <polygon points="334,191 334,199 326,195" fill="#3B82F6" />
       </svg>
     `,
   },
@@ -107,4 +125,6 @@ export const managementConfig: SubjectConfig = {
     'Strategy Frameworks, Financial Formulas & OB Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: managementSyllabus,
+  syllabusSource: managementSyllabusSource,
 };

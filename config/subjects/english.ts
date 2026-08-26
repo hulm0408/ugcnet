@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { englishSyllabus, englishSyllabusSource } from '../../data/syllabus/english';
 
 export const englishConfig: SubjectConfig = {
   code: '30',
@@ -15,6 +16,7 @@ export const englishConfig: SubjectConfig = {
     surfaceGradient: 'from-[#2A0617] to-[#0A0105]',
     fontFamily: 'font-serif',
     scriptDirection: 'ltr',
+    visualConcept: 'Open book with literary timeline spine from Old English to Postcolonial',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
@@ -22,39 +24,75 @@ export const englishConfig: SubjectConfig = {
             <stop offset="0%" stop-color="#3B0720" />
             <stop offset="100%" stop-color="#12010A" />
           </linearGradient>
-          <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#F472B6" />
-            <stop offset="100%" stop-color="#DB2777" />
+          <linearGradient id="spineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#DB2777" />
+            <stop offset="100%" stop-color="#831843" />
           </linearGradient>
         </defs>
         <rect width="500" height="360" rx="20" fill="url(#bgEng)" stroke="#831843" stroke-width="1.5" />
 
-        <!-- First Folio Silhouette Header -->
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1C030F" stroke="#9D174D" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#FBCFE8" font-size="12" font-weight="bold">MR. WILLIAM SHAKESPEARES COMEDIES, HISTORIES, & TRAGEDIES (FIRST FOLIO 1623)</text>
-        <text x="250" y="98" text-anchor="middle" fill="#F472B6" font-size="9">From Old English Beowulf to Post-Structuralism & Deconstruction</text>
+        <!-- Open Book Base -->
+        <path d="M 250 50 C 350 30, 450 60, 450 60 L 450 300 C 450 300, 350 270, 250 290 Z" fill="#2A0617" stroke="#DB2777" stroke-width="1" />
+        <path d="M 250 50 C 150 30, 50 60, 50 60 L 50 300 C 50 300, 150 270, 250 290 Z" fill="#2A0617" stroke="#DB2777" stroke-width="1" />
+        
+        <!-- Book Pages layers -->
+        <path d="M 250 40 C 340 20, 440 50, 440 50 L 440 290 C 440 290, 340 260, 250 280 Z" fill="#18030D" stroke="#9D174D" stroke-width="1" />
+        <path d="M 250 40 C 160 20, 60 50, 60 50 L 60 290 C 60 290, 160 260, 250 280 Z" fill="#18030D" stroke="#9D174D" stroke-width="1" />
 
-        <!-- Center Emblem -->
-        <circle cx="250" cy="210" r="55" fill="#240414" stroke="url(#roseGrad)" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="900">ENGLISH</text>
-        <text x="250" y="227" text-anchor="middle" fill="#F472B6" font-size="10" font-weight="bold" letter-spacing="1">CODE 30</text>
+        <!-- Timeline Spine -->
+        <rect x="242" y="30" width="16" height="270" fill="url(#spineGrad)" rx="5" />
+        
+        <!-- Timeline Nodes and Labels -->
+        <!-- Old English -->
+        <circle cx="250" cy="70" r="4" fill="#FBCFE8" />
+        <path d="M 250 70 L 200 70" stroke="#DB2777" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="190" y="73" text-anchor="end" fill="#F472B6" font-size="12" font-weight="bold">Old English</text>
+        <text x="190" y="86" text-anchor="end" fill="#94A3B8" font-size="10">Beowulf</text>
 
-        <!-- Left Node: British & American -->
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#18030D" stroke="#831843" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#FBCFE8" font-size="11" font-weight="bold">British & American</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Chaucer • Milton • Wordsworth</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Eliot • Joyce • Morrison</text>
+        <!-- Renaissance -->
+        <circle cx="250" cy="110" r="4" fill="#FBCFE8" />
+        <path d="M 250 110 L 300 110" stroke="#DB2777" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="310" y="113" text-anchor="start" fill="#F472B6" font-size="12" font-weight="bold">Renaissance</text>
+        <text x="310" y="126" text-anchor="start" fill="#94A3B8" font-size="10">Shakespeare</text>
 
-        <!-- Right Node: Theory & Postcolonial -->
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#18030D" stroke="#831843" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#FBCFE8" font-size="11" font-weight="bold">Theory & Cultural</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Derrida • Foucault • Said</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Achebe • Rushdie • Spivak</text>
+        <!-- Romantic -->
+        <circle cx="250" cy="150" r="4" fill="#FBCFE8" />
+        <path d="M 250 150 L 200 150" stroke="#DB2777" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="190" y="153" text-anchor="end" fill="#F472B6" font-size="12" font-weight="bold">Romantic</text>
+        <text x="190" y="166" text-anchor="end" fill="#94A3B8" font-size="10">Wordsworth</text>
 
-        <path d="M 175 210 L 195 210" stroke="#F472B6" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#F472B6" stroke-width="2" stroke-dasharray="3,3" />
+        <!-- Victorian -->
+        <circle cx="250" cy="190" r="4" fill="#FBCFE8" />
+        <path d="M 250 190 L 300 190" stroke="#DB2777" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="310" y="193" text-anchor="start" fill="#F472B6" font-size="12" font-weight="bold">Victorian</text>
+        <text x="310" y="206" text-anchor="start" fill="#94A3B8" font-size="10">Dickens</text>
 
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+        <!-- Modern -->
+        <circle cx="250" cy="230" r="4" fill="#FBCFE8" />
+        <path d="M 250 230 L 200 230" stroke="#DB2777" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="190" y="233" text-anchor="end" fill="#F472B6" font-size="12" font-weight="bold">Modern</text>
+        <text x="190" y="246" text-anchor="end" fill="#94A3B8" font-size="10">Eliot</text>
+
+        <!-- Postcolonial -->
+        <circle cx="250" cy="270" r="4" fill="#FBCFE8" />
+        <path d="M 250 270 L 300 270" stroke="#DB2777" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="310" y="273" text-anchor="start" fill="#F472B6" font-size="12" font-weight="bold">Postcolonial</text>
+        <text x="310" y="286" text-anchor="start" fill="#94A3B8" font-size="10">Rushdie</text>
+
+        <!-- Quill Pen -->
+        <path d="M 380 200 Q 360 140 420 100 Q 400 150 380 200 Z" fill="#9D174D" stroke="#F472B6" stroke-width="1" />
+        <path d="M 380 200 L 370 230" stroke="#F472B6" stroke-width="2" />
+        
+        <!-- Ink Splatters -->
+        <circle cx="365" cy="240" r="2" fill="#DB2777" />
+        <circle cx="375" cy="245" r="1.5" fill="#DB2777" />
+        <circle cx="360" cy="230" r="1" fill="#DB2777" />
+
+        <!-- Theatrical Masks near Renaissance -->
+        <circle cx="380" cy="115" r="6" fill="none" stroke="#F472B6" stroke-width="1" />
+        <circle cx="388" cy="120" r="6" fill="none" stroke="#DB2777" stroke-width="1" />
+
+        <text x="250" y="340" text-anchor="middle" fill="#FBCFE8" font-size="18" font-weight="900">ENGLISH (CODE 30)</text>
       </svg>
     `,
   },
@@ -107,4 +145,6 @@ export const englishConfig: SubjectConfig = {
     'Critical Theory, Chronology & Text Mistake Tracker',
     'Official NTA CBT Mock Simulator with Countdown Timer',
   ],
+  officialSyllabus: englishSyllabus,
+  syllabusSource: englishSyllabusSource,
 };

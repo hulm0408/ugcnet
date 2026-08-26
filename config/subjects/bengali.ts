@@ -1,4 +1,5 @@
 import { SubjectConfig } from './types';
+import { bengaliSyllabus, bengaliSyllabusSource } from '../../data/syllabus/bengali';
 
 export const bengaliConfig: SubjectConfig = {
   code: '19',
@@ -18,48 +19,69 @@ export const bengaliConfig: SubjectConfig = {
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
-          <linearGradient id="bgBengali" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#3B071E" />
-            <stop offset="100%" stop-color="#14020A" />
+          <linearGradient id="bgBeng" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2A0818" />
+            <stop offset="100%" stop-color="#0D0207" />
           </linearGradient>
-          <linearGradient id="goldBengali" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#F59E0B" />
-            <stop offset="100%" stop-color="#F97316" />
+          <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#D97706" />
+            <stop offset="50%" stop-color="#F59E0B" />
+            <stop offset="100%" stop-color="#D97706" />
           </linearGradient>
+          <filter id="roughEdge">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
         </defs>
-        <rect width="500" height="360" rx="20" fill="url(#bgBengali)" stroke="#831843" stroke-width="1.5" />
-        
-        <!-- Charyapada Palm Leaf Manuscript Silhouette -->
-        <rect x="50" y="70" width="400" height="65" rx="8" fill="#1C040E" stroke="#9D174D" stroke-width="1.5" />
-        <line x1="70" y1="90" x2="430" y2="90" stroke="#F59E0B" stroke-width="1" stroke-dasharray="6,4" opacity="0.6" />
-        <line x1="70" y1="110" x2="380" y2="110" stroke="#F59E0B" stroke-width="1" stroke-dasharray="6,4" opacity="0.6" />
-        <text x="250" y="105" text-anchor="middle" fill="#FDE68A" font-size="13" font-weight="bold">॥ কাআ তরুবর পঞ্চবি ডাল • চঞ্চল চীএ পইঠো কাল ॥</text>
-        
-        <!-- Center Emblem: Bengali Renaissance & Modernism Hub -->
-        <circle cx="250" cy="225" r="55" fill="#2A0818" stroke="url(#goldBengali)" stroke-width="2.5" />
-        <text x="250" y="220" text-anchor="middle" fill="#FFFFFF" font-size="22" font-weight="900">বাংলা</text>
-        <text x="250" y="240" text-anchor="middle" fill="#F472B6" font-size="10" font-weight="bold" letter-spacing="1">CODE 19</text>
-        
-        <!-- Left Pillar: Ancient/Medieval -->
-        <rect x="50" y="180" width="120" height="90" rx="12" fill="#1A030D" stroke="#831843" stroke-width="1" />
-        <text x="110" y="210" text-anchor="middle" fill="#F472B6" font-size="11" font-weight="bold">প্রাচীন ও মধ্যযুগ</text>
-        <text x="110" y="230" text-anchor="middle" fill="#D1D5DB" font-size="9">চর্যাপদ • মঙ্গলকাব্য</text>
-        <text x="110" y="248" text-anchor="middle" fill="#9CA3AF" font-size="8">শ্রীকৃষ্ণকীর্তন • পদাবলী</text>
-        
-        <!-- Right Pillar: Modern Era -->
-        <rect x="330" y="180" width="120" height="90" rx="12" fill="#1A030D" stroke="#831843" stroke-width="1" />
-        <text x="390" y="210" text-anchor="middle" fill="#F472B6" font-size="11" font-weight="bold">আধুনিক যুগ</text>
-        <text x="390" y="230" text-anchor="middle" fill="#D1D5DB" font-size="9">রবীন্দ্র • কল্লোল যুগ</text>
-        <text x="390" y="248" text-anchor="middle" fill="#9CA3AF" font-size="8">কথাসাহিত্য ও নাটক</text>
-        
-        <!-- Connecting Vectors -->
-        <path d="M 170 225 L 195 225" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 225 L 330 225" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
-        
-        <!-- Bottom Banner -->
-        <text x="250" y="320" text-anchor="middle" fill="#9CA3AF" font-size="10" font-weight="bold">১০টি অফিশিয়াল ইউনিট • বিগত ২০ বছরের NTA প্রশ্নব্যাংক</text>
+        <rect width="500" height="360" rx="20" fill="url(#bgBeng)" />
+
+        <!-- Subject Title -->
+        <text x="30" y="40" fill="#F97316" font-size="18" font-weight="900" font-family="sans-serif">বাংলা</text>
+        <text x="30" y="58" fill="#FCA5A5" font-size="12" font-family="sans-serif">CODE 19 • সাহিত্য ও সংস্কৃতি</text>
+
+        <!-- Palm Leaf Manuscript -->
+        <g transform="translate(20, 110)">
+          <!-- Leaf Shape -->
+          <path d="M 20 40 Q 230 10, 440 40 Q 460 50, 440 60 Q 230 90, 20 60 Q 0 50, 20 40 Z" fill="url(#leafGrad)" filter="url(#roughEdge)" opacity="0.9" />
+          <path d="M 20 40 Q 230 10, 440 40 Q 460 50, 440 60 Q 230 90, 20 60 Q 0 50, 20 40 Z" fill="none" stroke="#78350F" stroke-width="1.5" />
+          
+          <!-- Etched lines on leaf -->
+          <path d="M 50 35 Q 230 20, 410 35" fill="none" stroke="#78350F" stroke-width="0.5" opacity="0.5" />
+          <path d="M 45 50 Q 230 35, 415 50" fill="none" stroke="#78350F" stroke-width="0.5" opacity="0.5" />
+          <path d="M 50 65 Q 230 50, 410 65" fill="none" stroke="#78350F" stroke-width="0.5" opacity="0.5" />
+
+          <!-- Binding Holes and Cord -->
+          <circle cx="150" cy="50" r="4" fill="#2A0818" />
+          <circle cx="310" cy="50" r="4" fill="#2A0818" />
+          <path d="M 150 50 C 140 20, 160 -10, 180 -30" fill="none" stroke="#92400E" stroke-width="2" stroke-dasharray="2,2" />
+          <path d="M 310 50 C 300 20, 320 -10, 340 -30" fill="none" stroke="#92400E" stroke-width="2" stroke-dasharray="2,2" />
+
+          <!-- Charyapada Text -->
+          <text x="230" y="47" fill="#451A03" font-size="12" font-weight="bold" text-anchor="middle" opacity="0.8">॥ কাআ তরুবর পঞ্চবি ডাল ॥</text>
+          <text x="230" y="62" fill="#451A03" font-size="12" font-weight="bold" text-anchor="middle" opacity="0.8">॥ চঞ্চল চীএ পইঠো কাল ॥</text>
+        </g>
+
+        <!-- Timeline Ribbon -->
+        <g transform="translate(50, 260)">
+          <path d="M 0 20 L 400 20" fill="none" stroke="#831843" stroke-width="4" />
+          <path d="M 0 20 L 400 20" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="8,4" />
+          
+          <!-- Nodes -->
+          <circle cx="0" cy="20" r="6" fill="#F97316" />
+          <text x="0" y="10" fill="#FCA5A5" font-size="10" font-weight="bold" text-anchor="middle">আদিযুগ (950)</text>
+
+          <circle cx="130" cy="20" r="6" fill="#F97316" />
+          <text x="130" y="40" fill="#FCA5A5" font-size="10" font-weight="bold" text-anchor="middle">মধ্যযুগ (1350)</text>
+
+          <circle cx="260" cy="20" r="6" fill="#F97316" />
+          <text x="260" y="10" fill="#FCA5A5" font-size="10" font-weight="bold" text-anchor="middle">আধুনিক (1800)</text>
+
+          <circle cx="390" cy="20" r="6" fill="#F97316" />
+          <text x="390" y="40" fill="#FCA5A5" font-size="10" font-weight="bold" text-anchor="middle">রবীন্দ্র (1861)</text>
+        </g>
       </svg>
     `,
+    visualConcept: 'Palm-leaf (tala patra) manuscript with Charyapada verse and literary period timeline',
   },
   pillars: [
     {
@@ -110,4 +132,6 @@ export const bengaliConfig: SubjectConfig = {
     'ভুলত্রুটি ট্র্যাকার ও দুর্বল টপিক চিহ্নিতকরণ',
     'NTA CBT অফিশিয়াল পরীক্ষা সিমুলেটর ও টাইমার',
   ],
+  officialSyllabus: bengaliSyllabus,
+  syllabusSource: bengaliSyllabusSource,
 };

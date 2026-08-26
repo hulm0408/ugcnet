@@ -75,36 +75,57 @@ function buildDynamicDisciplineTheme(slug: string, name: string, code: string, i
       surfaceGradient: 'from-[#2C0717] to-[#0A0105]',
       fontFamily: isRtl ? 'font-arabic' : 'font-serif',
       scriptDirection: isRtl ? 'rtl' : 'ltr',
+      visualConcept: 'Parchment manuscript with calligraphic quill and literary evolution ribbon',
       heroSvgIllustration: `
         <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
           <defs>
             <linearGradient id="bgLang_${code}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#3B0820" />
-              <stop offset="100%" stop-color="#12010A" />
+              <stop offset="0%" stop-color="#2D0818" />
+              <stop offset="100%" stop-color="#0F0208" />
             </linearGradient>
-            <linearGradient id="goldLang_${code}" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="parchmentGrad_${code}" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#3D1224" />
+              <stop offset="100%" stop-color="#220612" />
+            </linearGradient>
+            <linearGradient id="goldRibbon_${code}" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#F59E0B" />
-              <stop offset="100%" stop-color="#F97316" />
+              <stop offset="100%" stop-color="#D97706" />
             </linearGradient>
           </defs>
+          <!-- Background -->
           <rect width="500" height="360" rx="20" fill="url(#bgLang_${code})" stroke="#9D174D" stroke-width="1.5" />
-          <rect x="50" y="55" width="400" height="55" rx="8" fill="#1C030F" stroke="#BE185D" stroke-width="1.5" />
-          <text x="250" y="78" text-anchor="middle" fill="#FDE68A" font-size="12" font-weight="bold">${nativeName} • CLASSICAL CANON & MODERN PROSE</text>
-          <text x="250" y="98" text-anchor="middle" fill="#F472B6" font-size="9">Grammar • Prosody • Poetics • Drama • Historical Linguistics</text>
-          <circle cx="250" cy="210" r="55" fill="#240314" stroke="url(#goldLang_${code})" stroke-width="2.5" />
-          <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="900">${name.toUpperCase().slice(0, 14)}</text>
-          <text x="250" y="227" text-anchor="middle" fill="#FDE68A" font-size="10" font-weight="bold" letter-spacing="1">CODE ${code}</text>
-          <rect x="45" y="165" width="130" height="90" rx="12" fill="#17020D" stroke="#831843" stroke-width="1" />
-          <text x="110" y="195" text-anchor="middle" fill="#FBCFE8" font-size="11" font-weight="bold">Classical Literature</text>
-          <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Epics • Poetry • Heritage</text>
-          <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Chhandas • Alankara</text>
-          <rect x="325" y="165" width="130" height="90" rx="12" fill="#17020D" stroke="#831843" stroke-width="1" />
-          <text x="390" y="195" text-anchor="middle" fill="#FBCFE8" font-size="11" font-weight="bold">Modern & Criticism</text>
-          <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Novels • Short Fiction</text>
-          <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Literary Movements</text>
-          <path d="M 175 210 L 195 210" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
-          <path d="M 305 210 L 325 210" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,3" />
-          <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+
+          <!-- Unfurled Manuscript Parchment Shape -->
+          <path d="M 50 70 Q 250 55 450 70 L 440 270 Q 250 290 60 270 Z" fill="url(#parchmentGrad_${code})" stroke="#BE185D" stroke-width="1.5" />
+          
+          <!-- Top Discipline Banner -->
+          <path d="M 90 90 L 410 90" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,4" />
+          <text x="250" y="115" text-anchor="middle" fill="#FDE68A" font-size="14" font-weight="900" letter-spacing="1.5">${name.toUpperCase()}</text>
+          <text x="250" y="133" text-anchor="middle" fill="#F472B6" font-size="10" font-weight="bold">CODE ${code} • OFFICIAL NTA CURRICULUM</text>
+          
+          <!-- Classical Literary Canon Lines -->
+          <g stroke="#9D174D" stroke-width="1" opacity="0.6">
+            <line x1="100" y1="160" x2="400" y2="160" />
+            <line x1="100" y1="185" x2="400" y2="185" />
+            <line x1="100" y1="210" x2="400" y2="210" />
+          </g>
+
+          <!-- Literary Taxonomy Pills -->
+          <rect x="95" y="150" width="85" height="20" rx="4" fill="#500724" stroke="#F59E0B" stroke-width="1" />
+          <text x="137" y="164" text-anchor="middle" fill="#FDE68A" font-size="8" font-weight="bold">Classical Canon</text>
+
+          <rect x="200" y="175" width="100" height="20" rx="4" fill="#500724" stroke="#BE185D" stroke-width="1" />
+          <text x="250" y="189" text-anchor="middle" fill="#FBCFE8" font-size="8" font-weight="bold">Poetics &amp; Prosody</text>
+
+          <rect x="320" y="200" width="85" height="20" rx="4" fill="#500724" stroke="#F59E0B" stroke-width="1" />
+          <text x="362" y="214" text-anchor="middle" fill="#FDE68A" font-size="8" font-weight="bold">Modern Prose</text>
+
+          <!-- Quill Pen Silhouette -->
+          <path d="M 410 80 Q 430 140 440 220 Q 425 210 415 170 Z" fill="url(#goldRibbon_${code})" opacity="0.85" />
+
+          <!-- Bottom Timeline Ribbon -->
+          <path d="M 70 300 Q 250 285 430 300 L 420 325 Q 250 310 80 325 Z" fill="#1C030F" stroke="#F59E0B" stroke-width="1" />
+          <text x="250" y="316" text-anchor="middle" fill="#FDE68A" font-size="10" font-weight="bold">Ancient Traditions ➔ Medieval Bhakti ➔ Modern Era</text>
         </svg>
       `,
     };
@@ -126,36 +147,57 @@ function buildDynamicDisciplineTheme(slug: string, name: string, code: string, i
       surfaceGradient: 'from-[#05212B] to-[#010B0E]',
       fontFamily: 'font-sans',
       scriptDirection: 'ltr',
+      visualConcept: 'Oscilloscope data bus with coordinate matrix grid and analytical waveform',
       heroSvgIllustration: `
         <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
           <defs>
             <linearGradient id="bgSci_${code}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#08303E" />
-              <stop offset="100%" stop-color="#021015" />
+              <stop offset="0%" stop-color="#041E28" />
+              <stop offset="100%" stop-color="#010B0F" />
             </linearGradient>
-            <linearGradient id="cyanSci_${code}" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#22D3EE" />
-              <stop offset="100%" stop-color="#06B6D4" />
+            <linearGradient id="cyanWave_${code}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#06B6D4" />
+              <stop offset="50%" stop-color="#22D3EE" />
+              <stop offset="100%" stop-color="#38BDF8" />
             </linearGradient>
           </defs>
+          <!-- Background -->
           <rect width="500" height="360" rx="20" fill="url(#bgSci_${code})" stroke="#0E7490" stroke-width="1.5" />
-          <rect x="50" y="55" width="400" height="55" rx="8" fill="#041920" stroke="#0891B2" stroke-width="1.5" />
-          <text x="250" y="78" text-anchor="middle" fill="#CFFAFE" font-size="12" font-weight="bold">${name.toUpperCase()} • SCIENTIFIC METHODS & PROTOCOLS</text>
-          <text x="250" y="98" text-anchor="middle" fill="#22D3EE" font-size="9">Experimental Design • Standards • Analytics • Information Systems</text>
-          <circle cx="250" cy="210" r="55" fill="#062633" stroke="url(#cyanSci_${code})" stroke-width="2.5" />
-          <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="900">${name.toUpperCase().slice(0, 14)}</text>
-          <text x="250" y="227" text-anchor="middle" fill="#22D3EE" font-size="10" font-weight="bold" letter-spacing="1">CODE ${code}</text>
-          <rect x="45" y="165" width="130" height="90" rx="12" fill="#031B24" stroke="#0E7490" stroke-width="1" />
-          <text x="110" y="195" text-anchor="middle" fill="#A5F3FC" font-size="11" font-weight="bold">Core Foundations</text>
-          <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Principles • Standards</text>
-          <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Methodologies</text>
-          <rect x="325" y="165" width="130" height="90" rx="12" fill="#031B24" stroke="#0E7490" stroke-width="1" />
-          <text x="390" y="195" text-anchor="middle" fill="#A5F3FC" font-size="11" font-weight="bold">Applied & Systems</text>
-          <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Analytics • Case Studies</text>
-          <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Practical Protocols</text>
-          <path d="M 175 210 L 195 210" stroke="#22D3EE" stroke-width="2" stroke-dasharray="3,3" />
-          <path d="M 305 210 L 325 210" stroke="#22D3EE" stroke-width="2" stroke-dasharray="3,3" />
-          <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+
+          <!-- Oscilloscope / Scientific Grid -->
+          <g stroke="#0E4A5C" stroke-width="0.75" opacity="0.6">
+            <line x1="50" y1="100" x2="450" y2="100" />
+            <line x1="50" y1="160" x2="450" y2="160" />
+            <line x1="50" y1="220" x2="450" y2="220" />
+            <line x1="50" y1="280" x2="450" y2="280" />
+            <line x1="130" y1="50" x2="130" y2="310" />
+            <line x1="210" y1="50" x2="210" y2="310" />
+            <line x1="290" y1="50" x2="290" y2="310" />
+            <line x1="370" y1="50" x2="370" y2="310" />
+          </g>
+
+          <!-- Top Terminal Header -->
+          <rect x="50" y="45" width="400" height="40" rx="6" fill="#03161E" stroke="#0891B2" stroke-width="1" />
+          <text x="70" y="69" fill="#22D3EE" font-size="11" font-family="monospace" font-weight="bold">> SYSTEM_${code} // ${name.toUpperCase().slice(0, 24)}</text>
+          <circle cx="430" cy="65" r="4" fill="#10B981" />
+
+          <!-- Scientific Waveform Path -->
+          <path d="M 50 190 Q 110 100 170 190 T 290 190 T 410 190 L 450 190" fill="none" stroke="url(#cyanWave_${code})" stroke-width="3" />
+          
+          <!-- Sample Data Points / Sensors -->
+          <circle cx="170" cy="190" r="5" fill="#22D3EE" stroke="#FFFFFF" stroke-width="1.5" />
+          <circle cx="290" cy="190" r="5" fill="#22D3EE" stroke="#FFFFFF" stroke-width="1.5" />
+          <circle cx="230" cy="135" r="4" fill="#F59E0B" />
+          <text x="230" y="125" text-anchor="middle" fill="#FDE68A" font-size="8" font-family="monospace">PEAK_ANALYSIS</text>
+
+          <!-- Metrics Telemetry Box -->
+          <rect x="50" y="240" width="180" height="60" rx="8" fill="#03161E" stroke="#0E7490" stroke-width="1" />
+          <text x="65" y="260" fill="#67E8F9" font-size="9" font-family="monospace" font-weight="bold">PROTOCOL: VERIFIED NTA</text>
+          <text x="65" y="278" fill="#94A3B8" font-size="8" font-family="monospace">10 Empirical Units • 20+ Yrs</text>
+
+          <rect x="270" y="240" width="180" height="60" rx="8" fill="#03161E" stroke="#0E7490" stroke-width="1" />
+          <text x="285" y="260" fill="#67E8F9" font-size="9" font-family="monospace" font-weight="bold">METHODOLOGY: APPLIED</text>
+          <text x="285" y="278" fill="#94A3B8" font-size="8" font-family="monospace">Laboratory &amp; Field Analytics</text>
         </svg>
       `,
     };
@@ -168,36 +210,51 @@ function buildDynamicDisciplineTheme(slug: string, name: string, code: string, i
     surfaceGradient: 'from-[#2A0E06] to-[#0A0301]',
     fontFamily: 'font-sans',
     scriptDirection: 'ltr',
+    visualConcept: 'Pillars of knowledge architectural pediment with foundational theory base',
     heroSvgIllustration: `
       <svg viewBox="0 0 500 360" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="select-none">
         <defs>
           <linearGradient id="bgSoc_${code}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#361309" />
-            <stop offset="100%" stop-color="#120502" />
+            <stop offset="0%" stop-color="#260C05" />
+            <stop offset="100%" stop-color="#0D0301" />
           </linearGradient>
-          <linearGradient id="orangeSoc_${code}" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#FB923C" />
-            <stop offset="100%" stop-color="#EA580C" />
+          <linearGradient id="orangePillar_${code}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#EA580C" />
+            <stop offset="100%" stop-color="#9A3412" />
           </linearGradient>
         </defs>
+        <!-- Background -->
         <rect width="500" height="360" rx="20" fill="url(#bgSoc_${code})" stroke="#9A3412" stroke-width="1.5" />
-        <rect x="50" y="55" width="400" height="55" rx="8" fill="#1A0904" stroke="#C2410C" stroke-width="1.5" />
-        <text x="250" y="78" text-anchor="middle" fill="#FFEDD5" font-size="12" font-weight="bold">${name.toUpperCase()} • THEORETICAL FOUNDATIONS & RESEARCH</text>
-        <text x="250" y="98" text-anchor="middle" fill="#FB923C" font-size="9">Conceptual Paradigms • Structural Models • Qualitative & Empirical Methods</text>
-        <circle cx="250" cy="210" r="55" fill="#240C05" stroke="url(#orangeSoc_${code})" stroke-width="2.5" />
-        <text x="250" y="205" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="900">${name.toUpperCase().slice(0, 14)}</text>
-        <text x="250" y="227" text-anchor="middle" fill="#FB923C" font-size="10" font-weight="bold" letter-spacing="1">CODE ${code}</text>
-        <rect x="45" y="165" width="130" height="90" rx="12" fill="#170703" stroke="#7C2D12" stroke-width="1" />
-        <text x="110" y="195" text-anchor="middle" fill="#FED7AA" font-size="11" font-weight="bold">Core Concepts</text>
-        <text x="110" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Thinkers • Theories</text>
-        <text x="110" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Foundational Axioms</text>
-        <rect x="325" y="165" width="130" height="90" rx="12" fill="#170703" stroke="#7C2D12" stroke-width="1" />
-        <text x="390" y="195" text-anchor="middle" fill="#FED7AA" font-size="11" font-weight="bold">Research & Policy</text>
-        <text x="390" y="215" text-anchor="middle" fill="#E2E8F0" font-size="9">Methods • Fieldwork</text>
-        <text x="390" y="233" text-anchor="middle" fill="#94A3B8" font-size="8">Contemporary Trends</text>
-        <path d="M 175 210 L 195 210" stroke="#FB923C" stroke-width="2" stroke-dasharray="3,3" />
-        <path d="M 305 210 L 325 210" stroke="#FB923C" stroke-width="2" stroke-dasharray="3,3" />
-        <text x="250" y="315" text-anchor="middle" fill="#94A3B8" font-size="10" font-weight="bold">10 Official Units • 20+ Years NTA Archive (2004–2024)</text>
+
+        <!-- Classical Pediment (Triangle Roof) -->
+        <polygon points="250,55 70,110 430,110" fill="#1C0904" stroke="#EA580C" stroke-width="2" />
+        <text x="250" y="95" text-anchor="middle" fill="#FFEDD5" font-size="12" font-weight="900" letter-spacing="2">${name.toUpperCase().slice(0, 20)}</text>
+
+        <!-- Pediment Architrave -->
+        <rect x="60" y="110" width="380" height="16" rx="2" fill="#2E0E06" stroke="#C2410C" stroke-width="1" />
+        <text x="250" y="122" text-anchor="middle" fill="#FB923C" font-size="8" font-weight="bold" letter-spacing="1">UGC NET CODE ${code} • DISCIPLINE FOUNDATIONS</text>
+
+        <!-- 4 Classical Columns -->
+        <!-- Column 1: Classical Theory -->
+        <rect x="80" y="130" width="50" height="120" rx="4" fill="url(#orangePillar_${code})" opacity="0.85" />
+        <text x="105" y="195" text-anchor="middle" fill="#FFFFFF" font-size="8" font-weight="bold" transform="rotate(-90 105 195)">THEORY</text>
+
+        <!-- Column 2: Thinkers & Paradigms -->
+        <rect x="170" y="130" width="50" height="120" rx="4" fill="url(#orangePillar_${code})" opacity="0.85" />
+        <text x="195" y="195" text-anchor="middle" fill="#FFFFFF" font-size="8" font-weight="bold" transform="rotate(-90 195 195)">THINKERS</text>
+
+        <!-- Column 3: Methodology -->
+        <rect x="280" y="130" width="50" height="120" rx="4" fill="url(#orangePillar_${code})" opacity="0.85" />
+        <text x="305" y="195" text-anchor="middle" fill="#FFFFFF" font-size="8" font-weight="bold" transform="rotate(-90 305 195)">METHODS</text>
+
+        <!-- Column 4: Applied / Policy -->
+        <rect x="370" y="130" width="50" height="120" rx="4" fill="url(#orangePillar_${code})" opacity="0.85" />
+        <text x="395" y="195" text-anchor="middle" fill="#FFFFFF" font-size="8" font-weight="bold" transform="rotate(-90 395 195)">POLICY</text>
+
+        <!-- Classical Stylobate (Base Steps) -->
+        <rect x="60" y="255" width="380" height="18" rx="2" fill="#2E0E06" stroke="#C2410C" stroke-width="1" />
+        <rect x="45" y="275" width="410" height="22" rx="4" fill="#1C0904" stroke="#EA580C" stroke-width="1.5" />
+        <text x="250" y="290" text-anchor="middle" fill="#FFEDD5" font-size="10" font-weight="bold">10 Official Units • 20+ Years Verified NTA Examination Archive</text>
       </svg>
     `,
   };
@@ -280,3 +337,8 @@ export function getSubjectConfig(slug: string, fallbackSubject?: any): SubjectCo
     ],
   };
 }
+
+export function getAllSubjectConfigs(): SubjectConfig[] {
+  return Object.values(SUBJECT_REGISTRY);
+}
+

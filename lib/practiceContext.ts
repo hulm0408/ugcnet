@@ -19,6 +19,7 @@ export type PracticeMode =
 
 export interface PracticeContext {
   mode: PracticeMode;
+  subject?: string;
   paperId?: string;
   sessionId?: string;
   year?: number;
@@ -38,6 +39,7 @@ export function resolvePracticeContext(searchParams: {
   get: (key: string) => string | null;
 }): PracticeContext {
   const modeParam = searchParams.get('mode')?.toLowerCase();
+  const subjectParam = searchParams.get('subject') || searchParams.get('subjectId') || searchParams.get('subject_id');
   const paperId = searchParams.get('paperId') || searchParams.get('paper_id');
   const sessionId = searchParams.get('sessionId') || searchParams.get('session_id');
   const yearParam = searchParams.get('year');
@@ -56,6 +58,7 @@ export function resolvePracticeContext(searchParams: {
   if (questionId) {
     return {
       mode: 'question',
+      subject: subjectParam || undefined,
       questionId,
       titleEnglish: `Question Practice`,
       titleArabic: `تدريب على السؤال`,
@@ -68,6 +71,7 @@ export function resolvePracticeContext(searchParams: {
     if (sessionId) {
       return {
         mode: 'incorrect',
+        subject: subjectParam || undefined,
         sessionId,
         titleEnglish: 'Test Mistakes Practice',
         titleArabic: 'تدريب على أخطاء الاختبار',
@@ -77,6 +81,7 @@ export function resolvePracticeContext(searchParams: {
     if (unitNumber) {
       return {
         mode: 'incorrect',
+        subject: subjectParam || undefined,
         unitNumber,
         titleEnglish: `Unit ${unitNumber} Mistakes Practice`,
         titleArabic: `تدريب على أخطاء الوحدة ${unitNumber}`,
@@ -85,6 +90,7 @@ export function resolvePracticeContext(searchParams: {
     }
     return {
       mode: 'incorrect',
+      subject: subjectParam || undefined,
       titleEnglish: 'Mistakes & Review Practice',
       titleArabic: 'مراجعة الأسئلة الخاطئة',
       subtitle: 'Practice all questions you answered incorrectly',
@@ -94,6 +100,7 @@ export function resolvePracticeContext(searchParams: {
   if (modeParam === 'bookmarked') {
     return {
       mode: 'bookmarked',
+      subject: subjectParam || undefined,
       titleEnglish: 'Bookmarked Questions Practice',
       titleArabic: 'تدريب على الأسئلة المحفوظة',
       subtitle: 'Review and practice your saved bookmarks',
@@ -103,6 +110,7 @@ export function resolvePracticeContext(searchParams: {
   if (modeParam === 'unattempted') {
     return {
       mode: 'unattempted',
+      subject: subjectParam || undefined,
       titleEnglish: 'Unattempted Questions Practice',
       titleArabic: 'تدريب على الأسئلة غير المجابة',
       subtitle: 'Practice questions you have not tried yet',
@@ -114,12 +122,13 @@ export function resolvePracticeContext(searchParams: {
     const title = paperTitleParam || (year ? `Year ${year} Paper` : 'Exam Paper');
     return {
       mode: 'paper',
+      subject: subjectParam || undefined,
       paperId,
       year: isNaN(year!) ? undefined : year,
       paperTitle: title,
       titleEnglish: title,
       titleArabic: year ? `امتحان سنة ${year}` : 'ورقة الامتحان',
-      subtitle: `Official UGC NET Arabic exam paper`,
+      subtitle: `Official UGC NET exam paper`,
     };
   }
 
@@ -127,6 +136,7 @@ export function resolvePracticeContext(searchParams: {
   if (nodeParam) {
     return {
       mode: 'node',
+      subject: subjectParam || undefined,
       nodeSlug: nodeParam,
       subtopicSlug: subtopicParam || undefined,
       topicSlug: topicParam || undefined,
@@ -142,6 +152,7 @@ export function resolvePracticeContext(searchParams: {
     const st = subtopicParam || entityParam || '';
     return {
       mode: 'subtopic',
+      subject: subjectParam || undefined,
       subtopicSlug: st,
       topicSlug: topicParam || undefined,
       unitNumber: isNaN(unitNumber!) ? undefined : unitNumber,
@@ -155,6 +166,7 @@ export function resolvePracticeContext(searchParams: {
   if (topicParam) {
     return {
       mode: 'topic',
+      subject: subjectParam || undefined,
       topicSlug: topicParam,
       unitNumber: isNaN(unitNumber!) ? undefined : unitNumber,
       titleEnglish: `Topic: ${topicParam}`,
@@ -167,6 +179,7 @@ export function resolvePracticeContext(searchParams: {
   if (unitNumber && !isNaN(unitNumber)) {
     return {
       mode: 'unit',
+      subject: subjectParam || undefined,
       unitNumber,
       titleEnglish: `Unit ${unitNumber} Practice`,
       titleArabic: `تدريب الوحدة ${unitNumber}`,
@@ -178,6 +191,7 @@ export function resolvePracticeContext(searchParams: {
   if (year && !isNaN(year)) {
     return {
       mode: 'year',
+      subject: subjectParam || undefined,
       year,
       titleEnglish: `Year ${year} Previous Year Questions`,
       titleArabic: `أسئلة سنة ${year}`,
@@ -188,6 +202,7 @@ export function resolvePracticeContext(searchParams: {
   // 9. Default Fallback Context (All Published Questions)
   return {
     mode: 'custom',
+    subject: subjectParam || undefined,
     titleEnglish: 'Full Question Bank Practice',
     titleArabic: 'التدريب الشامل على بنك الأسئلة',
     subtitle: 'Comprehensive mixed practice across all syllabus units',
@@ -198,6 +213,7 @@ export function buildQuestionsApiUrl(context: PracticeContext): string {
   const params = new URLSearchParams();
   params.set('published', 'true');
   params.set('limit', '250');
+  if (context.subject) params.set('subject', context.subject);
 
   switch (context.mode) {
     case 'paper':

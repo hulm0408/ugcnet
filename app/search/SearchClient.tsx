@@ -89,7 +89,7 @@ export default function SearchClient({
       {/* Search Input Bar & Filters */}
       <form
         onSubmit={handleSearch}
-        className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4"
+        className="bg-white border border-stone-200/90 rounded-3xl p-4 sm:p-7 shadow-sm space-y-4 max-w-full overflow-hidden"
       >
         <div className="relative">
           <input
@@ -97,19 +97,19 @@ export default function SearchClient({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search keywords, authors (امرؤ القيس, الجاحظ), poems, or concepts..."
-            className="w-full pl-12 pr-28 py-4 bg-stone-50 border-2 border-stone-200 rounded-2xl text-stone-900 placeholder-stone-400 focus:outline-none focus:bg-white focus:border-primary transition-all text-base font-medium"
+            className="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 bg-stone-50 border-2 border-stone-200 rounded-2xl text-stone-900 placeholder-stone-400 focus:outline-none focus:bg-white focus:border-primary transition-all text-sm sm:text-base font-medium"
           />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
+          <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
           <button
             type="submit"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold text-sm rounded-xl transition-colors shadow-sm"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 sm:px-5 py-2 sm:py-2.5 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm rounded-xl transition-colors shadow-sm"
           >
             Search
           </button>
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-stone-100">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-2 border-t border-stone-100">
           <div className="flex items-center gap-1.5 text-xs font-bold text-stone-400 uppercase tracking-wider">
             <Filter size={14} /> Filter:
           </div>
@@ -121,7 +121,7 @@ export default function SearchClient({
               const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
               setSelectedUnit(val);
             }}
-            className="px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 focus:outline-none focus:border-primary cursor-pointer"
+            className="w-full sm:w-auto max-w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 focus:outline-none focus:border-primary cursor-pointer truncate"
           >
             <option value="">All 10 Units</option>
             {units.map((u) => (
@@ -138,7 +138,7 @@ export default function SearchClient({
               const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
               setSelectedYear(val);
             }}
-            className="px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 focus:outline-none focus:border-primary cursor-pointer"
+            className="w-full sm:w-auto max-w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 focus:outline-none focus:border-primary cursor-pointer truncate"
           >
             <option value="">All Exam Years (2004–2024)</option>
             {years.map((y) => (
@@ -187,7 +187,7 @@ export default function SearchClient({
             return (
               <div
                 key={q.id}
-                className="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow relative"
+                className="bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-8 shadow-sm hover:shadow-md transition-shadow relative max-w-full overflow-hidden"
               >
                 {/* Meta Badges */}
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-stone-100">
@@ -223,52 +223,55 @@ export default function SearchClient({
                 </div>
 
                 {/* Arabic Question Text */}
-                <p
+                <div
                   dir="rtl"
                   lang="ar"
-                  className="font-arabic font-bold text-xl sm:text-2xl text-stone-900 leading-loose mb-6"
+                  className="font-arabic font-semibold text-2xl sm:text-3xl text-stone-950 leading-[2.4] mb-4 text-right"
                 >
                   {q.question_arabic}
-                </p>
+                </div>
 
                 {/* English Question Text if available */}
                 {q.question_english && (
-                  <p className="text-stone-600 text-sm sm:text-base font-medium mb-6">
+                  <div className="text-stone-700 text-sm sm:text-base font-normal border-l-3 border-emerald-500 pl-4 py-1 leading-relaxed mb-6">
                     {q.question_english}
-                  </p>
+                  </div>
                 )}
 
                 {/* MCQ Options A, B, C, D */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  {['A', 'B', 'C', 'D'].map((optKey) => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+                  {['A', 'B', 'C', 'D'].map((optKey, idx) => {
                     const optTextAr = q.options_arabic?.[optKey];
                     const isCorrect = q.correct_answer === optKey;
 
-                    let optStyle = 'border-stone-200 bg-stone-50/60 text-stone-800';
+                    let optStyle = 'border-stone-200/90 bg-white text-stone-800';
                     if (isRevealed) {
                       if (isCorrect) {
-                        optStyle = 'border-emerald-500 bg-emerald-50/80 text-emerald-950 font-bold ring-1 ring-emerald-400';
+                        optStyle = 'border-emerald-500 bg-emerald-50/90 text-emerald-950 ring-2 ring-emerald-400/30';
                       }
                     }
 
                     return (
                       <div
                         key={optKey}
-                        className={`p-4 rounded-2xl border transition-all flex items-start gap-3 ${optStyle}`}
+                        className={`p-4 sm:p-5 rounded-2xl border-2 transition-all flex items-start gap-3.5 ${optStyle}`}
                       >
-                        <div
-                          className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
-                            isRevealed && isCorrect
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-stone-200 text-stone-700'
-                          }`}
-                        >
-                          {optKey}
+                        <div className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5">
+                          <span
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-black shadow-xs ${
+                              isRevealed && isCorrect
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-stone-100 text-stone-700'
+                            }`}
+                          >
+                            {optKey}
+                          </span>
+                          <span className="text-[9px] font-mono text-stone-400">({idx + 1})</span>
                         </div>
                         <div
                           dir="rtl"
                           lang="ar"
-                          className="font-arabic font-bold text-base sm:text-lg leading-snug flex-1"
+                          className="font-arabic font-semibold text-xl sm:text-2xl leading-[2.2] flex-1 text-right"
                         >
                           {getOptionText(optTextAr, 'ar') || '—'}
                         </div>

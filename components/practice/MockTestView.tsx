@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import NtaPaletteIcon from '@/components/ui/NtaPaletteIcon';
-import { Menu, X, AlertCircle, Bookmark, Check, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Menu, X, AlertCircle, Bookmark, Check, CheckCircle2, RefreshCw, ArrowLeft } from 'lucide-react';
 import { getOptionText } from '@/lib/arabicUtils';
 import MemoryButton from '@/components/memory/MemoryButton';
 import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
 import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 import { calculateTestDurationSeconds } from '@/lib/dateUtils';
+import BilingualText from '@/components/ui/BilingualText';
 
 interface MockTestViewProps {
   year?: string;
@@ -42,8 +42,8 @@ export default function MockTestView({
   evaluations = {},
 }: MockTestViewProps) {
   const currentQ = questions[currentIndex] || questions[0];
-  
-  // Dynamic Timer logic: 1 minute 20 seconds (80 seconds) per question
+
+  // Dynamic Timer logic: 80 seconds per question
   const initialDuration = calculateTestDurationSeconds(questions?.length || 1);
   const [timeLeft, setTimeLeft] = useState(initialDuration);
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -93,7 +93,11 @@ export default function MockTestView({
   const isCurrentBookmarked = currentQ ? bookmarked.has(currentQ.id) : false;
   const isCurrentAnswered = currentQ ? !!answers[currentQ.id] : false;
 
-  const headerTitle = paper || (year ? `UGC NET Arabic – ${year}` : 'UGC NET Arabic Practice');
+  const headerTitle =
+    paper ||
+    currentQ?.exam_paper?.display_name ||
+    currentQ?.exam_paper?.exam_name ||
+    (year ? `UGC NET – ${year}` : 'UGC NET CBT Simulator');
 
   if (!currentQ) {
     return (
@@ -105,14 +109,16 @@ export default function MockTestView({
     );
   }
 
+  const currentEval = evaluations[currentQ.id];
+  const correctOptionLetter = currentEval?.correctAnswer || currentEval?.correctOption;
+
   return (
     <div className="flex flex-col h-screen bg-[#FCFAF8] font-sans overflow-hidden">
-      
       {/* Top Header */}
       <header className="flex flex-wrap items-center justify-between gap-4 px-4 sm:px-6 py-3 bg-white border-b border-stone-200 shrink-0 shadow-sm z-20 relative">
         <div className="flex items-center gap-3">
           {/* Mobile menu toggle */}
-          <button 
+          <button
             onClick={() => setIsNavOpen(!isNavOpen)}
             className="lg:hidden p-2 -ml-2 rounded-lg text-stone-600 hover:bg-stone-100"
           >
@@ -128,11 +134,9 @@ export default function MockTestView({
             <span>Exit</span>
           </Link>
 
-          <div className="font-bold text-stone-900 text-sm sm:text-base">
-            {headerTitle}
-          </div>
+          <div className="font-bold text-stone-900 text-sm sm:text-base">{headerTitle}</div>
         </div>
-        
+
         {/* Timer */}
         <div className="flex flex-col items-center justify-center">
           <div className="text-lg sm:text-xl font-bold text-stone-900 tracking-wider flex items-center gap-1 font-mono">
@@ -152,31 +156,34 @@ export default function MockTestView({
         <button
           onClick={() => setShowSubmitModal(true)}
           disabled={submitting}
-          className="px-4 py-2 sm:px-6 sm:py-2.5 bg-rose-600 text-white font-bold text-xs sm:text-sm rounded-xl hover:bg-rose-700 transition-colors shadow-sm disabled:opacity-50"
+          className="px-4 py-2 sm:px-6 sm:py-2.5 bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50"
         >
-          {submitting ? 'Submitting...' : 'Submit Test'}
+          {submitting ? 'Calculating...' : 'Finish & View Analysis'}
         </button>
       </header>
 
       {/* Legend Bar */}
       <div className="flex items-center gap-6 sm:gap-8 px-4 sm:px-6 py-2.5 bg-stone-50 border-b border-stone-200 shrink-0 text-[10px] sm:text-xs font-bold text-stone-600 overflow-x-auto whitespace-nowrap z-10 no-scrollbar">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" /> Answered ({mockStats.answered})
+          <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" /> Answered (
+          {mockStats.answered})
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" /> Not Answered ({mockStats.notAnswered})
+          <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" /> Not Answered (
+          {mockStats.notAnswered})
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" /> Marked for Review ({mockStats.marked})
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" /> Marked for Review (
+          {mockStats.marked})
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-stone-300 shrink-0" /> Not Visited ({mockStats.notVisited})
+          <div className="w-2.5 h-2.5 rounded-full bg-stone-300 shrink-0" /> Not Visited (
+          {mockStats.notVisited})
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden relative">
-        
         {/* Left: Question Area */}
         <div className="flex-1 flex flex-col min-w-0 bg-white z-0 h-full">
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
@@ -192,8 +199,8 @@ export default function MockTestView({
                 )}
               </div>
 
-              {evaluations[currentQ.id] && (
-                evaluations[currentQ.id].isCorrect ? (
+              {currentEval &&
+                (currentEval.isCorrect ? (
                   <span className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 border border-emerald-200">
                     <Check size={14} /> Correct (+2 Marks)
                   </span>
@@ -201,42 +208,53 @@ export default function MockTestView({
                   <span className="px-3 py-1 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 border border-rose-200">
                     <X size={14} /> Incorrect (0 Marks)
                   </span>
-                )
-              )}
+                ))}
             </div>
-            
+
             {/* Arabic Question Body */}
-            <div dir="rtl" className="text-xl sm:text-2xl font-arabic font-bold text-stone-900 leading-loose mb-6">
+            <div
+              dir="rtl"
+              lang="ar"
+              className="text-2xl sm:text-3xl font-arabic font-semibold text-stone-950 leading-[2.4] mb-6 text-right"
+            >
               {currentQ.question_arabic}
             </div>
-            
+
             {currentQ.question_english && (
-              <div className="text-stone-700 text-sm sm:text-base font-medium mb-6 sm:mb-8">
-                {currentQ.question_english}
+              <div className="text-stone-700 text-sm sm:text-base font-normal mb-6 sm:mb-8 border-l-3 border-emerald-500 pl-4 py-1 leading-relaxed">
+                <BilingualText text={currentQ.question_english} />
               </div>
             )}
 
             {/* MCQ Options A, B, C, D */}
-            <div className="space-y-3 max-w-3xl mb-8">
-              {['A', 'B', 'C', 'D'].map((opt) => {
+            <div className="space-y-3.5 max-w-3xl mb-8">
+              {[
+                { opt: 'A', num: '1' },
+                { opt: 'B', num: '2' },
+                { opt: 'C', num: '3' },
+                { opt: 'D', num: '4' },
+              ].map(({ opt, num }) => {
                 const isSelected = answers[currentQ.id] === opt;
-                const evalRes = evaluations[currentQ.id];
-                
-                let optBg = 'border-stone-200 hover:border-stone-300 hover:bg-stone-50/80';
-                let iconBg = 'bg-stone-100 text-stone-600';
-                
+                const isCorrectOption = correctOptionLetter === opt;
+
+                let optBg = 'border-stone-200/90 bg-white hover:border-emerald-500/60 hover:bg-[#FAF9F6]';
+                let iconBg = 'bg-stone-100 text-stone-700';
+
                 if (isSelected) {
-                  optBg = 'border-primary bg-primary-surface ring-1 ring-primary/30 shadow-sm';
-                  iconBg = 'bg-primary text-white';
+                  optBg = 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20 shadow-sm';
+                  iconBg = 'bg-emerald-700 text-white';
                 }
 
-                if (evalRes) {
-                  if (evalRes.correctOption === opt) {
-                    optBg = 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400 shadow-sm';
+                if (currentEval) {
+                  if (isCorrectOption) {
+                    optBg = 'border-emerald-500 bg-emerald-50/90 ring-2 ring-emerald-400/30 shadow-sm';
                     iconBg = 'bg-emerald-600 text-white';
-                  } else if (isSelected && !evalRes.isCorrect) {
-                    optBg = 'border-rose-300 bg-rose-50 ring-1 ring-rose-300 shadow-sm';
+                  } else if (isSelected && !currentEval.isCorrect) {
+                    optBg = 'border-rose-400 bg-rose-50/90 ring-2 ring-rose-300/30 shadow-sm';
                     iconBg = 'bg-rose-600 text-white';
+                  } else {
+                    optBg = 'border-stone-100 bg-stone-50/40 opacity-60';
+                    iconBg = 'bg-stone-100 text-stone-400';
                   }
                 }
 
@@ -244,27 +262,47 @@ export default function MockTestView({
                   <button
                     key={opt}
                     onClick={() => {
-                      if (!evalRes) onSelectOption(currentQ.id, opt);
+                      if (!currentEval) onSelectOption(currentQ.id, opt);
                     }}
-                    disabled={!!evalRes}
-                    className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex items-start gap-4 ${optBg}`}
+                    disabled={!!currentEval}
+                    className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all duration-150 flex items-start gap-4 ${optBg}`}
                   >
-                    <div className={`shrink-0 w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold mt-0.5 ${iconBg}`}>
-                      {opt}
+                    <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-xs ${iconBg}`}>
+                        {opt}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-stone-400">({num})</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div dir="rtl" className="font-arabic text-base sm:text-lg font-bold text-stone-900 mb-1 leading-snug">
+
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div
+                        dir="rtl"
+                        lang="ar"
+                        className={`font-arabic text-xl sm:text-2xl font-semibold leading-[2.2] text-right ${
+                          isCorrectOption && currentEval ? 'text-emerald-950' : 'text-stone-900'
+                        }`}
+                      >
                         {getOptionText(currentQ.options_arabic?.[opt], 'ar')}
                       </div>
                       {currentQ.options_english && (
-                        <div className="text-stone-600 text-xs sm:text-sm">
-                          {getOptionText(currentQ.options_english[opt], 'en')}
+                        <div
+                          className={`text-xs sm:text-sm leading-relaxed font-medium ${
+                            isCorrectOption && currentEval ? 'text-emerald-800' : 'text-stone-600'
+                          }`}
+                        >
+                          <BilingualText text={getOptionText(currentQ.options_english[opt], 'en')} />
                         </div>
                       )}
                     </div>
-                    {isSelected && !evalRes && (
-                      <div className="ml-auto shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center">
-                        <Check size={14} />
+
+                    {isSelected && !currentEval && (
+                      <div className="ml-auto shrink-0 w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center mt-1">
+                        <Check size={13} />
+                      </div>
+                    )}
+                    {currentEval && isCorrectOption && (
+                      <div className="ml-auto shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-xs">
+                        Correct
                       </div>
                     )}
                   </button>
@@ -272,17 +310,33 @@ export default function MockTestView({
               })}
             </div>
 
-            {/* Explanation if evaluated */}
-            {evaluations[currentQ.id]?.explanation && (
-              <div className="bg-primary-surface border border-primary/20 rounded-2xl p-5 mb-4">
-                <h3 className="text-stone-900 font-bold mb-2 text-sm sm:text-base">Explanation</h3>
-                <div className="text-stone-700 text-xs sm:text-sm space-y-2">
-                  {evaluations[currentQ.id].explanation.split('\n').map((para: string, i: number) => (
-                    <p key={i} dir={para.match(/[\u0600-\u06FF]/) ? 'rtl' : 'ltr'} className={para.match(/[\u0600-\u06FF]/) ? 'font-arabic text-base leading-relaxed' : 'leading-relaxed'}>
-                      {para}
-                    </p>
-                  ))}
+            {/* Comprehensive Explanation & Answer Key if evaluated */}
+            {currentEval && (
+              <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-5 sm:p-6 mb-6 animate-slide-up">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <h3 className="text-emerald-950 font-bold text-sm sm:text-base">
+                    Official Answer &amp; Scholarly Explanation
+                  </h3>
+                  <span className="text-xs font-bold text-emerald-800 bg-white/80 px-2.5 py-1 rounded-full border border-emerald-200">
+                    Correct Option: {correctOptionLetter}
+                  </span>
                 </div>
+
+                {currentEval.correctText && (
+                  <div
+                    dir="rtl"
+                    lang="ar"
+                    className="text-emerald-900 font-arabic font-bold text-lg mb-3 text-right bg-white/70 p-3 rounded-xl border border-emerald-100"
+                  >
+                    {currentEval.correctText}
+                  </div>
+                )}
+
+                {currentEval.explanation && (
+                  <div className="text-stone-800 text-xs sm:text-sm leading-relaxed bg-white p-4 rounded-xl border border-emerald-100 shadow-xs">
+                    <BilingualText text={currentEval.explanation} />
+                  </div>
+                )}
               </div>
             )}
 
@@ -300,8 +354,8 @@ export default function MockTestView({
               <button
                 onClick={() => onToggleBookmark(currentQ.id)}
                 className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 transition-colors font-bold text-xs sm:text-sm ${
-                  isCurrentBookmarked 
-                    ? 'border-amber-500 text-amber-700 bg-amber-50' 
+                  isCurrentBookmarked
+                    ? 'border-amber-500 text-amber-700 bg-amber-50'
                     : 'border-stone-200 text-stone-600 hover:bg-stone-50'
                 }`}
               >
@@ -314,7 +368,7 @@ export default function MockTestView({
                 onOpenMemoryModal={() => setMemoryModalOpen(true)}
               />
 
-              {isCurrentAnswered && onClearResponse && (
+              {isCurrentAnswered && onClearResponse && !currentEval && (
                 <button
                   onClick={() => onClearResponse(currentQ.id)}
                   className="px-3.5 py-2.5 rounded-xl border border-stone-200 text-stone-500 hover:text-stone-800 hover:bg-stone-50 transition-colors font-bold text-xs"
@@ -353,135 +407,115 @@ export default function MockTestView({
           </div>
         </div>
 
-        {/* Right: Question Palette Navigator */}
-        {isNavOpen && (
-          <div 
-            className="fixed inset-0 bg-stone-900/50 z-30 lg:hidden"
-            onClick={() => setIsNavOpen(false)}
-          />
-        )}
-        
-        <aside className={`
-          fixed inset-y-0 right-0 z-40 w-72 sm:w-80 bg-[#FCFAF8] shadow-2xl lg:shadow-none transform transition-transform duration-300 ease-in-out flex flex-col shrink-0 lg:static lg:w-[320px] lg:border-l lg:border-stone-200 lg:translate-x-0
-          ${isNavOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}>
-          <div className="px-5 py-4 border-b border-stone-200 bg-white flex items-center justify-between shrink-0">
-            <span className="font-bold text-stone-900 text-sm sm:text-base">Question Navigator</span>
-            <button 
+        {/* Right Sidebar: Palette Navigation */}
+        <aside
+          className={`fixed inset-y-0 right-0 z-30 w-72 sm:w-80 bg-white border-l border-stone-200 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+            isNavOpen ? 'translate-x-0 shadow-2xl' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-4 border-b border-stone-200 flex items-center justify-between">
+            <h2 className="font-bold text-stone-900 text-sm">Question Palette</h2>
+            <button
               onClick={() => setIsNavOpen(false)}
-              className="lg:hidden p-1.5 text-stone-500 hover:bg-stone-100 rounded-md"
+              className="lg:hidden p-1.5 rounded-lg text-stone-400 hover:text-stone-700"
             >
               <X size={18} />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5">
-            <div className="grid grid-cols-5 gap-2.5">
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="grid grid-cols-5 gap-2">
               {questions.map((q, idx) => {
-                const isCurrent = idx === currentIndex;
-                const isAns = !!answers[q.id];
-                const isBook = bookmarked.has(q.id);
-                const isVis = visited.has(q.id);
+                const isSelected = currentIndex === idx;
+                const isAnswered = !!answers[q.id];
+                const isMarked = bookmarked.has(q.id);
+                const isVisited = visited.has(q.id);
 
-                let status: React.ComponentProps<typeof NtaPaletteIcon>['status'] = 'not-visited';
-                if (isAns && isBook) status = 'answered-marked';
-                else if (isAns) status = 'answered';
-                else if (isBook) status = 'marked';
-                else if (isVis) status = 'not-answered';
+                let btnBg = 'bg-stone-100 text-stone-600 hover:bg-stone-200';
+                if (isAnswered && isMarked) {
+                  btnBg = 'bg-purple-600 text-white font-bold';
+                } else if (isAnswered) {
+                  btnBg = 'bg-primary text-white font-bold';
+                } else if (isMarked) {
+                  btnBg = 'bg-amber-500 text-white font-bold';
+                } else if (isVisited) {
+                  btnBg = 'bg-rose-500 text-white font-bold';
+                }
 
                 return (
                   <button
                     key={q.id}
                     onClick={() => {
                       onNavigate(idx);
-                      if (typeof window !== 'undefined' && window.innerWidth < 1024) setIsNavOpen(false);
+                      setIsNavOpen(false);
                     }}
-                    className={`relative rounded-xl transition-all hover:scale-105 ${
-                      isCurrent ? 'ring-2 ring-offset-2 ring-stone-900 scale-105 z-10' : ''
+                    className={`h-10 rounded-xl text-xs font-bold transition-all ${btnBg} ${
+                      isSelected ? 'ring-2 ring-stone-900 ring-offset-2' : ''
                     }`}
                   >
-                    <NtaPaletteIcon status={status} number={idx + 1} className="w-full h-9 sm:h-10 text-[10px] sm:text-xs font-bold rounded-xl" />
+                    {idx + 1}
                   </button>
                 );
               })}
             </div>
           </div>
-          
-          <div className="p-4 bg-white border-t border-stone-200 shrink-0">
-            <div className="grid grid-cols-2 gap-y-2.5 gap-x-2">
-              <div className="flex items-center gap-2">
-                <NtaPaletteIcon status="answered" number={mockStats.answered} className="w-5 h-5 text-[9px] rounded-md" />
-                <span className="text-[10px] font-bold text-stone-600">Answered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <NtaPaletteIcon status="not-answered" number={mockStats.notAnswered} className="w-5 h-5 text-[9px] rounded-md" />
-                <span className="text-[10px] font-bold text-stone-600">Not Answered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <NtaPaletteIcon status="marked" number={mockStats.marked} className="w-5 h-5 text-[9px] rounded-md" />
-                <span className="text-[10px] font-bold text-stone-600">Marked</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <NtaPaletteIcon status="not-visited" number={mockStats.notVisited} className="w-5 h-5 text-[9px] rounded-md" />
-                <span className="text-[10px] font-bold text-stone-600">Not Visited</span>
-              </div>
-            </div>
+
+          <div className="p-4 border-t border-stone-200">
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              disabled={submitting}
+              className="w-full py-3 bg-emerald-800 text-white font-bold text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50"
+            >
+              {submitting ? 'Calculating...' : 'Finish & View Analysis'}
+            </button>
           </div>
         </aside>
-
       </div>
 
-      {/* Submit Confirmation Modal */}
+      {/* Confirmation Modal before Submit */}
       {showSubmitModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-stone-200 space-y-6">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-              <h3 className="font-extrabold text-stone-900 text-lg">Submit Examination</h3>
-              <button
-                onClick={() => setShowSubmitModal(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-700"
-              >
-                <X size={20} />
-              </button>
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-800 flex items-center justify-center mx-auto">
+              <CheckCircle2 size={28} />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-xl font-bold text-stone-900">Ready to Review Your Score?</h3>
+              <p className="text-stone-500 text-xs sm:text-sm">
+                You have answered <strong>{Object.keys(answers).length}</strong> of{' '}
+                <strong>{questions.length}</strong> questions.
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
-                <div className="text-2xl font-black text-emerald-800">{mockStats.answered + mockStats.answeredMarked}</div>
-                <div className="text-xs font-bold text-emerald-700">Answered</div>
-              </div>
-              <div className="p-3 bg-rose-50 rounded-2xl border border-rose-100">
-                <div className="text-2xl font-black text-rose-800">{questions.length - (mockStats.answered + mockStats.answeredMarked)}</div>
-                <div className="text-xs font-bold text-rose-700">Unanswered</div>
-              </div>
+            <div className="grid grid-cols-2 gap-3 text-xs bg-stone-50 p-4 rounded-2xl border border-stone-100 font-medium">
+              <div className="text-stone-600">Answered:</div>
+              <div className="text-right font-bold text-emerald-800">{mockStats.answered + mockStats.answeredMarked}</div>
+              <div className="text-stone-600">Unanswered:</div>
+              <div className="text-right font-bold text-rose-600">{questions.length - (mockStats.answered + mockStats.answeredMarked)}</div>
+              <div className="text-stone-600">Marked for Review:</div>
+              <div className="text-right font-bold text-amber-600">{mockStats.marked + mockStats.answeredMarked}</div>
             </div>
-
-            <p className="text-stone-500 text-xs sm:text-sm text-center">
-              Are you sure you want to submit your test? Once submitted, you will receive your score breakdown and answers analysis.
-            </p>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowSubmitModal(false)}
-                className="flex-1 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm rounded-xl transition-colors"
+                className="flex-1 py-3 bg-stone-100 text-stone-700 font-bold text-xs sm:text-sm rounded-xl hover:bg-stone-200 transition-colors"
               >
-                Continue Test
+                Continue Solving
               </button>
               <button
                 onClick={() => {
                   setShowSubmitModal(false);
                   onSubmit();
                 }}
-                disabled={submitting}
-                className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl transition-colors shadow-sm disabled:opacity-50"
+                className="flex-1 py-3 bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
               >
-                {submitting ? 'Submitting...' : 'Confirm Submit'}
+                Show My Score
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
