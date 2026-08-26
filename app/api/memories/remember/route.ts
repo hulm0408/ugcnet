@@ -73,63 +73,68 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { questionId, remember } = body;
+    const { questionId, questionIds, remember } = body;
 
-    if (!questionId) {
-      return NextResponse.json({ error: 'Question ID is required' }, { status: 400 });
+    if (!questionId && (!questionIds || !Array.isArray(questionIds) || questionIds.length === 0)) {
+      return NextResponse.json({ error: 'Question ID or questionIds array is required' }, { status: 400 });
     }
 
+    const idsToProcess = questionIds && Array.isArray(questionIds) ? questionIds : [questionId];
+    const enrollment = getInitialEnrollment();
+
     if (remember === false) {
-      // Remove from queue
       await prisma.spacedMemoryQueue.deleteMany({
         where: {
           user_id: session.user.id,
-          question_id: questionId,
+          question_id: { in: idsToProcess },
         },
       });
 
       return NextResponse.json({
         success: true,
+        count: idsToProcess.length,
         isRemembered: false,
       });
-    } else {
-      const enrollment = getInitialEnrollment();
-
-      // Enroll into 5-Level Spaced Repetition (Level 1: 24h review)
-      const queueItem = await prisma.spacedMemoryQueue.upsert({
-        where: {
-          user_id_question_id: {
-            user_id: session.user.id,
-            question_id: questionId,
-          },
-        },
-        create: {
-          user_id: session.user.id,
-          question_id: questionId,
-          level: enrollment.level,
-          status: enrollment.status,
-          interval_days: enrollment.intervalDays,
-          next_review_at: enrollment.nextReviewAt,
-          due_deadline: enrollment.dueDeadline,
-          memory_strength: 1.0,
-          is_completed: false,
-        },
-        update: {
-          level: enrollment.level,
-          status: enrollment.status,
-          interval_days: enrollment.intervalDays,
-          next_review_at: enrollment.nextReviewAt,
-          due_deadline: enrollment.dueDeadline,
-          updated_at: new Date(),
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        isRemembered: true,
-        queueItem,
-      });
     }
+
+    // Enroll all question IDs into Level 1 Spaced Repetition (24h)
+    await Promise.all(
+      idsToProcess.map((qId: string) =>
+        prisma.spacedMemoryQueue.upsert({
+          where: {
+            user_id_question_id: {
+              user_id: session.user.id,
+              question_id: qId,
+            },
+          },
+          create: {
+            user_id: session.user.id,
+            question_id: qId,
+            level: enrollment.level,
+            status: enrollment.status,
+            interval_days: enrollment.intervalDays,
+            next_review_at: enrollment.nextReviewAt,
+            due_deadline: enrollment.dueDeadline,
+            memory_strength: 1.0,
+            is_completed: false,
+          },
+          update: {
+            level: enrollment.level,
+            status: enrollment.status,
+            interval_days: enrollment.intervalDays,
+            next_review_at: enrollment.nextReviewAt,
+            due_deadline: enrollment.dueDeadline,
+            updated_at: new Date(),
+          },
+        })
+      )
+    );
+
+    return NextResponse.json({
+      success: true,
+      enrolledCount: idsToProcess.length,
+      isRemembered: true,
+    });
   } catch (error) {
     console.error('[API /memories/remember] POST Error:', error);
     return NextResponse.json({ error: 'Failed to update memory queue' }, { status: 500 });

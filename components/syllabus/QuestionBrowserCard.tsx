@@ -5,6 +5,7 @@ import { Eye, EyeOff, CheckCircle2, Bookmark, Share2 } from 'lucide-react';
 import MemoryButton from '@/components/memory/MemoryButton';
 import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
 import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
+import GoogleSearchButton from '@/components/ui/GoogleSearchButton';
 
 export interface QuestionData {
   id: string;
@@ -140,6 +141,12 @@ export default function QuestionBrowserCard({ question, index }: QuestionBrowser
               </>
             )}
           </button>
+          <GoogleSearchButton
+            questionArabic={question.question_arabic}
+            questionEnglish={question.question_english}
+            microFocusArabic={question.question_micro_focus_arabic}
+            size="sm"
+          />
         </div>
 
         <MemoryButton

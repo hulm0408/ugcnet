@@ -14,6 +14,7 @@ import {
 import ProfileSidePanel from '@/components/layout/ProfileSidePanel';
 import SubjectSwitcher from '@/components/layout/SubjectSwitcher';
 import AuthPreviewModal from '@/components/layout/AuthPreviewModal';
+import AuthModal from '@/components/layout/AuthModal';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -32,6 +33,7 @@ export default function Header({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // Do not show global header on full-screen test/practice/instructions pages
   if (pathname.startsWith('/practice') || pathname.startsWith('/instructions')) {
@@ -125,7 +127,7 @@ export default function Header({
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2.5 p-1 pr-3 rounded-full bg-[#0A3325] hover:bg-[#0D3A2B] border border-[#134E3A] transition-colors"
+                  className="flex items-center gap-2.5 p-1 pr-3 rounded-full bg-[#0A3325] hover:bg-[#0D3A2B] border border-[#134E3A] transition-colors cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-full bg-[#00E699] text-[#03140E] flex items-center justify-center font-bold text-xs">
                     {userName.charAt(0)}
@@ -136,19 +138,20 @@ export default function Header({
                   </div>
                 </button>
               ) : (
-                <Link
-                  href="/login"
-                  className="px-4 py-2 bg-[#00E699] hover:bg-[#00B377] text-[#03140E] font-bold text-xs rounded-xl transition-all shadow-sm"
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="px-4 py-2 bg-[#00E699] hover:bg-[#00B377] text-[#03140E] font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   Sign In
-                </Link>
+                </button>
               )}
 
               {/* Mobile Hamburger */}
               <button
                 type="button"
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 text-stone-500 hover:text-stone-900 rounded-lg hover:bg-stone-200 transition-colors"
+                className="md:hidden p-2 text-stone-300 hover:text-white rounded-lg hover:bg-[#0A3325] transition-colors"
                 aria-label="Toggle Menu"
               >
                 {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -173,13 +176,16 @@ export default function Header({
             ))}
             {!user && (
               <div className="pt-3 border-t border-[#134E3A] flex gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex-1 py-2 text-center text-xs font-bold text-[#03140E] bg-[#00E699] hover:bg-[#00B377] rounded-xl"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setAuthModalOpen(true);
+                  }}
+                  className="flex-1 py-2 text-center text-xs font-bold text-[#03140E] bg-[#00E699] hover:bg-[#00B377] rounded-xl cursor-pointer"
                 >
                   Sign In
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -191,6 +197,13 @@ export default function Header({
         user={user}
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
+      />
+
+      {/* Global Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        callbackUrl={pathname}
       />
     </>
   );

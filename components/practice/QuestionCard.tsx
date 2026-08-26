@@ -6,6 +6,7 @@ import MemoryButton from '@/components/memory/MemoryButton';
 import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
 import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 import BilingualText from '@/components/ui/BilingualText';
+import GoogleSearchButton from '@/components/ui/GoogleSearchButton';
 
 type EvalResult = {
   isCorrect: boolean;
@@ -267,10 +268,18 @@ export default function QuestionCard({
           })}
         </div>
 
-        {/* ── 5. Memory Note Trigger Bar ──────────────────────── */}
+        {/* ── 5. Memory Note & Search Action Bar ────────────── */}
         <div className="pt-4 border-t border-stone-100 flex items-center justify-between gap-3 flex-wrap">
-          <div className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-            Personal Memory Note
+          <div className="flex items-center gap-2">
+            <GoogleSearchButton
+              questionArabic={question.question_arabic}
+              questionEnglish={question.question_english}
+              entityNameArabic={question.specific_entity_name_arabic}
+              entityNameEnglish={question.specific_entity_name_english}
+              microFocusArabic={question.question_micro_focus_arabic}
+              unitName={question.unit?.name_english}
+              size="sm"
+            />
           </div>
           <MemoryButton
             questionId={question.id}

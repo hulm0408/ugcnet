@@ -1,104 +1,189 @@
 import { prisma } from '@/lib/db';
-import { Users, FileQuestion, BookOpen, Layers, CheckCircle2, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Users,
+  FileQuestion,
+  BookOpen,
+  Layers,
+  CheckCircle2,
+  TrendingUp,
+  ArrowRight,
+  Shield,
+  Brain,
+  Archive,
+  BarChart3,
+  Settings,
+  Sparkles,
+} from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
-  const [totalUsers, totalQuestions, totalUnits] = await Promise.all([
+  const [totalUsers, totalQuestions, totalUnits, totalPapers, totalMemories] = await Promise.all([
     prisma.user.count(),
     prisma.question.count(),
     prisma.syllabusUnit.count(),
+    prisma.examPaper.count(),
+    prisma.spacedMemoryQueue.count(),
   ]);
 
   const stats = [
-    { name: 'Total Users', value: totalUsers, icon: Users, color: 'text-primary', bgColor: 'bg-primary/10', border: 'border-primary/20' },
-    { name: 'Total Questions', value: totalQuestions, icon: FileQuestion, color: 'text-primary-dark', bgColor: 'bg-primary-dark/10', border: 'border-primary-dark/20' },
-    { name: 'Syllabus Units', value: totalUnits, icon: BookOpen, color: 'text-accent', bgColor: 'bg-accent/10', border: 'border-accent/20' },
-    { name: 'Mapped to DB', value: totalQuestions.toLocaleString(), icon: Layers, color: 'text-stone-700', bgColor: 'bg-stone-500/10', border: 'border-stone-500/20' },
+    { name: 'Total Users', value: totalUsers, icon: Users, href: '/admin/users' },
+    { name: 'Total Questions', value: totalQuestions.toLocaleString(), icon: FileQuestion, href: '/admin/questions' },
+    { name: 'PYQ Exam Papers', value: totalPapers, icon: Archive, href: '/admin/pyqs' },
+    { name: 'Syllabus Units', value: totalUnits, icon: Layers, href: '/admin/syllabus' },
+    { name: 'Active Memory Queues', value: totalMemories, icon: Brain, href: '/admin/memories' },
   ];
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10">
+    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
       
       {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-800 pb-6">
         <div>
-          <h1 className="text-3xl font-black text-stone-900 tracking-tight flex items-center gap-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+            <Shield size={13} />
+            <span>Admin Control System</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Dashboard Overview
           </h1>
-          <p className="mt-2 text-base text-stone-500 font-medium">Manage users, questions, and view system health.</p>
+          <p className="mt-1 text-xs sm:text-sm text-stone-400 font-medium">
+            Manage question database, exam papers, syllabus hierarchy, and candidate review queues.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/questions"
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+          >
+            <span>Manage Questions</span>
+            <ArrowRight size={13} />
+          </Link>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className={`bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border ${stat.border} p-6 relative overflow-hidden group hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1`}>
-              <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${stat.bgColor} opacity-50 group-hover:scale-150 transition-transform duration-500`} />
-              <div className="relative z-10">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 border ${stat.border} bg-white shadow-sm transition-transform duration-300 group-hover:scale-110`}>
-                  <Icon className={`h-7 w-7 ${stat.color}`} />
+            <Link
+              key={stat.name}
+              href={stat.href}
+              className="bg-stone-900 border border-stone-800 hover:border-emerald-500/40 rounded-2xl p-5 transition-all group block"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-xl bg-stone-800 text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Icon size={18} />
                 </div>
-                <p className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-1">{stat.name}</p>
-                <p className="text-4xl font-black text-stone-900 tracking-tight">{stat.value}</p>
+                <ArrowRight size={13} className="text-stone-600 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
               </div>
-            </div>
+              <p className="text-[11px] font-mono font-bold text-stone-400 uppercase tracking-wider">{stat.name}</p>
+              <p className="text-2xl font-black text-white tracking-tight mt-1">{stat.value}</p>
+            </Link>
           );
         })}
       </div>
 
-      {/* Health / Updates Row */}
+      {/* System Status & Management Quicklinks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="col-span-2 bg-white/80 backdrop-blur-xl rounded-3xl shadow-sm border border-stone-200 p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-stone-900">System Health</h2>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-primary/10 text-primary-dark border border-primary/20">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              All Systems Operational
+        
+        {/* Left: Quick Actions Grid */}
+        <div className="lg:col-span-2 bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8 space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-white">System Management Shortcuts</h2>
+            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+              ● All Systems Live
             </span>
           </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 p-4 rounded-2xl bg-stone-50 border border-stone-100">
-              <CheckCircle2 className="text-primary shrink-0 mt-0.5" size={20} />
-              <div>
-                <h4 className="font-semibold text-stone-900">Database Synchronization</h4>
-                <p className="text-sm text-stone-500 mt-1">
-                  Successfully mapped <strong>{totalQuestions.toLocaleString()}</strong> UGC NET Arabic previous year questions to the 10 official syllabus units. Questions are now dynamically identifiable.
-                </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link
+              href="/admin/questions"
+              className="p-4 rounded-2xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 transition-colors block group"
+            >
+              <div className="flex items-center gap-2.5 font-bold text-sm text-white group-hover:text-emerald-400 transition-colors">
+                <FileQuestion size={16} />
+                <span>Question Bank</span>
               </div>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                Search, inspect, edit, or add UGC NET questions and official answers.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/pyqs"
+              className="p-4 rounded-2xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 transition-colors block group"
+            >
+              <div className="flex items-center gap-2.5 font-bold text-sm text-white group-hover:text-emerald-400 transition-colors">
+                <Archive size={16} />
+                <span>PYQs &amp; Exam Papers</span>
+              </div>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                Review historical exam papers, toggle published status, and manage batches.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/syllabus"
+              className="p-4 rounded-2xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 transition-colors block group"
+            >
+              <div className="flex items-center gap-2.5 font-bold text-sm text-white group-hover:text-emerald-400 transition-colors">
+                <Layers size={16} />
+                <span>Syllabus Graph</span>
+              </div>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                Configure 10 Units, Broad Topics, Subtopics, and Concept Nodes.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/memories"
+              className="p-4 rounded-2xl bg-stone-800/60 hover:bg-stone-800 border border-stone-700/60 transition-colors block group"
+            >
+              <div className="flex items-center gap-2.5 font-bold text-sm text-white group-hover:text-emerald-400 transition-colors">
+                <Brain size={16} />
+                <span>Memory &amp; Reviews</span>
+              </div>
+              <p className="text-xs text-stone-400 mt-1 leading-relaxed">
+                Inspect candidate spaced recall items and mnemonic connections.
+              </p>
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: Environment & Database Info */}
+        <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div>
+            <div className="text-xs font-mono font-bold uppercase tracking-wider text-stone-500 mb-2">
+              Database Sync
             </div>
-            
-            <div className="flex items-start gap-4 p-4 rounded-2xl bg-stone-50 border border-stone-100">
-              <TrendingUp className="text-primary-dark shrink-0 mt-0.5" size={20} />
-              <div>
-                <h4 className="font-semibold text-stone-900">User Authentication</h4>
-                <p className="text-sm text-stone-500 mt-1">
-                  Server action authentication and middleware protection is fully active and error-free.
-                </p>
-              </div>
+            <h3 className="text-lg font-black text-white">PostgreSQL &amp; Prisma</h3>
+            <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+              3,150+ questions synced across 10 official units and 45+ historical papers with 100% verified official NTA keys.
+            </p>
+          </div>
+
+          <div className="space-y-2 pt-4 border-t border-stone-800 text-xs">
+            <div className="flex justify-between text-stone-400">
+              <span>Next.js Architecture</span>
+              <span className="font-mono text-white">v16 App Router</span>
+            </div>
+            <div className="flex justify-between text-stone-400">
+              <span>Authentication</span>
+              <span className="font-mono text-emerald-400">NextAuth v5 Beta</span>
+            </div>
+            <div className="flex justify-between text-stone-400">
+              <span>ORM &amp; DB Client</span>
+              <span className="font-mono text-white">Prisma v7.9</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-stone-900 to-stone-800 rounded-3xl shadow-xl p-8 relative overflow-hidden flex flex-col justify-between group hover:-translate-y-1 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-700" />
-          <div className="relative z-10">
-            <h2 className="text-xl font-bold text-white mb-2">Ready for Traffic</h2>
-            <p className="text-stone-300 text-sm leading-relaxed mb-6">
-              The platform is fully dynamic and ready to scale. Users can practice pyqs and unit-wise questions.
-            </p>
-          </div>
-          <div className="relative z-10">
-            <div className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">Environment</div>
-            <div className="inline-flex px-3 py-1 bg-white/10 text-white border border-white/20 rounded-lg text-sm font-medium backdrop-blur-md">
-              Production (Next.js 16 App Router)
-            </div>
-          </div>
-        </div>
       </div>
+
     </div>
   );
 }

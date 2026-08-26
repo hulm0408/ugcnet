@@ -6,8 +6,8 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-  title: 'Manage Syllabus',
-  description: 'Manage the official UGC NET Arabic syllabus structure',
+  title: 'Manage Syllabus — Admin Panel',
+  description: 'Manage the official UGC NET syllabus structure',
 };
 
 export const dynamic = 'force-dynamic';
@@ -26,29 +26,31 @@ export default async function AdminSyllabusPage() {
         orderBy: { order_index: 'asc' },
         include: {
           subtopics: {
-            orderBy: { order_index: 'asc' }
-          }
-        }
-      }
-    }
+            orderBy: { order_index: 'asc' },
+          },
+        },
+      },
+    },
   });
 
   return (
-    <div className="flex-1 bg-transparent min-h-screen py-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="w-12 h-12 bg-primary/10 text-primary-dark rounded-xl flex items-center justify-center">
-            <Layers size={24} />
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-800 pb-6">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+            <Layers size={13} />
+            <span>Curriculum Hierarchy</span>
           </div>
-          <div>
-            <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight">Syllabus Structure</h1>
-            <p className="text-stone-500 mt-1">Manage official NTA units, topics, and subtopics.</p>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Syllabus Knowledge Graph</h1>
+          <p className="mt-1 text-xs sm:text-sm text-stone-400 font-medium">
+            Manage official NTA units, broad topics, subtopics, and concept nodes.
+          </p>
         </div>
+      </div>
 
-        <div className="bg-white/80 backdrop-blur-xl border border-stone-200/60 shadow-sm rounded-3xl p-8">
-          <SyllabusManager initialUnits={units as any} />
-        </div>
+      <div className="bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <SyllabusManager initialUnits={units as any} />
       </div>
     </div>
   );

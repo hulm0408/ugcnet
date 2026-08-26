@@ -99,10 +99,9 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
         {papersWithAccess.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {papersWithAccess.map((paper) => (
-              <Link
+              <div
                 key={paper.id}
-                href={`/practice?year=${year}&paperId=${paper.id}&paperTitle=${encodeURIComponent(paper.title)}`}
-                className={`bg-white border rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden flex flex-col h-full ${
+                className={`bg-white border rounded-3xl p-6 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full ${
                   paper.isFree
                     ? 'border-emerald-300 ring-2 ring-emerald-500/20 hover:border-emerald-500'
                     : 'border-stone-200/80 hover:border-primary/40'
@@ -158,25 +157,21 @@ export default async function SelectYearPaperPage({ params }: { params: Promise<
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs font-bold text-stone-600 group-hover:text-primary transition-colors">
-                    {paper.isFree
-                      ? 'Start Free Test'
-                      : paper.hasAccess
-                      ? 'Start Practice'
-                      : 'Unlock Pro Paper'}
-                  </span>
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:translate-x-1 ${
-                      paper.isFree
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-stone-100 text-stone-700 group-hover:bg-primary group-hover:text-white'
-                    }`}
+                <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                  <Link
+                    href={`/practice?year=${year}&paperId=${paper.id}&paperTitle=${encodeURIComponent(paper.title)}&type=practice`}
+                    className="flex-1 py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold rounded-xl text-center transition-colors"
                   >
-                    <ArrowRight size={14} />
-                  </div>
+                    Learn / Solutions
+                  </Link>
+                  <Link
+                    href={`/practice?year=${year}&paperId=${paper.id}&paperTitle=${encodeURIComponent(paper.title)}&type=mock`}
+                    className="flex-1 py-2.5 px-3 bg-[#0C6240] hover:bg-[#094d32] text-white text-xs font-bold rounded-xl text-center transition-colors shadow-sm"
+                  >
+                    Take CBT Mock
+                  </Link>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

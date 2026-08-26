@@ -6,6 +6,7 @@ import MemoryButton from '@/components/memory/MemoryButton';
 import QuestionMemoryStrip from '@/components/memory/QuestionMemoryStrip';
 import MemoryConnectionModal from '@/components/memory/MemoryConnectionModal';
 import BilingualText from '@/components/ui/BilingualText';
+import GoogleSearchButton from '@/components/ui/GoogleSearchButton';
 
 interface QuestionReviewViewProps {
   year?: string;
@@ -238,21 +239,32 @@ export default function QuestionReviewView({
                     <h2 className="text-lg sm:text-xl font-bold text-stone-900">
                       Question {activeIndex + 1} of {totalQuestions}
                     </h2>
-                    {userAnswer ? (
-                      evalRes?.isCorrect ? (
-                        <div className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 border border-emerald-200">
-                          ✓ Correct (+2 Marks)
-                        </div>
+                    <div className="flex items-center gap-2">
+                      <GoogleSearchButton
+                        questionArabic={currentQ.question_arabic}
+                        questionEnglish={currentQ.question_english}
+                        entityNameArabic={currentQ.specific_entity_name_arabic}
+                        entityNameEnglish={currentQ.specific_entity_name_english}
+                        microFocusArabic={currentQ.question_micro_focus_arabic}
+                        unitName={currentQ.unit?.name_english}
+                        size="sm"
+                      />
+                      {userAnswer ? (
+                        evalRes?.isCorrect ? (
+                          <div className="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 border border-emerald-200">
+                            ✓ Correct (+2 Marks)
+                          </div>
+                        ) : (
+                          <div className="px-3 py-1 bg-rose-50 text-rose-700 text-xs sm:text-sm font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 border border-rose-200">
+                            ✕ Incorrect (0 Marks)
+                          </div>
+                        )
                       ) : (
-                        <div className="px-3 py-1 bg-rose-50 text-rose-700 text-xs sm:text-sm font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 border border-rose-200">
-                          ✕ Incorrect (0 Marks)
+                        <div className="px-3 py-1 bg-stone-100 text-stone-600 text-xs sm:text-sm font-bold rounded-lg uppercase tracking-wider">
+                          Unattempted
                         </div>
-                      )
-                    ) : (
-                      <div className="px-3 py-1 bg-stone-100 text-stone-600 text-xs sm:text-sm font-bold rounded-lg uppercase tracking-wider">
-                        Unattempted
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
                   <div className="bg-white p-6 sm:p-9 rounded-3xl border border-stone-200/90 shadow-sm space-y-4">

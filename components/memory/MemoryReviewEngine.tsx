@@ -27,6 +27,7 @@ import {
 import { getOptionText } from '@/lib/arabicUtils';
 import { SPACING_LEVELS } from '@/lib/memoryEngine';
 import BilingualText from '@/components/ui/BilingualText';
+import GoogleSearchButton from '@/components/ui/GoogleSearchButton';
 
 interface MemoryReviewItem {
   queueId: string;
@@ -291,7 +292,7 @@ export default function MemoryReviewEngine({ items, onFinish }: MemoryReviewEngi
       {/* ── Question & Memory Card ── */}
       <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-6 sm:p-10 space-y-6">
         {/* Metadata Strip */}
-        <div className="flex items-center justify-between border-b border-stone-100 pb-4 text-xs font-bold text-stone-500">
+        <div className="flex items-center justify-between border-b border-stone-100 pb-4 text-xs font-bold text-stone-500 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             {question.exam_paper && (
               <span className="px-2.5 py-1 rounded-lg bg-stone-900 text-white font-bold text-[11px]">
@@ -301,15 +302,23 @@ export default function MemoryReviewEngine({ items, onFinish }: MemoryReviewEngi
             <span>Q{question.original_question_number}</span>
           </div>
 
-          {question.question_micro_focus_arabic && (
-            <span
-              dir="rtl"
-              lang="ar"
-              className="font-arabic text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"
-            >
-              {question.question_micro_focus_arabic}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            <GoogleSearchButton
+              questionArabic={question.question_arabic}
+              questionEnglish={question.question_english}
+              microFocusArabic={question.question_micro_focus_arabic}
+              size="sm"
+            />
+            {question.question_micro_focus_arabic && (
+              <span
+                dir="rtl"
+                lang="ar"
+                className="font-arabic text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100"
+              >
+                {question.question_micro_focus_arabic}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Question Arabic Text */}

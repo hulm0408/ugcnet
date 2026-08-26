@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Edit2, Save, X } from 'lucide-react';
 import { updateSyllabusUnit, updateBroadTopic, updateSubtopic } from '../actions';
+import toast from 'react-hot-toast';
 
 type UnitData = {
   id: string;
@@ -70,11 +71,11 @@ export default function SyllabusManager({ initialUnits }: { initialUnits: UnitDa
       } else if (type === 'subtopic') {
         await updateSubtopic(id, editForm);
       }
-      
+
       // Optimistic update
       const updatedUnits = [...units];
       if (type === 'unit') {
-        const u = updatedUnits.find(u => u.id === id);
+        const u = updatedUnits.find((u) => u.id === id);
         if (u) {
           u.name_arabic = editForm.name_arabic;
           u.name_english = editForm.name_english;
@@ -82,7 +83,7 @@ export default function SyllabusManager({ initialUnits }: { initialUnits: UnitDa
         }
       } else if (type === 'topic') {
         for (const u of updatedUnits) {
-          const t = u.broad_topics.find(t => t.id === id);
+          const t = u.broad_topics.find((t) => t.id === id);
           if (t) {
             t.name_arabic = editForm.name_arabic;
             t.name_english = editForm.name_english;
@@ -93,7 +94,7 @@ export default function SyllabusManager({ initialUnits }: { initialUnits: UnitDa
       } else if (type === 'subtopic') {
         for (const u of updatedUnits) {
           for (const t of u.broad_topics) {
-            const st = t.subtopics.find(st => st.id === id);
+            const st = t.subtopics.find((st) => st.id === id);
             if (st) {
               st.name_arabic = editForm.name_arabic;
               st.name_english = editForm.name_english;
@@ -105,157 +106,196 @@ export default function SyllabusManager({ initialUnits }: { initialUnits: UnitDa
       }
       setUnits(updatedUnits);
       setEditingId(null);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to save');
+      toast.success('Updated successfully.');
+    } catch {
+      toast.error('Failed to save changes');
     } finally {
       setSaving(false);
     }
   };
 
-  const renderEditForm = (id: string, type: 'unit' | 'topic' | 'subtopic') => (
-    <div className="flex-1 bg-stone-50 p-4 rounded-xl border border-stone-200 mt-2">
-      <div className="grid gap-3">
-        <div>
-          <label className="text-xs font-semibold text-stone-500 uppercase">Arabic Name</label>
-          <input
-            type="text"
-            dir="rtl"
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg font-arabic mt-1 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-            value={editForm.name_arabic}
-            onChange={e => setEditForm({ ...editForm, name_arabic: e.target.value })}
-          />
-        </div>
-        <div>
-          <label className="text-xs font-semibold text-stone-500 uppercase">English Name</label>
-          <input
-            type="text"
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg mt-1 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-            value={editForm.name_english}
-            onChange={e => setEditForm({ ...editForm, name_english: e.target.value })}
-          />
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <input
-            type="checkbox"
-            id={`active-${id}`}
-            checked={editForm.is_active}
-            onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })}
-          />
-          <label htmlFor={`active-${id}`} className="text-sm text-stone-700">Active (Published)</label>
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <button 
-            disabled={saving}
-            onClick={() => handleSave(id, type)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-dark disabled:opacity-50 transition-colors shadow-sm"
-          >
-            <Save size={16} /> Save
-          </button>
-          <button 
-            disabled={saving}
-            onClick={cancelEdit}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-200 text-stone-700 rounded-lg text-sm font-bold hover:bg-stone-300 disabled:opacity-50 transition-colors"
-          >
-            <X size={16} /> Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-4">
-      {units.map(unit => (
-        <div key={unit.id} className="border border-stone-200 rounded-2xl overflow-hidden bg-white/50 shadow-sm transition-all hover:shadow-md">
-          <div className="flex items-center justify-between p-4 bg-stone-50/80 border-b border-stone-200">
-            <button onClick={() => toggleUnit(unit.id)} className="flex items-center gap-3 flex-1 text-left">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary-dark font-bold shrink-0">
-                {unit.unit_number}
-              </div>
-              <div className="flex-1">
-                <div className="font-bold text-stone-900">{unit.name_english}</div>
-                <div className="font-arabic text-stone-600" dir="rtl">{unit.name_arabic}</div>
-              </div>
-              <div className="text-stone-400">
-                {expandedUnits.has(unit.id) ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-              </div>
-            </button>
-            <button 
-              onClick={() => startEdit(unit.id, unit.name_arabic, unit.name_english, unit.is_active)}
-              className="p-2 text-stone-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors ml-4"
-            >
-              <Edit2 size={18} />
-            </button>
-          </div>
-          
-          {editingId === unit.id && (
-            <div className="px-4 pb-4">
-              {renderEditForm(unit.id, 'unit')}
-            </div>
-          )}
+      {units.map((unit) => {
+        const isUnitExpanded = expandedUnits.has(unit.id);
+        const isUnitEditing = editingId === unit.id;
 
-          {expandedUnits.has(unit.id) && (
-            <div className="p-4 pl-12 space-y-3">
-              {unit.broad_topics.map(topic => (
-                <div key={topic.id} className="border border-stone-100 rounded-xl overflow-hidden shadow-sm">
-                  <div className="flex items-center justify-between p-3 bg-white">
-                    <button onClick={() => toggleTopic(topic.id)} className="flex items-center gap-3 flex-1 text-left">
-                      <div className="flex-1">
-                        <div className="font-semibold text-stone-800 text-sm">{topic.name_english}</div>
-                        <div className="font-arabic text-stone-500 text-sm" dir="rtl">{topic.name_arabic}</div>
-                      </div>
-                      <div className="text-stone-300">
-                        {expandedTopics.has(topic.id) ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                      </div>
-                    </button>
-                    <button 
-                      onClick={() => startEdit(topic.id, topic.name_arabic, topic.name_english, topic.is_active)}
-                      className="p-1.5 text-stone-300 hover:text-primary-dark hover:bg-primary-dark/10 rounded-md transition-colors ml-4"
-                    >
-                      <Edit2 size={16} />
-                    </button>
+        return (
+          <div key={unit.id} className="border border-stone-800 rounded-2xl bg-stone-950/40 overflow-hidden">
+            {/* Unit Header */}
+            <div className="p-4 flex items-center justify-between gap-4 bg-stone-900/60 border-b border-stone-800">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => toggleUnit(unit.id)}
+                  className="p-1 hover:bg-stone-800 rounded-lg text-stone-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  {isUnitExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
+
+                {isUnitEditing ? (
+                  <div className="flex flex-col sm:flex-row gap-2 flex-1 max-w-xl">
+                    <input
+                      type="text"
+                      value={editForm.name_english}
+                      onChange={(e) => setEditForm({ ...editForm, name_english: e.target.value })}
+                      className="px-3 py-1.5 bg-stone-900 border border-stone-700 rounded-lg text-xs text-white"
+                      placeholder="English Title"
+                    />
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={editForm.name_arabic}
+                      onChange={(e) => setEditForm({ ...editForm, name_arabic: e.target.value })}
+                      className="px-3 py-1.5 bg-stone-900 border border-stone-700 rounded-lg text-xs font-arabic text-white"
+                      placeholder="Arabic Title"
+                    />
                   </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 truncate">
+                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-mono font-bold text-xs">
+                      UNIT {unit.unit_number}
+                    </span>
+                    <span className="font-bold text-sm text-white truncate">{unit.name_english}</span>
+                    <span dir="rtl" className="font-arabic font-semibold text-xs text-stone-400 hidden sm:inline">
+                      ({unit.name_arabic})
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                  {editingId === topic.id && (
-                    <div className="px-3 pb-3">
-                      {renderEditForm(topic.id, 'topic')}
-                    </div>
-                  )}
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {isUnitEditing ? (
+                  <>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => handleSave(unit.id, 'unit')}
+                      className="p-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500"
+                    >
+                      <Save size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="p-1.5 bg-stone-800 text-stone-400 rounded-lg hover:bg-stone-700"
+                    >
+                      <X size={14} />
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => startEdit(unit.id, unit.name_arabic, unit.name_english, unit.is_active)}
+                    className="p-1.5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
 
-                  {expandedTopics.has(topic.id) && (
-                    <div className="p-3 pl-8 bg-stone-50 space-y-2 border-t border-stone-100">
-                      {topic.subtopics.map(subtopic => (
-                        <div key={subtopic.id} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-stone-200 shadow-sm">
-                          {editingId === subtopic.id ? (
-                            renderEditForm(subtopic.id, 'subtopic')
+            {/* Broad Topics List */}
+            {isUnitExpanded && (
+              <div className="p-4 space-y-3 bg-stone-950/20">
+                {unit.broad_topics.map((topic) => {
+                  const isTopicExpanded = expandedTopics.has(topic.id);
+                  const isTopicEditing = editingId === topic.id;
+
+                  return (
+                    <div key={topic.id} className="border border-stone-800/80 rounded-xl bg-stone-900/40 p-3 space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => toggleTopic(topic.id)}
+                            className="p-1 hover:bg-stone-800 rounded text-stone-500 hover:text-stone-300 transition-colors cursor-pointer"
+                          >
+                            {isTopicExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                          </button>
+                          {isTopicEditing ? (
+                            <div className="flex gap-2 flex-1 max-w-lg">
+                              <input
+                                type="text"
+                                value={editForm.name_english}
+                                onChange={(e) => setEditForm({ ...editForm, name_english: e.target.value })}
+                                className="px-2.5 py-1 bg-stone-900 border border-stone-700 rounded text-xs text-white"
+                              />
+                              <input
+                                type="text"
+                                dir="rtl"
+                                value={editForm.name_arabic}
+                                onChange={(e) => setEditForm({ ...editForm, name_arabic: e.target.value })}
+                                className="px-2.5 py-1 bg-stone-900 border border-stone-700 rounded text-xs font-arabic text-white"
+                              />
+                            </div>
                           ) : (
-                            <>
-                              <div className="flex-1">
-                                <div className="font-medium text-stone-700 text-sm">{subtopic.name_english}</div>
-                                <div className="font-arabic text-stone-500 text-sm mt-0.5" dir="rtl">{subtopic.name_arabic}</div>
-                              </div>
-                              <button 
-                                onClick={() => startEdit(subtopic.id, subtopic.name_arabic, subtopic.name_english, subtopic.is_active)}
-                                className="p-1.5 text-stone-300 hover:text-accent hover:bg-accent/10 rounded-md transition-colors ml-4"
-                              >
-                                <Edit2 size={16} />
-                              </button>
-                            </>
+                            <div className="truncate">
+                              <span className="font-semibold text-xs text-stone-200">{topic.name_english}</span>
+                              <span dir="rtl" className="font-arabic text-xs text-stone-400 ml-2">
+                                {topic.name_arabic}
+                              </span>
+                            </div>
                           )}
                         </div>
-                      ))}
-                      {topic.subtopics.length === 0 && (
-                        <div className="text-xs text-stone-400 p-2 italic">No subtopics</div>
+
+                        {/* Actions */}
+                        <div>
+                          {isTopicEditing ? (
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => handleSave(topic.id, 'topic')}
+                                className="p-1 bg-emerald-600 text-white rounded hover:bg-emerald-500"
+                              >
+                                <Save size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEdit}
+                                className="p-1 bg-stone-800 text-stone-400 rounded hover:bg-stone-700"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => startEdit(topic.id, topic.name_arabic, topic.name_english, topic.is_active)}
+                              className="p-1 text-stone-500 hover:text-stone-300 rounded cursor-pointer"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Subtopics / Nodes list */}
+                      {isTopicExpanded && (
+                        <div className="pl-6 pt-2 border-t border-stone-800/60 space-y-1.5">
+                          {topic.subtopics.map((st) => (
+                            <div
+                              key={st.id}
+                              className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-stone-950/40 text-stone-300 border border-stone-800/40"
+                            >
+                              <span>{st.name_english}</span>
+                              <span dir="rtl" className="font-arabic text-stone-400">
+                                {st.name_arabic}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
